@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文章RPG 最終版</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:10px;font-family:"Hiragino Sans","Noto Sans JP",sans-serif;background:#0d1117;color:#eef3f8}
+h1{font-size:19px;margin:6px 0 12px}h2{font-size:16px;margin:6px 0}h3{font-size:14px;margin:6px 0}
+button,select,input,textarea{font-size:13px;padding:8px;border-radius:9px;border:1px solid #44505c;background:#1b232c;color:#eef3f8;width:100%}
+button{cursor:pointer;background:#24313d;font-weight:bold}button:disabled{opacity:.4;cursor:not-allowed}
+.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:10px}
+.tabbtn{padding:8px 2px;font-size:11px}.tabbtn.active{background:#35506b}
+.tab{display:none}.tab.active{display:block}
+.card{background:#161d26;border:1px solid #2c3b4a;border-radius:12px;padding:10px;margin-bottom:10px}
+.row{display:grid;gap:7px;margin-bottom:8px}.two{display:grid;grid-template-columns:1fr 1fr;gap:7px}.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+label{display:block;font-size:11px;color:#b8c4d0;margin-bottom:4px}
+.log{background:#0a0e12;border:1px solid #2c3b4a;border-radius:12px;min-height:220px;max-height:340px;overflow-y:auto;padding:10px;line-height:1.75;font-size:12px;white-space:pre-wrap}
+.log div{margin-bottom:6px}.mini{font-size:11px;color:#c9d5e1;margin-bottom:3px}
+.check{display:flex;align-items:center;gap:7px;font-size:12px;margin:6px 0}.check input{width:auto}
+.pre{background:#0a0e12;border:1px solid #2c3b4a;border-radius:12px;padding:8px;font-size:10px;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+.msg{margin:6px 0;font-size:12px;color:#9fe8a8}.gold{color:#ffd76a;font-weight:bold}.eff{color:#7fd7ff}.res{color:#93a1af}.brk{color:#ff9f6a}.aw{color:#e6b3ff}.adv{color:#ffd76a}.rc{color:#7fffd4}
+hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
+.bar{height:7px;background:#22303c;border-radius:4px;overflow:hidden;margin:2px 0;min-width:60px}
+.bar i{display:block;height:100%;background:#4caf7d}.bar.mp i{background:#42a5f5}.bar.en i{background:#ef5350}
+.bw{display:flex;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+<h1>文章RPG 最終版</h1>
+<div class="tabs">
+<button class="tabbtn active" data-tab="create">作成</button>
+<button class="tabbtn" data-tab="party">パーティ</button>
+<button class="tabbtn" data-tab="skill">スキル</button>
+<button class="tabbtn" data-tab="battle">戦闘</button>
+<button class="tabbtn" data-tab="shop">ショップ</button>
+<button class="tabbtn" data-tab="save">セーブ</button>
+</div>
+
+<section id="tab-create" class="tab active"><h2>キャラ作成（4人/Lv1）</h2><div id="createBoxes"></div><button id="createBtn">4人パーティ作成してセーブ</button></section>
+
+<section id="tab-party" class="tab"><h2>パーティ/装備</h2>
+<div class="mini">ゴールド：<span class="gold" id="goldView">0</span> G</div>
+<div id="partyList"></div>
+<div class="two"><button id="restBtn">休憩して全回復</button><button id="towerViewBtn">実績/タワー</button></div>
+<h3>所持装備</h3><div id="invList"></div></section>
+
+<section id="tab-skill" class="tab"><h2>スキル</h2>
+<div class="two"><button id="respecBtn">スキルリセット（500G）</button></div>
+<div id="learnModal" class="card" style="display:none"><h3 id="lmName"></h3><div class="mini" id="lmFl"></div><div class="mini" id="lmDesc"></div><div class="two"><button id="lmYes">習得する</button><button id="lmNo">やめる</button></div></div>
+<div id="skillList"></div></section>
+
+<section id="tab-battle" class="tab"><h2>戦闘</h2>
+<div class="card"><div class="row">
+<div><label>エリア</label><select id="areaSelect"></select></div>
+<div class="two"><label>速度<select id="speedSel"><option value="1">1x</option><option value="2">2x</option><option value="4">4x</option></select></label>
+<div class="check"><input type="checkbox" id="showDamage" checked><span>ダメージ表示</span></div></div>
+<div class="check"><input type="checkbox" id="autoItem" checked><span>ポーション自動</span></div>
+<div class="three"><button id="exploreBtn">探索</button><button id="bossBtn">ボス</button><button id="towerBtn">タワー</button></div>
+<div class="two"><button id="raidBtn">レイド</button><button id="autoBtn">オート開始</button></div>
+<div class="two"><button id="turnBtn">1ターン</button><button id="stopBtn">停止</button></div>
+</div></div>
+<div id="battleStatus" class="card">戦闘未開始</div>
+<div id="battleLog" class="log"></div></section>
+
+<section id="tab-shop" class="tab"><h2>ショップ</h2><div class="mini">G：<span class="gold" id="goldView2">0</span></div><div id="shopList"></div></section>
+
+<section id="tab-save" class="tab"><h2>セーブ</h2>
+<div class="card"><div class="row"><div class="three"><button id="saveBtn">セーブ</button><button id="loadBtn">ロード</button><button id="deleteBtn">削除</button></div>
+<div id="saveMsg" class="msg"></div><div class="mini" id="storageType"></div></div></div>
+<div class="card"><div class="row"><label>セーブ文字列</label><textarea id="saveText" rows="3"></textarea>
+<div class="two"><button id="exportBtn">エクスポート</button><button id="importBtn">インポート</button></div></div></div>
+<div class="card"><pre id="savePreview" class="pre"></pre></div></section>
+
+<script>
+"use strict";
+const storage=(()=>{let err="";
+try{localStorage.setItem("__t","1");localStorage.removeItem("__t");
+return{type:"local",err,get:k=>localStorage.getItem(k),set:(k,v)=>localStorage.setItem(k,v),del:k=>localStorage.removeItem(k)};}
+catch(e){err=(e&&e.name||"Error")+":"+(e&&e.message||"");const m={};
+return{type:"memory",err,get:k=>m[k]??null,set:(k,v)=>{m[k]=v},del:k=>{delete m[k]}};}})();
+const SAVE_KEY="text_rpg_v9";
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const pick=a=>a[Math.floor(Math.random()*a.length)];const rnd=n=>Math.floor(Math.random()*n);
+const fill=(t,p={})=>t.replace(/\{(\w+)\}/g,(_,k)=>p[k]??"");
+const STAT_KEYS=["hp","mp","atk","def","matk","mdef","agi","luk","hit","eva"];
+const STAT_NM={hp:"HP",mp:"MP",atk:"物攻",def:"物防",matk:"魔攻",mdef:"魔防",agi:"素早",luk:"運",hit:"命中",eva:"回避"};
+const ST_NM={poison:"毒",burn:"燃焼",bleed:"出血",confuse:"混乱",blind:"暗闇",stun:"スタン",curse:"呪い",slow:"鈍足",vulnerable:"脆弱",defdown:"防御低下",regen:"再生"};
+const EL_NM={fire:"火",water:"水",wind:"風",earth:"地",light:"光",dark:"闇",none:"無"};
+
+const FLAVOR={
+ss01:"剣と盾の基礎を鍛える。",ss02:"盾が身体の一部となる。",ss03:"盾で打ちつけ敵の注意を引く。",ss04:"守りを固め攻撃に備える。",ss05:"仲間の前に立ち攻撃を肩代わりする。",ss06:"聖なる光で仲間の守りを強める。",ss07:"窮地でこそ守りは輝く。",ss08:"絶対の聖盾が仲間を包む。",
+gs01:"大剣の重さに体が慣れる。",gs02:"大剣を薙ぎ複数敵を払う。",gs03:"大振りだが破壊力は抜群。",gs04:"鎧ごと打ち砕く一撃。",gs05:"傷つくほど怒りが湧く。",gs06:"力を溜め次の一撃に込める。",gs07:"防御など意味をなさない。",gs08:"天地を断つ究極の一振。",
+bm01:"軽い剣で速度を活かす。",bm02:"抜刀の一閃は先制で鋭い。",bm03:"相手の攻撃が見える。",bm04:"風のように突き勢いを増す。",bm05:"受け流しざまに反撃する。",bm06:"避けた直後がチャンス。",bm07:"返し刃で確実に捉える。",bm08:"影すら見えない連斬。",
+td01:"二つの刃が同時に舞う。",td02:"攻撃が止まらない。",td03:"刃に毒を仕込む。",td04:"急所が見える。",td05:"影を走り速度を上げる。",td06:"急所を突き血を流す。",td07:"左右の牙が連なる。",td08:"千の影が敵を呑む。",
+gd01:"大盾が体を護る。",gd02:"敵の注意を一身に集める。",gd03:"盾の壁が堅くなる。",gd04:"いかなる打撃も揺るがぬ。",gd05:"体当たりで敵を鈍らせる。",gd06:"仲間を盾の内に守る。",gd07:"倒れぬ限り壁は崩れぬ。",gd08:"絶対の防衛線で仲間を守る。",
+he01:"癒やしの光を灯す。",he02:"祈りが癒やしを強める。",he03:"継続的に傷を癒やす。",he04:"穢れを清める。",he05:"仲間全体を癒やす。",he06:"弱った者ほど癒やしは深く。",he07:"死の淵から引き戻す。",he08:"聖域が全てを癒やす。",
+bd01:"力の歌で攻撃を高める。",bd02:"守りの歌で防御を固める。",bd03:"敵の動きを鈍らせる。",bd04:"敵を脆弱にする印。",bd05:"歌の効果が強まる。",bd06:"混乱の旋律で敵を惑わす。",bd07:"呪いが深く効く。",bd08:"終焉の歌が敵を弱らせる。",
+sm01:"下位精霊を呼び出す。",sm02:"契約が強くなる。",sm03:"癒やしの精霊を呼ぶ。",sm04:"前衛の魔獣を召喚。",sm05:"維持の負担が減る。",sm06:"精霊を力に変える。",sm07:"より多くの従者と契約。",sm08:"大いなる存在を降臨させる。",
+tm01:"敵を懐かせ味方にする。",tm02:"獣の牙が鋭くなる。",tm03:"餌で心を開かせる。",tm04:"絆が獣を守る。",tm05:"獣の力を身に宿す。",tm06:"網で敵を捕らえる。",tm07:"獣が成長する。",tm08:"百獣が行進する。",
+sg01:"味方の武器に属性を宿す。",sg02:"敵の弱点を見抜く。",sg03:"魔力を分け与える。",sg04:"魔法が増幅される。",sg05:"結界で魔法から守る。",sg06:"魔法を跳ね返す。",sg07:"星の動きを読む。",sg08:"星脈が味方を満たす。",
+am01:"魔力が高まる。",am02:"火球を放つ。",am03:"詠唱で威力を高める。",am04:"氷の槍で鈍らせる。",am05:"魔法が防御を貫く。",am06:"雷が全体を打つ。",am07:"魔法が急所を捉える。",am08:"隕石を呼び落とす。",
+sh01:"影の刃が馴染む。",sh02:"影で敵の視界を奪う。",sh03:"影が身代わりとなる。",sh04:"分身が同時に斬る。",sh05:"暗殺の歩法で威力が増す。",sh06:"影が敵を縛る。",sh07:"闇の中でも見える。",sh08:"影が敵を殺す。",
+nc01:"死体から力を得る。",nc02:"生気を吸い取る。",nc03:"骸を従わせる。",nc04:"呪いで魔防を削る。",nc05:"死体を爆発させる。",nc06:"恐怖が敵を萎縮させる。",nc07:"グールを召喚。",nc08:"死者の軍勢が起きる。",
+gn01:"銃が手の延長になる。",gn02:"素早い一射。",gn03:"装甲を貫く弾。",gn04:"連続で撃ち込む。",gn05:"弱点を狙う。",gn06:"炸裂弾が薙ぎ払う。",gn07:"特殊な弾薬を使う。",gn08:"必中の一射。",
+bk01:"剛力が宿る。",bk02:"血を代償に威力が増す。",bk03:"身を削って斬る。",bk04:"怒りで攻撃が高まる。",bk05:"傷つくほど強い。",bk06:"捨て身の突進。",bk07:"絶叫が会心を呼ぶ。",bk08:"血で血を洗う一撃。",
+on01:"呪力が高まる。",on02:"火炎の術。",on03:"氷で縛る術。",on04:"式神を使役する。",on05:"属性の扱いに長ける。",on06:"呪殺の印を刻む。",on07:"方角の結界を張る。",on08:"陰陽の理で薙ぎ払う。",
+u01:"不動の聖域が展開される。",u02:"軍神の裁きが下る。",u03:"無心の連斬が敵を刻む。",u04:"影の絶技が急所を貫く。",u05:"絶対の城塞が守り抜く。",u06:"聖母の祝福が全てを癒やす。",u07:"天地が交響する。",u08:"神霊が降臨する。",u09:"百獣の咆哮が敵を薙ぐ。",u10:"大星脈が味方を満たす。",u11:"禁じられた隕石が落ちる。",u12:"影の領域が敵を支配する。",u13:"冥界の軍勢が溢れる。",u14:"極限の連射が敵を穿つ。",u15:"戦鬼の血祭りが始まる。",u16:"陰陽転生の陣が回る。",
+va01:"攻撃が一段階上がる。",va02:"会心が研ぎ澄まされる。",va03:"上級の強打。",va04:"上級の貫通。",va05:"上級の連斬。",va06:"上級の体力。",va07:"上級の溜め。",va08:"上級の会心威力。",
+vs01:"魔攻が一段階上がる。",vs02:"回復が深くなる。",vs03:"上級の全体治癒。",vs04:"上級の魔力。",vs05:"上級の結界。",vs06:"上級の強化。",vs07:"上級の蘇生。",vs08:"上級の軽減。",
+rc01:"転生の肉体。",rc02:"転生の会心。",rc03:"転生の一撃。",rc04:"転生の軽減。"};
+
+const JOBS={
+sword_shield:{nm:"ソード＆シールド",base:{hp:60,mp:22,atk:12,def:14,matk:6,mdef:10,agi:9,luk:8,hit:10,eva:7},g:{hp:10,mp:3,atk:2,def:2.4,matk:.8,mdef:1.4,agi:1,luk:.9,hit:1.2,eva:.8}},
+great_sword:{nm:"グレートソード",base:{hp:70,mp:14,atk:16,def:10,matk:4,mdef:8,agi:8,luk:9,hit:9,eva:5},g:{hp:11,mp:2,atk:2.8,def:1.8,matk:.6,mdef:1,agi:.9,luk:1,hit:1.1,eva:.6}},
+blade_master:{nm:"ブレードマスター",base:{hp:58,mp:18,atk:14,def:9,matk:6,mdef:9,agi:13,luk:11,hit:12,eva:11},g:{hp:9,mp:2.4,atk:2.4,def:1.5,matk:.8,mdef:1.2,agi:1.6,luk:1.2,hit:1.4,eva:1.2}},
+twin_dagger:{nm:"ツインダガー",base:{hp:52,mp:16,atk:13,def:8,matk:5,mdef:8,agi:14,luk:13,hit:11,eva:12},g:{hp:8,mp:2.2,atk:2.2,def:1.3,matk:.7,mdef:1,agi:1.7,luk:1.4,hit:1.3,eva:1.3}},
+guardian:{nm:"ガーディアン",base:{hp:75,mp:16,atk:10,def:18,matk:3,mdef:12,agi:6,luk:7,hit:9,eva:3},g:{hp:12,mp:2.2,atk:1.6,def:3,matk:.5,mdef:1.8,agi:.7,luk:.8,hit:1,eva:.5}},
+healer:{nm:"ヒーラー",base:{hp:50,mp:40,atk:6,def:7,matk:12,mdef:14,agi:8,luk:10,hit:10,eva:6},g:{hp:7,mp:5,atk:.8,def:1,matk:2,mdef:2,agi:.9,luk:1,hit:1.1,eva:.7}},
+buffer_debuffer:{nm:"バフデバッファー",base:{hp:52,mp:36,atk:7,def:8,matk:13,mdef:13,agi:10,luk:12,hit:11,eva:8},g:{hp:7.5,mp:4.5,atk:.9,def:1.1,matk:2.1,mdef:1.9,agi:1.1,luk:1.2,hit:1.2,eva:.9}},
+summoner:{nm:"サモナー",base:{hp:48,mp:42,atk:5,def:6,matk:14,mdef:13,agi:9,luk:9,hit:10,eva:6},g:{hp:7,mp:5.2,atk:.7,def:.9,matk:2.2,mdef:1.9,agi:1,luk:1,hit:1.1,eva:.7}},
+tamer:{nm:"テイマー",base:{hp:55,mp:30,atk:10,def:9,matk:8,mdef:10,agi:11,luk:10,hit:10,eva:8},g:{hp:8.5,mp:3.8,atk:1.5,def:1.3,matk:1.2,mdef:1.4,agi:1.2,luk:1.1,hit:1.1,eva:.9}},
+sage:{nm:"セージ",base:{hp:50,mp:38,atk:5,def:7,matk:15,mdef:15,agi:9,luk:11,hit:12,eva:6},g:{hp:7.2,mp:4.8,atk:.7,def:1,matk:2.3,mdef:2.1,agi:1,luk:1.1,hit:1.3,eva:.7}},
+attack_mage:{nm:"攻撃魔法使い",base:{hp:46,mp:44,atk:4,def:6,matk:16,mdef:12,agi:9,luk:9,hit:11,eva:6},g:{hp:6.5,mp:5.5,atk:.6,def:.9,matk:2.6,mdef:1.8,agi:1,luk:1,hit:1.2,eva:.7}},
+shadow_user:{nm:"影使い",base:{hp:50,mp:24,atk:12,def:7,matk:8,mdef:9,agi:15,luk:12,hit:12,eva:14},g:{hp:7.5,mp:3,atk:2.2,def:1.2,matk:1,mdef:1.2,agi:1.8,luk:1.4,hit:1.4,eva:1.5}},
+necromancer:{nm:"ネクロマンサー",base:{hp:48,mp:40,atk:5,def:7,matk:14,mdef:14,agi:8,luk:8,hit:10,eva:6},g:{hp:7,mp:5,atk:.7,def:1,matk:2.2,mdef:2,agi:.9,luk:.9,hit:1.1,eva:.7}},
+gunner:{nm:"ガンナー",base:{hp:54,mp:18,atk:14,def:8,matk:5,mdef:9,agi:12,luk:12,hit:15,eva:9},g:{hp:8,mp:2.4,atk:2.4,def:1.3,matk:.7,mdef:1.1,agi:1.4,luk:1.4,hit:1.6,eva:1}},
+berserker:{nm:"バーサーカー",base:{hp:72,mp:12,atk:17,def:9,matk:3,mdef:7,agi:10,luk:8,hit:10,eva:6},g:{hp:11.5,mp:1.8,atk:2.9,def:1.6,matk:.5,mdef:.9,agi:1.2,luk:.9,hit:1.2,eva:.7}},
+onmyoji:{nm:"陰陽師",base:{hp:48,mp:42,atk:5,def:7,matk:15,mdef:13,agi:9,luk:10,hit:11,eva:7},g:{hp:7,mp:5.2,atk:.7,def:1,matk:2.4,mdef:1.9,agi:1,luk:1.1,hit:1.2,eva:.8}},
+holy_knight:{nm:"ホーリーナイト",base:{hp:80,mp:28,atk:15,def:24,matk:8,mdef:16,agi:9,luk:9,hit:12,eva:6},g:{hp:15,mp:2.8,atk:2.1,def:3.9,matk:.6,mdef:2.3,agi:.9,luk:1,hit:1.3,eva:.6}},
+war_god:{nm:"ウォーゴッド",base:{hp:90,mp:18,atk:21,def:13,matk:5,mdef:10,agi:10,luk:12,hit:12,eva:6},g:{hp:14,mp:2.6,atk:3.6,def:2.3,matk:.8,mdef:1.3,agi:1.2,luk:1.3,hit:1.4,eva:.8}},
+sword_saint:{nm:"剣聖",base:{hp:75,mp:23,atk:18,def:12,matk:8,mdef:12,agi:17,luk:14,hit:16,eva:14},g:{hp:12,mp:3,atk:3.1,def:2,matk:1,mdef:1.6,agi:2.1,luk:1.6,hit:1.8,eva:1.6}},
+assassin:{nm:"アサシン",base:{hp:68,mp:21,atk:17,def:10,matk:6,mdef:10,agi:18,luk:17,hit:14,eva:16},g:{hp:10,mp:2.8,atk:2.9,def:1.7,matk:.9,mdef:1.3,agi:2.2,luk:1.8,hit:1.7,eva:1.7}},
+bastion:{nm:"バスティオン",base:{hp:98,mp:21,atk:13,def:23,matk:4,mdef:16,agi:8,luk:9,hit:12,eva:4},g:{hp:16,mp:2.8,atk:2.1,def:3.9,matk:.6,mdef:2.3,agi:.9,luk:1,hit:1.3,eva:.6}},
+saint:{nm:"セイント",base:{hp:65,mp:52,atk:8,def:9,matk:16,mdef:18,agi:10,luk:13,hit:13,eva:8},g:{hp:9,mp:6.5,atk:1,def:1.3,matk:2.6,mdef:2.6,agi:1.2,luk:1.3,hit:1.4,eva:.9}},
+maestro:{nm:"マエストロ",base:{hp:68,mp:47,atk:9,def:10,matk:17,mdef:17,agi:13,luk:16,hit:14,eva:10},g:{hp:9.8,mp:5.9,atk:1.2,def:1.4,matk:2.7,mdef:2.5,agi:1.4,luk:1.6,hit:1.6,eva:1.2}},
+arch_summoner:{nm:"アークサモナー",base:{hp:62,mp:55,atk:6,def:8,matk:18,mdef:17,agi:12,luk:12,hit:13,eva:8},g:{hp:9,mp:6.8,atk:.9,def:1.2,matk:2.9,mdef:2.5,agi:1.3,luk:1.3,hit:1.4,eva:.9}},
+beast_lord:{nm:"ビーストロード",base:{hp:72,mp:39,atk:13,def:12,matk:10,mdef:13,agi:14,luk:13,hit:13,eva:10},g:{hp:11,mp:5,atk:2,def:1.7,matk:1.6,mdef:1.8,agi:1.6,luk:1.4,hit:1.4,eva:1.2}},
+arch_sage:{nm:"アークセイジ",base:{hp:65,mp:50,atk:6,def:9,matk:20,mdef:20,agi:12,luk:14,hit:16,eva:8},g:{hp:9.4,mp:6.2,atk:.9,def:1.3,matk:3,mdef:2.7,agi:1.3,luk:1.4,hit:1.7,eva:.9}},
+archmage:{nm:"アークメイジ",base:{hp:60,mp:57,atk:5,def:8,matk:21,mdef:16,agi:12,luk:12,hit:14,eva:8},g:{hp:8.5,mp:7.2,atk:.8,def:1.2,matk:3.4,mdef:2.3,agi:1.3,luk:1.3,hit:1.6,eva:.9}},
+shadow_master:{nm:"シャドウマスター",base:{hp:65,mp:31,atk:16,def:9,matk:10,mdef:12,agi:20,luk:16,hit:16,eva:18},g:{hp:9.8,mp:3.9,atk:2.9,def:1.6,matk:1.3,mdef:1.6,agi:2.3,luk:1.8,hit:1.8,eva:2}},
+death_lord:{nm:"デスロード",base:{hp:62,mp:52,atk:6,def:9,matk:18,mdef:18,agi:10,luk:10,hit:13,eva:8},g:{hp:9,mp:6.5,atk:.9,def:1.3,matk:2.9,mdef:2.6,agi:1.2,luk:1.2,hit:1.4,eva:.9}},
+gunslinger:{nm:"ガンスリンガー",base:{hp:70,mp:23,atk:18,def:10,matk:6,mdef:12,agi:16,luk:16,hit:20,eva:12},g:{hp:10,mp:3,atk:3.1,def:1.7,matk:.9,mdef:1.4,agi:1.8,luk:1.8,hit:2.1,eva:1.3}},
+war_demon:{nm:"ウォーデーモン",base:{hp:94,mp:16,atk:22,def:12,matk:4,mdef:9,agi:13,luk:10,hit:13,eva:8},g:{hp:15,mp:2.3,atk:3.8,def:2.1,matk:.6,mdef:1.2,agi:1.6,luk:1.2,hit:1.6,eva:.9}},
+grand_onmyoji:{nm:"グラン陰陽師",base:{hp:62,mp:55,atk:6,def:9,matk:20,mdef:17,agi:12,luk:13,hit:14,eva:9},g:{hp:9,mp:6.8,atk:.9,def:1.3,matk:3.1,mdef:2.5,agi:1.3,luk:1.4,hit:1.6,eva:1}}
+};
+const ADV_MAP={sword_shield:"holy_knight",great_sword:"war_god",blade_master:"sword_saint",twin_dagger:"assassin",guardian:"bastion",healer:"saint",buffer_debuffer:"maestro",summoner:"arch_summoner",tamer:"beast_lord",sage:"arch_sage",attack_mage:"archmage",shadow_user:"shadow_master",necromancer:"death_lord",gunner:"gunslinger",berserker:"war_demon",onmyoji:"grand_onmyoji"};
+const BASE_OF={};Object.entries(ADV_MAP).forEach(([b,a])=>BASE_OF[a]=b);
+const COMBAT_JOBS=new Set(["sword_shield","great_sword","blade_master","twin_dagger","guardian","attack_mage","shadow_user","gunner","berserker","holy_knight","war_god","sword_saint","assassin","bastion","archmage","shadow_master","gunslinger","war_demon"]);
+const TANK_JOBS=new Set(["guardian","sword_shield","bastion","holy_knight"]);
+const HEAL_JOBS=new Set(["healer","saint","sage","arch_sage","onmyoji","grand_onmyoji"]);
+const RACE_ELEM={slime:{weak:"wind",resist:"fire"},beast:{weak:"fire",resist:"earth"},humanoid:{weak:"light",resist:"none"},undead:{weak:"light",resist:"dark"},golem:{weak:"water",resist:"wind"},magic:{weak:"dark",resist:"light"},dragon:{weak:"light",resist:"fire"},bird:{weak:"water",resist:"earth"},ghost:{weak:"light",resist:"dark"},insect:{weak:"fire",resist:"wind"}};
+
+const SKILLS={
+sword_shield:[{id:"ss01",nm:"片手剣熟練",ty:"P",sp:2,lv:1,k:"stat",stat:"atk",pct:5},{id:"ss02",nm:"盾熟練",ty:"P",sp:2,lv:1,k:"stat",stat:"def",pct:5},{id:"ss03",nm:"シールドバッシュ",ty:"A",sp:3,lv:5,mp:6,k:"dmg",pw:110,brk:20},{id:"ss04",nm:"ガードスタンス",ty:"A",sp:3,lv:10,mp:8,k:"guard"},{id:"ss05",nm:"かばう",ty:"A",sp:3,lv:15,mp:10,k:"shield",pct:30,tn:2,tg:"ally"},{id:"ss06",nm:"ホーリーガード",ty:"A",sp:4,lv:20,mp:12,k:"buff",stat:"def",pct:10,tn:3,tg:"party"},{id:"ss07",nm:"堅守",ty:"P",sp:5,lv:30,k:"stat",stat:"def",pct:15,cond:"hp30"},{id:"ss08",nm:"聖盾の城塞",ty:"A",sp:8,lv:90,mp:30,k:"shield",pct:30,tn:2,tg:"party"}],
+great_sword:[{id:"gs01",nm:"大剣熟練",ty:"P",sp:2,lv:1,k:"stat",stat:"atk",pct:6},{id:"gs02",nm:"薙ぎ払い",ty:"A",sp:2,lv:5,mp:8,k:"dmg",pw:120,tg:"all",brk:10},{id:"gs03",nm:"大振り",ty:"A",sp:3,lv:10,mp:10,k:"dmg",pw:160,hm:-10,brk:25},{id:"gs04",nm:"アーマーブレイク",ty:"A",sp:3,lv:15,mp:10,k:"dmg",pw:110,st:"defdown",brk:20},{id:"gs05",nm:"怒りの咆哮",ty:"P",sp:4,lv:25,k:"stat",stat:"atk",pct:10,cond:"hp50"},{id:"gs06",nm:"ブレイブチャージ",ty:"A",sp:4,lv:30,mp:12,k:"chant",pct:50},{id:"gs07",nm:"破壊王",ty:"P",sp:5,lv:60,k:"flag",fl:"defPen",val:10},{id:"gs08",nm:"天地断滅",ty:"A",sp:8,lv:90,mp:35,k:"dmg",pw:300,hm:-15,crit:20,brk:40}],
+blade_master:[{id:"bm01",nm:"軽量両手剣熟練",ty:"P",sp:2,lv:1,k:"stat",stat:"agi",pct:5},{id:"bm02",nm:"居合斬り",ty:"A",sp:2,lv:5,mp:6,k:"dmg",pw:110,brk:10},{id:"bm03",nm:"見切り",ty:"P",sp:3,lv:10,k:"flag",fl:"eva",val:8},{id:"bm04",nm:"疾風突き",ty:"A",sp:3,lv:15,mp:8,k:"dmg",pw:120,el:"wind"},{id:"bm05",nm:"カウンター",ty:"A",sp:3,lv:20,mp:8,k:"guard"},{id:"bm06",nm:"残像",ty:"P",sp:4,lv:30,k:"flag",fl:"extraAct",val:8},{id:"bm07",nm:"燕返し",ty:"A",sp:4,lv:40,mp:12,k:"dmg",pw:140,hm:10},{id:"bm08",nm:"無影連斬",ty:"A",sp:8,lv:90,mp:30,k:"dmg",pw:90,hits:3}],
+twin_dagger:[{id:"td01",nm:"二刀流",ty:"P",sp:2,lv:1,k:"flag",fl:"double",val:1},{id:"td02",nm:"連撃",ty:"P",sp:3,lv:5,k:"flag",fl:"extraAct",val:10},{id:"td03",nm:"毒刃",ty:"A",sp:3,lv:10,mp:8,k:"dmg",pw:100,st:"poison"},{id:"td04",nm:"会心研ぎ",ty:"P",sp:3,lv:15,k:"flag",fl:"critRate",val:8},{id:"td05",nm:"影走り",ty:"A",sp:3,lv:20,mp:8,k:"buff",stat:"agi",pct:15,tn:3,tg:"self"},{id:"td06",nm:"急所突き",ty:"A",sp:4,lv:30,mp:10,k:"dmg",pw:130,st:"bleed"},{id:"td07",nm:"乱れ双牙",ty:"A",sp:5,lv:45,mp:14,k:"dmg",pw:90,hits:2,crit:10},{id:"td08",nm:"千影双舞",ty:"A",sp:8,lv:90,mp:30,k:"dmg",pw:70,hits:4,crit:20}],
+guardian:[{id:"gd01",nm:"大盾熟練",ty:"P",sp:2,lv:1,k:"stat",stat:"def",pct:8},{id:"gd02",nm:"挑発",ty:"A",sp:2,lv:5,mp:6,k:"guard"},{id:"gd03",nm:"シールドウォール",ty:"A",sp:3,lv:10,mp:8,k:"buff",stat:"def",pct:20,tn:3,tg:"self"},{id:"gd04",nm:"鉄壁",ty:"P",sp:3,lv:15,k:"stat",stat:"def",pct:5},{id:"gd05",nm:"反撃タックル",ty:"A",sp:3,lv:20,mp:8,k:"dmg",pw:90,st:"slow",brk:15},{id:"gd06",nm:"守護陣",ty:"A",sp:4,lv:30,mp:12,k:"shield",pct:30,tn:2,tg:"ally"},{id:"gd07",nm:"不落の砦",ty:"P",sp:5,lv:50,k:"stat",stat:"def",pct:25,cond:"hp20"},{id:"gd08",nm:"絶対防衛線",ty:"A",sp:8,lv:90,mp:35,k:"shield",pct:40,tn:3,tg:"party"}],
+healer:[{id:"he01",nm:"治癒術",ty:"A",sp:2,lv:1,mp:8,k:"heal",pw:120,tg:"ally"},{id:"he02",nm:"回復の祈り",ty:"P",sp:2,lv:5,k:"flag",fl:"healPow",val:10},{id:"he03",nm:"リジェネ",ty:"A",sp:3,lv:10,mp:10,k:"heal",pw:60,st:"regen",tg:"ally"},{id:"he04",nm:"浄化",ty:"A",sp:3,lv:15,mp:10,k:"cleanse",tg:"ally"},{id:"he05",nm:"集団治癒",ty:"A",sp:4,lv:30,mp:18,k:"heal",pw:80,tg:"party"},{id:"he06",nm:"光の加護",ty:"P",sp:5,lv:50,k:"flag",fl:"healPow",val:10},{id:"he07",nm:"蘇生",ty:"A",sp:6,lv:60,mp:30,k:"revive",pw:30},{id:"he08",nm:"聖域の祈り",ty:"A",sp:8,lv:90,mp:40,k:"heal",pw:150,tg:"party",el:"light"}],
+buffer_debuffer:[{id:"bd01",nm:"力の歌",ty:"A",sp:2,lv:1,mp:8,k:"buff",stat:"atk",pct:10,tn:3,tg:"party"},{id:"bd02",nm:"守りの歌",ty:"A",sp:2,lv:5,mp:8,k:"buff",stat:"def",pct:10,tn:3,tg:"party"},{id:"bd03",nm:"遅延の呪い",ty:"A",sp:3,lv:10,mp:10,k:"debuff",stat:"agi",pct:15,tn:3},{id:"bd04",nm:"脆弱の呪印",ty:"A",sp:3,lv:15,mp:10,k:"debuff",stat:"def",pct:10,tn:3},{id:"bd05",nm:"激励",ty:"P",sp:4,lv:25,k:"flag",fl:"buffPow",val:10},{id:"bd06",nm:"混乱の旋律",ty:"A",sp:4,lv:35,mp:14,k:"status",st:"confuse"},{id:"bd07",nm:"呪術師の眼",ty:"P",sp:5,lv:60,k:"flag",fl:"debHit",val:15},{id:"bd08",nm:"終焉のレクイエム",ty:"A",sp:8,lv:90,mp:35,k:"debuff",stat:"atk",pct:20,tn:2,tg:"all"}],
+summoner:[{id:"sm01",nm:"下位精霊召喚",ty:"A",sp:3,lv:1,mp:12,k:"summon",pw:60,tn:3},{id:"sm02",nm:"契約強化",ty:"P",sp:2,lv:5,k:"flag",fl:"summonPow",val:10},{id:"sm03",nm:"治癒精霊",ty:"A",sp:3,lv:10,mp:14,k:"heal",pw:50,st:"regen",tg:"ally"},{id:"sm04",nm:"魔獣召喚",ty:"A",sp:4,lv:20,mp:18,k:"summon",pw:80,tn:3},{id:"sm05",nm:"MP分配",ty:"P",sp:3,lv:30,k:"flag",fl:"mpReduce",val:1},{id:"sm06",nm:"精霊融合",ty:"A",sp:5,lv:45,mp:20,k:"dmg",mg:1,pw:180},{id:"sm07",nm:"上位契約",ty:"P",sp:6,lv:60,k:"flag",fl:"summonMax",val:1},{id:"sm08",nm:"大召喚",ty:"A",sp:8,lv:90,mp:45,k:"summon",pw:200,tn:3}],
+tamer:[{id:"tm01",nm:"テイム",ty:"A",sp:3,lv:1,mp:10,k:"status",st:"stun"},{id:"tm02",nm:"獣の牙",ty:"P",sp:2,lv:5,k:"flag",fl:"summonPow",val:10},{id:"tm03",nm:"餌付け",ty:"P",sp:2,lv:10,k:"flag",fl:"debHit",val:10},{id:"tm04",nm:"忠誠の絆",ty:"P",sp:3,lv:20,k:"stat",stat:"def",pct:5},{id:"tm05",nm:"獣化",ty:"A",sp:3,lv:25,mp:10,k:"buff",stat:"atk",pct:10,tn:2,tg:"self"},{id:"tm06",nm:"捕獲網",ty:"A",sp:3,lv:35,mp:12,k:"status",st:"stun"},{id:"tm07",nm:"ペット進化",ty:"P",sp:5,lv:60,k:"flag",fl:"summonPow",val:20},{id:"tm08",nm:"獣王の行進",ty:"A",sp:8,lv:90,mp:35,k:"summon",pw:120,tn:3}],
+sage:[{id:"sg01",nm:"属性付与",ty:"A",sp:2,lv:1,mp:8,k:"chant",pct:30,tg:"ally"},{id:"sg02",nm:"弱点看破",ty:"A",sp:2,lv:5,mp:8,k:"debuff",stat:"def",pct:10,tn:3},{id:"sg03",nm:"MP供給",ty:"A",sp:3,lv:10,mp:0,k:"mp",pw:15,tg:"ally"},{id:"sg04",nm:"魔法増幅",ty:"P",sp:3,lv:20,k:"flag",fl:"buffPow",val:10},{id:"sg05",nm:"結界",ty:"A",sp:3,lv:25,mp:12,k:"shield",pct:20,tn:2,tg:"ally"},{id:"sg06",nm:"リフレク",ty:"A",sp:4,lv:35,mp:16,k:"shield",pct:30,tn:2,tg:"ally"},{id:"sg07",nm:"星読みの眼",ty:"P",sp:5,lv:50,k:"flag",fl:"hit",val:5},{id:"sg08",nm:"天地星脈陣",ty:"A",sp:8,lv:90,mp:40,k:"mp",pw:20,tg:"party"}],
+attack_mage:[{id:"am01",nm:"魔力増幅",ty:"P",sp:2,lv:1,k:"stat",stat:"matk",pct:5},{id:"am02",nm:"ファイアボール",ty:"A",sp:2,lv:5,mp:8,k:"dmg",mg:1,pw:130,st:"burn",el:"fire"},{id:"am03",nm:"詠唱",ty:"A",sp:3,lv:10,mp:6,k:"chant",pct:40},{id:"am04",nm:"アイスランス",ty:"A",sp:3,lv:15,mp:10,k:"dmg",mg:1,pw:120,st:"slow",el:"water"},{id:"am05",nm:"魔法貫通",ty:"P",sp:4,lv:25,k:"flag",fl:"defPen",val:10},{id:"am06",nm:"サンダーストーム",ty:"A",sp:5,lv:35,mp:16,k:"dmg",mg:1,pw:90,tg:"all",el:"wind"},{id:"am07",nm:"魔法クリティカル",ty:"P",sp:5,lv:55,k:"flag",fl:"critRate",val:10},{id:"am08",nm:"メテオ",ty:"A",sp:8,lv:90,mp:30,k:"dmg",mg:1,pw:160,tg:"all",el:"fire"}],
+shadow_user:[{id:"sh01",nm:"影刃熟練",ty:"P",sp:2,lv:1,k:"stat",stat:"atk",pct:5},{id:"sh02",nm:"影縫い",ty:"A",sp:2,lv:5,mp:6,k:"dmg",pw:100,st:"blind",el:"dark"},{id:"sh03",nm:"身代わりの影",ty:"A",sp:3,lv:10,mp:8,k:"shield",pct:100,tn:1,tg:"self"},{id:"sh04",nm:"影分身",ty:"A",sp:3,lv:20,mp:10,k:"dmg",pw:70,hits:2},{id:"sh05",nm:"暗殺歩法",ty:"P",sp:4,lv:30,k:"flag",fl:"critDmg",val:15},{id:"sh06",nm:"影縛り",ty:"A",sp:4,lv:40,mp:12,k:"dmg",pw:120,st:"stun",el:"dark"},{id:"sh07",nm:"夜目",ty:"P",sp:5,lv:60,k:"flag",fl:"eva",val:8},{id:"sh08",nm:"影殺し",ty:"A",sp:8,lv:90,mp:25,k:"dmg",pw:250,crit:30}],
+necromancer:[{id:"nc01",nm:"死体収集",ty:"P",sp:2,lv:1,k:"flag",fl:"corpse",val:1},{id:"nc02",nm:"ソウルドレイン",ty:"A",sp:2,lv:5,mp:8,k:"drain",mg:1,pw:90,el:"dark"},{id:"nc03",nm:"スケルトン召喚",ty:"A",sp:3,lv:10,mp:12,k:"summon",pw:70,tn:3},{id:"nc04",nm:"呪縛",ty:"A",sp:3,lv:15,mp:10,k:"debuff",stat:"mdef",pct:10,tn:3},{id:"nc05",nm:"死体爆発",ty:"A",sp:4,lv:30,mp:14,k:"dmg",mg:1,pw:150,el:"dark"},{id:"nc06",nm:"恐怖の気配",ty:"P",sp:4,lv:45,k:"flag",fl:"enemyHit",val:-5},{id:"nc07",nm:"グール召喚",ty:"A",sp:5,lv:60,mp:18,k:"summon",pw:110,tn:3},{id:"nc08",nm:"死者の軍勢",ty:"A",sp:8,lv:90,mp:35,k:"summon",pw:90,tn:3}],
+gunner:[{id:"gn01",nm:"銃器熟練",ty:"P",sp:2,lv:1,k:"flag",fl:"hit",val:5},{id:"gn02",nm:"スナップショット",ty:"A",sp:2,lv:5,mp:5,k:"dmg",pw:110},{id:"gn03",nm:"貫通弾",ty:"A",sp:3,lv:10,mp:7,k:"dmg",pw:120,pen:15,brk:15},{id:"gn04",nm:"連射",ty:"A",sp:3,lv:20,mp:9,k:"dmg",pw:70,hits:2},{id:"gn05",nm:"弱点狙い",ty:"P",sp:4,lv:30,k:"flag",fl:"critRate",val:8},{id:"gn06",nm:"炸裂弾",ty:"A",sp:4,lv:40,mp:14,k:"dmg",pw:90,tg:"all",brk:20},{id:"gn07",nm:"特殊弾薬",ty:"P",sp:5,lv:60,k:"flag",fl:"critDmg",val:20},{id:"gn08",nm:"フィニッシュバレット",ty:"A",sp:8,lv:90,mp:25,k:"dmg",pw:280,hm:100}],
+berserker:[{id:"bk01",nm:"剛力",ty:"P",sp:2,lv:1,k:"stat",stat:"atk",pct:6},{id:"bk02",nm:"血の代償",ty:"P",sp:3,lv:5,k:"flag",fl:"hpCostPow",val:15},{id:"bk03",nm:"捨身斬り",ty:"A",sp:3,lv:10,mp:0,k:"dmg",pw:150,hpCost:5,brk:20},{id:"bk04",nm:"激怒",ty:"A",sp:3,lv:20,mp:6,k:"buff",stat:"atk",pct:20,tn:2,tg:"self"},{id:"bk05",nm:"怒りの血",ty:"P",sp:4,lv:30,k:"stat",stat:"atk",pct:15,cond:"hp50"},{id:"bk06",nm:"破壊の突進",ty:"A",sp:4,lv:40,mp:0,k:"dmg",pw:190,hm:-10,hpCost:8,brk:30},{id:"bk07",nm:"絶叫",ty:"P",sp:5,lv:60,k:"flag",fl:"critDmg",val:20},{id:"bk08",nm:"血滅斬",ty:"A",sp:8,lv:90,mp:0,k:"dmg",pw:280,hpCost:10,crit:20,brk:40}],
+onmyoji:[{id:"on01",nm:"呪力増幅",ty:"P",sp:2,lv:1,k:"stat",stat:"matk",pct:5},{id:"on02",nm:"火炎の術",ty:"A",sp:2,lv:5,mp:8,k:"dmg",mg:1,pw:125,st:"burn",el:"fire"},{id:"on03",nm:"氷縛の術",ty:"A",sp:3,lv:10,mp:10,k:"dmg",mg:1,pw:120,st:"slow",el:"water"},{id:"on04",nm:"式神召喚",ty:"A",sp:3,lv:15,mp:12,k:"summon",pw:70,tn:3},{id:"on05",nm:"属性精通",ty:"P",sp:4,lv:25,k:"flag",fl:"elemPow",val:15},{id:"on06",nm:"呪殺の印",ty:"A",sp:4,lv:35,mp:12,k:"debuff",stat:"mdef",pct:15,tn:3,el:"dark"},{id:"on07",nm:"方結界",ty:"A",sp:5,lv:50,mp:16,k:"shield",pct:25,tn:2,tg:"party"},{id:"on08",nm:"泰山府君祭",ty:"A",sp:8,lv:90,mp:35,k:"dmg",mg:1,pw:160,tg:"all",el:"light"}],
+spec_offense:[{id:"of01",nm:"攻撃の才能",ty:"P",sp:3,lv:10,k:"stat",stat:"atk",pct:6},{id:"of02",nm:"会心の才能",ty:"P",sp:3,lv:15,k:"flag",fl:"critRate",val:6},{id:"of03",nm:"猛撃",ty:"A",sp:4,lv:20,mp:10,k:"dmg",pw:140,hm:-5,brk:15},{id:"of04",nm:"貫通の才能",ty:"P",sp:4,lv:30,k:"flag",fl:"defPen",val:8},{id:"of05",nm:"会心威力の才能",ty:"P",sp:5,lv:40,k:"flag",fl:"critDmg",val:15},{id:"of06",nm:"全力強打",ty:"A",sp:5,lv:50,mp:14,k:"dmg",pw:200,hm:-10,brk:25},{id:"of07",nm:"連撃の才能",ty:"A",sp:6,lv:60,mp:16,k:"dmg",pw:110,hits:2},{id:"of08",nm:"破壊の才能",ty:"P",sp:7,lv:75,k:"stat",stat:"atk",pct:10}],
+spec_defense:[{id:"df01",nm:"防御の才能",ty:"P",sp:3,lv:10,k:"stat",stat:"def",pct:6},{id:"df02",nm:"体力の才能",ty:"P",sp:3,lv:15,k:"stat",stat:"hp",pct:8},{id:"df03",nm:"魔防の才能",ty:"P",sp:3,lv:20,k:"stat",stat:"mdef",pct:6},{id:"df04",nm:"鉄の意志",ty:"A",sp:4,lv:30,mp:10,k:"guard"},{id:"df05",nm:"庇護の才能",ty:"A",sp:5,lv:40,mp:14,k:"shield",pct:20,tn:2,tg:"party"},{id:"df06",nm:"被回復の才能",ty:"P",sp:4,lv:50,k:"flag",fl:"healRecv",val:10},{id:"df07",nm:"ダメージ軽減",ty:"P",sp:6,lv:60,k:"flag",fl:"dmgReduce",val:5},{id:"df08",nm:"不屈の才能",ty:"P",sp:7,lv:75,k:"stat",stat:"def",pct:10}],
+spec_support:[{id:"sp01",nm:"回復の才能",ty:"P",sp:3,lv:10,k:"flag",fl:"healPow",val:8},{id:"sp02",nm:"魔力の才能",ty:"P",sp:3,lv:15,k:"stat",stat:"mp",pct:10},{id:"sp03",nm:"小回復",ty:"A",sp:3,lv:20,mp:8,k:"heal",pw:70,tg:"party"},{id:"sp04",nm:"全体浄化",ty:"A",sp:4,lv:30,mp:12,k:"cleanse",tg:"party"},{id:"sp05",nm:"強化の才能",ty:"P",sp:4,lv:40,k:"flag",fl:"buffPow",val:8},{id:"sp06",nm:"魔力供給",ty:"A",sp:4,lv:50,mp:0,k:"mp",pw:12,tg:"party"},{id:"sp07",nm:"MP節約の才能",ty:"P",sp:5,lv:60,k:"flag",fl:"mpReduce",val:1},{id:"sp08",nm:"蘇生の才能",ty:"A",sp:7,lv:75,mp:25,k:"revive",pw:40}],
+spec_speed:[{id:"sd01",nm:"敏捷の才能",ty:"P",sp:3,lv:10,k:"stat",stat:"agi",pct:6},{id:"sd02",nm:"回避の才能",ty:"P",sp:3,lv:15,k:"flag",fl:"eva",val:6},{id:"sd03",nm:"連撃行動の才能",ty:"P",sp:4,lv:20,k:"flag",fl:"extraAct",val:6},{id:"sd04",nm:"命中の才能",ty:"P",sp:3,lv:30,k:"flag",fl:"hit",val:6},{id:"sd05",nm:"神速",ty:"A",sp:4,lv:40,mp:10,k:"buff",stat:"agi",pct:20,tn:2,tg:"self"},{id:"sd06",nm:"鈍足撃",ty:"A",sp:4,lv:50,mp:10,k:"dmg",pw:100,st:"slow"},{id:"sd07",nm:"先制の才能",ty:"P",sp:5,lv:60,k:"flag",fl:"firstStrike",val:10},{id:"sd08",nm:"双撃の才能",ty:"A",sp:6,lv:75,mp:14,k:"dmg",pw:90,hits:2}],
+talent:[{id:"tl01",nm:"才能:HP+5%",ty:"P",sp:2,lv:1,k:"stat",stat:"hp",pct:5},{id:"tl02",nm:"才能:物攻+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"atk",pct:4},{id:"tl03",nm:"才能:魔攻+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"matk",pct:4},{id:"tl04",nm:"才能:物防+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"def",pct:4},{id:"tl05",nm:"才能:素早さ+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"agi",pct:4},{id:"tl06",nm:"才能:運+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"luk",pct:4},{id:"tl07",nm:"才能:命中+5",ty:"P",sp:2,lv:1,k:"flag",fl:"hit",val:5},{id:"tl08",nm:"才能:回避+5",ty:"P",sp:2,lv:1,k:"flag",fl:"eva",val:5},{id:"tl09",nm:"才能:会心+4",ty:"P",sp:2,lv:1,k:"flag",fl:"critRate",val:4},{id:"tl10",nm:"才能:MP+8%",ty:"P",sp:2,lv:1,k:"stat",stat:"mp",pct:8}],
+adv_attack:[{id:"va01",nm:"上級:攻撃+12%",ty:"P",sp:6,lv:50,k:"stat",stat:"atk",pct:12},{id:"va02",nm:"上級:会心+12",ty:"P",sp:6,lv:50,k:"flag",fl:"critRate",val:12},{id:"va03",nm:"上級撃",ty:"A",sp:7,lv:55,mp:20,k:"dmg",pw:240,brk:35},{id:"va04",nm:"上級:貫通+15",ty:"P",sp:7,lv:60,k:"flag",fl:"defPen",val:15},{id:"va05",nm:"上級連斬",ty:"A",sp:8,lv:65,mp:24,k:"dmg",pw:110,hits:3},{id:"va06",nm:"上級:HP+12%",ty:"P",sp:7,lv:70,k:"stat",stat:"hp",pct:12},{id:"va07",nm:"上級:溜め+70",ty:"A",sp:8,lv:75,mp:18,k:"chant",pct:70},{id:"va08",nm:"上級:会心威力+30",ty:"P",sp:9,lv:80,k:"flag",fl:"critDmg",val:30}],
+adv_support:[{id:"vs01",nm:"上級:魔攻+12%",ty:"P",sp:6,lv:50,k:"stat",stat:"matk",pct:12},{id:"vs02",nm:"上級:回復+20",ty:"P",sp:6,lv:50,k:"flag",fl:"healPow",val:20},{id:"vs03",nm:"上級治癒",ty:"A",sp:7,lv:55,mp:24,k:"heal",pw:140,tg:"party"},{id:"vs04",nm:"上級:MP+20%",ty:"P",sp:7,lv:60,k:"stat",stat:"mp",pct:20},{id:"vs05",nm:"上級結界",ty:"A",sp:8,lv:65,mp:28,k:"shield",pct:35,tn:2,tg:"party"},{id:"vs06",nm:"上級:強化+15",ty:"P",sp:7,lv:70,k:"flag",fl:"buffPow",val:15},{id:"vs07",nm:"上級蘇生",ty:"A",sp:9,lv:75,mp:32,k:"revive",pw:60},{id:"vs08",nm:"上級:軽減+10",ty:"P",sp:9,lv:80,k:"flag",fl:"dmgReduce",val:10}],
+ult_holy_knight:[{id:"u01",nm:"聖域不動陣",ty:"A",sp:10,lv:70,mp:40,k:"shield",pct:50,tn:3,tg:"party"}],ult_war_god:[{id:"u02",nm:"軍神の断罪",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:350,crit:25,brk:50}],ult_sword_saint:[{id:"u03",nm:"無想連斬",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:120,hits:4,crit:20}],ult_assassin:[{id:"u04",nm:"影殺・絶",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:300,crit:40}],ult_bastion:[{id:"u05",nm:"絶対城塞",ty:"A",sp:10,lv:70,mp:40,k:"guard"}],ult_saint:[{id:"u06",nm:"聖母の祝福",ty:"A",sp:10,lv:70,mp:40,k:"heal",pw:200,tg:"party"}],ult_maestro:[{id:"u07",nm:"天地交響曲",ty:"A",sp:10,lv:70,mp:40,k:"buff",stat:"atk",pct:25,tn:3,tg:"party"}],ult_arch_summoner:[{id:"u08",nm:"神霊降臨",ty:"A",sp:10,lv:70,mp:40,k:"summon",pw:250,tn:3}],ult_beast_lord:[{id:"u09",nm:"百獣の咆哮",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:200,tg:"all",brk:40}],ult_arch_sage:[{id:"u10",nm:"大星脈陣",ty:"A",sp:10,lv:70,mp:40,k:"mp",pw:30,tg:"party"}],ult_archmage:[{id:"u11",nm:"禁呪・隕石",ty:"A",sp:10,lv:70,mp:40,k:"dmg",mg:1,pw:220,tg:"all",el:"fire"}],ult_shadow_master:[{id:"u12",nm:"影域支配",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:280,st:"stun",el:"dark"}],ult_death_lord:[{id:"u13",nm:"冥界の軍勢",ty:"A",sp:10,lv:70,mp:40,k:"summon",pw:150,tn:3}],ult_gunslinger:[{id:"u14",nm:"乱れ撃ち・極",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:90,hits:5,crit:20}],ult_war_demon:[{id:"u15",nm:"戦鬼の血祭",ty:"A",sp:10,lv:70,mp:0,k:"dmg",pw:350,hpCost:12,brk:50}],ult_grand_onmyoji:[{id:"u16",nm:"陰陽転生陣",ty:"A",sp:10,lv:70,mp:40,k:"dmg",mg:1,pw:200,tg:"all",el:"light"}],
+reinc_pool:[{id:"rc01",nm:"転生:全ステ+8%",ty:"P",sp:8,lv:1,k:"stat",stat:"hp",pct:8},{id:"rc02",nm:"転生:会心+15",ty:"P",sp:8,lv:1,k:"flag",fl:"critRate",val:15},{id:"rc03",nm:"転生撃",ty:"A",sp:9,lv:1,mp:20,k:"dmg",pw:260,tg:"all",brk:40},{id:"rc04",nm:"転生:軽減+12",ty:"P",sp:9,lv:1,k:"flag",fl:"dmgReduce",val:12}]
+};
+const SKILL_INDEX={};Object.values(SKILLS).forEach(a=>a.forEach(s=>SKILL_INDEX[s.id]=s));
+
+function flagDesc(fl,v){const m={critRate:`会心率+${v}`,critDmg:`会心威力+${v}`,eva:`回避+${v}`,hit:`命中+${v}`,defPen:`防御無視+${v}%`,healPow:`回復量+${v}%`,extraAct:`追加行動率+${v}%`,double:`通常攻撃が2回`,mpReduce:`MP消費-20%`,summonMax:`召喚数+1`,summonPow:`召喚威力+${v}%`,dmgReduce:`被ダメ-${v}%`,healRecv:`被回復+${v}%`,buffPow:`強化効果+${v}%`,elemPow:`属性威力+${v}%`,enemyHit:`敵命中${v}`,corpse:`撃破時死体カウント`,firstStrike:`先制ダメージ+${v}%`,hpCostPow:`血代償威力+${v}%`};return m[fl]||"";}
+function skillDesc(s){const p=[];p.push(s.ty==="P"?"【被动】常に発動。":"【主动】"+`MP${s.mp||0}消費。`);
+switch(s.k){case"stat":p.push(`${STAT_NM[s.stat]}+${s.pct}%${s.cond?"(HP低下時発動)":""}。`);break;
+case"flag":p.push(flagDesc(s.fl,s.val)+"。");break;
+case"dmg":p.push(`${s.mg?"魔法":"物理"}攻撃 威力${s.pw}${s.hits>1?`×${s.hits}回`:""}${s.tg==="all"?"(全体)":""}${s.el?` 属性[${EL_NM[s.el]}]`:""}${s.st?` ${ST_NM[s.st]}付与`:""}${s.brk?` ブレイク+${s.brk}`:""}${s.pen?` 防御無視${s.pen}%`:""}。`);break;
+case"drain":p.push(`魔法威力${s.pw}+与ダメの半分を吸収。`);break;
+case"heal":p.push(`HP回復 威力${s.pw}${s.tg==="party"?"(全体)":""}${s.st?" +再生付与":""}。`);break;
+case"revive":p.push(`戦闘不能をHP${s.pw}%で蘇生。`);break;
+case"buff":p.push(`${STAT_NM[s.stat]}+${s.pct}%(${s.tn}T)${s.tg==="party"?" 全体":""}。`);break;
+case"debuff":p.push(`敵の${STAT_NM[s.stat]}-${s.pct}%(${s.tn||3}T)。`);break;
+case"status":p.push(`敵に${ST_NM[s.st]||"状態異常"}を付与。`);break;
+case"guard":p.push("ガードし被ダメ軽減・ヘイト上昇。");break;
+case"shield":p.push(`味方に${s.pct}%ダメ軽減シールド(${s.tn}T)${s.tg==="party"?"全体":""}。`);break;
+case"summon":p.push(`召喚獣を呼ぶ(追撃威力${s.pw})。`);break;
+case"chant":p.push(`次の魔法威力+${s.pct}%。`);break;
+case"cleanse":p.push("状態異常を解除。");break;
+case"mp":p.push(`MPを${s.pw}回復。`);break;}
+return p.join("");}
+
+const RACES={slime:{hp:1.1,atk:.9,def:1,matk:.8,mdef:1,agi:.7,luk:.8,hit:.9,eva:.6},beast:{hp:.95,atk:1.1,def:.9,matk:.6,mdef:.8,agi:1.3,luk:1,hit:1.1,eva:1.2},humanoid:{hp:1,atk:1,def:1,matk:1,mdef:1,agi:1,luk:1,hit:1,eva:1},undead:{hp:1,atk:1,def:1,matk:1.2,mdef:1.3,agi:.8,luk:.8,hit:1,eva:.8},golem:{hp:1.3,atk:1.1,def:1.5,matk:.7,mdef:1.2,agi:.5,luk:.7,hit:.9,eva:.4},magic:{hp:.85,atk:.7,def:.8,matk:1.5,mdef:1.3,agi:1,luk:1,hit:1.1,eva:.9},dragon:{hp:1.4,atk:1.3,def:1.3,matk:1.3,mdef:1.2,agi:1.1,luk:1.1,hit:1.2,eva:1},bird:{hp:.8,atk:.9,def:.7,matk:.9,mdef:.8,agi:1.5,luk:1,hit:1.1,eva:1.5},ghost:{hp:.85,atk:.8,def:.7,matk:1.3,mdef:1.5,agi:1.2,luk:1.1,hit:1,eva:1.4},insect:{hp:.9,atk:1,def:1.1,matk:.7,mdef:.8,agi:1.1,luk:.8,hit:1,eva:1}};
+const MONSTERS=[["slime","スライム","slime","normal"],["horn_rabbit","角ウサギ","beast","normal"],["giant_bee","巨大ハチ","insect","normal"],["king_slime","キングスライム","slime","rare"],["goblin","ゴブリン","humanoid","normal"],["wolf","オオカミ","beast","normal"],["treant","トレアント","golem","normal"],["goblin_shaman","ゴブリンシャーマン","magic","rare"],["boar","鎧イノシシ","beast","normal"],["bandit","盗賊","humanoid","normal"],["bandit_leader","盗賊頭","humanoid","rare"],["skeleton","スケルトン兵","undead","normal"],["orc","オーク兵","humanoid","normal"],["stone_golem","ストーンゴーレム","golem","normal"],["cursed_knight","呪われし騎士","undead","rare"],["mimic","ミミック","golem","rare"],["cave_lizard","洞窟トカゲ","beast","normal"],["bat_swarm","コウモリ群","bird","normal"],["gargoyle","ガーゴイル","golem","normal"],["harpy","ハーピー","bird","normal"],["wind_spirit","風の精","magic","normal"],["storm_harpy","嵐のハーピー","bird","rare"],["shadow_wraith","影霊","ghost","normal"],["chimera","キマイラ","beast","normal"],["dark_priest","闇の司祭","magic","rare"],["lizardman","リザードマン","humanoid","normal"],["mist_snake","霧ヘビ","beast","normal"],["sahaugin","サハギン","humanoid","normal"],["lake_dragon","湖竜","dragon","rare"],["death_knight","死霊騎士","undead","normal"],["undead_horde","アンデッド群","undead","normal"],["cursed_king","呪縛の王","undead","rare"],["star_beast","星獣","magic","normal"],["dragon_whelp","竜の子","dragon","normal"],["void_watcher","虚ろの監視者","ghost","normal"],["chaos_beast","混沌獣","dragon","rare"],["primordial_dragon","原初竜","dragon","boss"]];
+const MON_INDEX={};MONSTERS.forEach(m=>MON_INDEX[m[0]]={id:m[0],nm:m[1],type:m[2],rar:m[3]});
+const AREAS=[["area01","始まりの草原",1,6,["slime","horn_rabbit","giant_bee"],"king_slime","",1],["area02","森の入り口",5,12,["goblin","wolf","treant"],"goblin_shaman","",10],["area03","東の街道",10,18,["wolf","boar","bandit"],"bandit_leader","",15],["area04","遺跡の門",15,25,["skeleton","orc","stone_golem"],"cursed_knight","",20],["area05","回声の洞窟",22,35,["cave_lizard","bat_swarm","stone_golem"],"mimic","",30],["area06","風鳴りの崖",30,45,["gargoyle","harpy","wind_spirit"],"storm_harpy","",40],["area07","闇の祠",40,55,["shadow_wraith","chimera","skeleton"],"dark_priest","",50],["area08","霧の湖",50,65,["lizardman","mist_snake","sahaugin"],"lake_dragon","",60],["area09","旧王都",60,80,["death_knight","undead_horde","gargoyle"],"cursed_king","",75],["area10","原初の門",80,100,["star_beast","dragon_whelp","void_watcher"],"chaos_beast","primordial_dragon",95]];
+
+const SERIES=[[1,"始まり",.8],[5,"見習い",1],[10,"銅",1.2],[15,"鉄",1.4],[20,"鋼",1.6],[25,"白銀",1.8],[30,"精霊",2],[35,"騎士",2.2],[40,"ミスリル",2.5],[45,"守護",2.8],[50,"英雄",3.2],[55,"聖銀",3.6],[60,"竜骨",4],[65,"妖魔",4.5],[70,"王宮",5],[75,"神代",5.5],[80,"星霜",6],[85,"天啓",6.6],[90,"神話",7.2],[95,"創世",8],[100,"原初",9]];
+const RARITY={common:{nm:"普通",mult:1,opt:0,ch:60},uncommon:{nm:"上級",mult:1.1,opt:1,ch:25},rare:{nm:"レア",mult:1.25,opt:2,ch:10},epic:{nm:"エピック",mult:1.4,opt:3,ch:4},legend:{nm:"レジェンド",mult:1.6,opt:4,ch:1}};
+const EQ_TYPES=[["one_hand_sword","weapon","剣",{atk:8,hit:2},["sword_shield","guardian","blade_master","shadow_user","holy_knight","bastion","sword_saint","assassin"]],["shield","sub","盾",{def:6,hp:10},["sword_shield","guardian","healer","holy_knight","bastion","saint"]],["great_sword","weapon","大剣",{atk:14,hit:-2,agi:-1},["great_sword","berserker","war_god","war_demon"]],["light_two_hand","weapon","両手剣",{atk:10,agi:3,hit:2},["blade_master","great_sword","berserker","sword_saint","war_god","war_demon"]],["twin_daggers","weapon","双剣",{atk:6,agi:3,luk:2},["twin_dagger","blade_master","shadow_user","assassin","shadow_master"]],["dagger","weapon","短剣",{atk:6,agi:2,luk:2},["shadow_user","twin_dagger","assassin","shadow_master"]],["great_shield","sub","大盾",{def:12,hp:20,agi:-2},["guardian","bastion"]],["staff","weapon","杖",{matk:10,mp:10},["healer","sage","attack_mage","necromancer","onmyoji","saint","arch_sage","archmage","death_lord","grand_onmyoji","maestro","arch_summoner"]],["grimoire","sub","魔導書",{matk:6,mp:10},["buffer_debuffer","summoner","sage","attack_mage","necromancer","onmyoji","maestro","arch_summoner","arch_sage","archmage","death_lord","grand_onmyoji","saint"]],["orb","weapon","宝玉",{matk:9,mp:12},["summoner","sage","attack_mage","necromancer","onmyoji","arch_summoner","arch_sage","archmage","death_lord","grand_onmyoji"]],["instrument","weapon","楽器",{matk:8,luk:2},["buffer_debuffer","maestro"]],["whip","weapon","鞭",{atk:6,luk:3},["tamer","beast_lord"]],["horn","sub","角笛",{matk:4,hp:6},["tamer","beast_lord"]],["astrolabe","weapon","星盤",{matk:10,hit:2},["sage","arch_sage"]],["gun","weapon","銃",{atk:12,hit:4},["gunner","gunslinger"]],["axe","weapon","戦斧",{atk:13,luk:-1},["berserker","war_demon"]],["heavy_armor","armor","重鎧",{def:10,hp:15,agi:-1},["sword_shield","great_sword","guardian","berserker","holy_knight","war_god","bastion","war_demon"]],["medium_armor","armor","中鎧",{def:7,hp:8,agi:1},["blade_master","twin_dagger","tamer","sword_shield","gunner","sword_saint","assassin","gunslinger","beast_lord"]],["light_armor","armor","軽鎧",{def:4,agi:3,eva:3},["blade_master","twin_dagger","tamer","healer","buffer_debuffer","shadow_user","gunner","berserker","assassin","shadow_master","gunslinger","beast_lord","sword_saint"]],["cloth_armor","armor","法衣",{mdef:6,mp:12},["healer","buffer_debuffer","summoner","sage","attack_mage","necromancer","onmyoji","saint","maestro","arch_summoner","beast_lord","arch_sage","archmage","death_lord","grand_onmyoji"]],["accessory","accessory","装飾品",{hp:5,mp:5,agi:1,luk:1},"all"]];
+
+const TEXT={
+phys:["{a}は間合いを測り、{e}の懐へ踏み込む。確かな手応えが残った。","{a}の足音が一つ。刃が閃き、{e}の体勢が崩れる。","息を殺して地を蹴る。{a}の一撃が{e}を捉えた。","{a}は体重を乗せた一撃を{e}へ叩き込む。","{a}の連動した踏み込みから繰り出された攻撃が{e}を打つ。","低く構えた{a}が、瞬間的に距離を詰めて{e}を裂く。"],
+crit:["{a}の瞳が細まる。次の一撃は迷いなく{e}の急所を捉えた。","空気が震えた。{a}の一撃は{e}の守りを打ち砕く。","{a}の攻撃が{e}の急所を貫き、強烈な衝撃が走る。","完璧なタイミング。{a}の一撃が{e}の弱点を抉る。"],
+magic:["{a}が手を掲げると光が走り、{e}へ弾けた。","{a}の詠唱に応え、魔力が{e}を打つ。","{a}の指先から魔力がほとばしり、{e}の周囲で炸裂する。","{a}が言葉を紡ぐと、術式が展開し{e}を焼き払う。"],
+miss:["{a}は踏み込んだが、{e}は紙一重でかわす。","{e}の動きが速かった。{a}の攻撃は空を切る。","{a}の一撃は{e}の残像を斬った。","{e}は身を翻し、{a}の攻撃を流す。"],
+heal:["{a}の手から柔らかな光が{t}を包み、傷が癒えていく。","{a}の祈りが{t}の呼吸を整える。","温かな光が{t}の傷を縫い合わせるように癒やす。","{a}の詠唱とともに、{t}の痛みが引いていく。"],
+buff:["{a}の支援が仲間に満ち、動きが軽くなる。","見えない加護がパーティを包む。","{a}の言葉に、仲間の士気が高まる。"],
+debuff:["{a}の術気が{e}に絡み、動きが鈍る。","{e}の周囲に重い気配が沈む。","{a}の妨害が{e}の体勢を崩す。"],
+guard:["{a}は盾を構え、仲間を守る壁となる。","{a}は半身で攻撃を受け止める構えを取る。","{a}の盾が低く構えられ、鉄の意志を示す。"],
+summon:["{a}が言葉を紡ぐと、空気のかたまりが従者として現れた。","地面に光が走り、{a}の呼びかけに応える影が立つ。","{a}の契約に応じ、従者が戦場へ降り立つ。"],
+enemy:["{a}が{t}へ襲いかかる。衝撃が走り、体勢が揺らいだ。","{a}の攻撃が{t}を捉える。腕にしびれる痛みが残る。","{a}は唸りとともに{t}へ殺到する。","{a}の重い一撃が{t}の守りを叩く。"],
+status:["{e}の体に変調が走る。","{e}は苦悶の表情を浮かべた。","{e}の動きが目に見えて鈍る。"]};
+const JOB_TEXT={sword_shield:["{a}は剣と盾の連動で{e}を押し込む。","{a}は盾で軸を作り、剣を{e}へ閃かせる。"],great_sword:["{a}は大剣を振り抜き、{e}を吹き飛ばす。","{a}の渾身の一振りが{e}を打ち据える。"],blade_master:["{a}は風のように回り込み、{e}を斬る。","{a}の刃が軌道を描き、{e}の隙を突く。"],twin_dagger:["{a}は双剣を交差させ、{e}を刻む。","{a}の左右の刃が時間差で{e}を裂く。"],guardian:["{a}は盾で前へ出て、{e}を打ち据える。","{a}の重厚な突進が{e}を揺さぶる。"],healer:["{a}の聖術が{e}を焼く。","{a}は祈りの光を{e}へ放つ。"],buffer_debuffer:["{a}の音色が{e}の体勢を狂わせる。","{a}の呪歌が{e}の力を削ぐ。"],summoner:["{a}の従者が{e}へ襲いかかる。","{a}の指示で精霊が{e}を打つ。"],tamer:["{a}の合図で獣が{e}へ飛びかかる。","{a}は獣と連動して{e}を挟撃する。"],sage:["{a}の星術が{e}の周囲で弾ける。","{a}は陣を展開し{e}を縛る。"],attack_mage:["{a}の詠唱が完了し、{e}へ術式が炸裂する。","{a}の魔力が{e}を飲み込む。"],shadow_user:["{a}は影から現れ、{e}の急所を突く。","{a}の短刀が影とともに{e}を裂く。"],necromancer:["{a}の呪力が{e}の生気を削る。","{a}の死霊術が{e}を蝕む。"],gunner:["{a}の銃声が響き、{e}が跳ねる。","{a}は狙いを定め、{e}を撃ち抜く。"],berserker:["{a}は雄叫びとともに{e}を叩き斬る。","{a}の荒々しい一撃が{e}を薙ぐ。"],onmyoji:["{a}の符が舞い、{e}を呪縛する。","{a}の陰陽術が{e}を打ち据える。"]};
+const WEAPON_TEXT={one_hand_sword:["{a}の片手剣が鋭く{e}を突く。","{a}は剣先で{e}のガードを崩す。"],great_sword:["{a}の大剣が唸り、{e}を両断せんと振るわれる。","重い一撃。{a}の大剣が{e}を打ち砕く。"],light_two_hand:["{a}の両手剣が流れるように{e}を斬る。","{a}は剣速で{e}を翻弄する。"],twin_daggers:["{a}の双剣が連続して{e}を刻む。","{a}は刃の雨を{e}へ浴びせる。"],dagger:["{a}の短刀が{e}の隙を突く。","{a}は素早い刺突で{e}を穿つ。"],staff:["{a}の杖先から魔力が{e}へ奔る。","{a}は杖で術式を導き{e}を打つ。"],orb:["{a}の宝玉が輝き、{e}を焼く。","{a}の宝珠が{e}へ魔力を放つ。"],grimoire:["{a}の魔導書が頁をめくり、{e}を呪う。","{a}は書から術を解放し{e}を打つ。"],instrument:["{a}の音色が刃となり{e}を裂く。","{a}の旋律が{e}を切り刻む。"],gun:["{a}の銃口が火を噴き、{e}が跳ねる。","{a}の連射が{e}を穿つ。"],axe:["{a}の戦斧が{e}を叩き割る。","{a}は斧を振り回し{e}を薙ぐ。"],whip:["{a}の鞭が唸り、{e}を打ち据える。","{a}の鞭が{e}の体勢を崩す。"],astrolabe:["{a}の星盤が回転し、{e}へ星力を放つ。","{a}は星を導き{e}を撃つ。"]};
+
+let game=null,battle=null,autoTimer=null,uidSeq=1,speed=1;
+
+function jobStats(j,lv){const b=JOBS[j].base,g=JOBS[j].g,o={};STAT_KEYS.forEach(k=>o[k]=Math.floor(b[k]+g[k]*(lv-1)));return o;}
+function titleBonus(){const b={atk:0,def:0,hp:0};const k=game.kills||0,bk=game.bossKills||0,tw=game.tower||1;
+if(k>=50)b.atk+=3;if(k>=200)b.atk+=5;if(bk>=5)b.hp+=5;if(bk>=20)b.hp+=8;if(tw>=10)b.def+=3;if(tw>=30)b.def+=5;return b;}
+function passiveMods(c){const m={pct:{},flat:{},flags:{}};(c.skills||[]).forEach(id=>{const s=SKILL_INDEX[id];if(!s||s.ty!=="P")return;
+if(s.k==="stat"&&!s.cond)m.pct[s.stat]=(m.pct[s.stat]||0)+s.pct;
+if(s.k==="flag"){if(s.fl==="hit"||s.fl==="eva")m.flat[s.fl]=(m.flat[s.fl]||0)+s.val;else m.flags[s.fl]=(m.flags[s.fl]||0)+s.val;}});return m;}
+function condMods(c,r){const m={};(c.skills||[]).forEach(id=>{const s=SKILL_INDEX[id];if(!s||s.ty!=="P"||s.k!=="stat"||!s.cond)return;
+if(s.cond==="hp30"&&r<.3)m[s.stat]=(m[s.stat]||0)+s.pct;if(s.cond==="hp50"&&r<.5)m[s.stat]=(m[s.stat]||0)+s.pct;if(s.cond==="hp20"&&r<.2)m[s.stat]=(m[s.stat]||0)+s.pct;});return m;}
+function setInfo(c){const cnt={},rc={};let maxSer=0;(c.equip||[]).forEach(uid=>{const it=(game.inv||[]).find(x=>x.uid===uid);if(!it)return;
+if(it.series)cnt[it.series]=(cnt[it.series]||0)+1;rc[it.rar]=(rc[it.rar]||0)+1;maxSer=Math.max(maxSer,it.lv);});
+return{sc:Math.max(0,...Object.values(cnt),0),maxSer,sameRar:Math.max(0,...Object.values(rc),0)};}
+function equipSum(c){const t={};STAT_KEYS.forEach(k=>t[k]=0);(c.equip||[]).forEach(uid=>{const it=(game.inv||[]).find(x=>x.uid===uid);if(it){const enh=1+(it.enh||0)*.04;Object.entries(it.stats).forEach(([k,v])=>t[k]+=Math.round(v*enh));}});return t;}
+function calcTotal(c){const base=jobStats(c.jobId,c.level),eq=equipSum(c),pm=passiveMods(c),tb=titleBonus(),si=setInfo(c);const o={};
+STAT_KEYS.forEach(k=>{let v=base[k]+eq[k];v=Math.floor(v*(1+(pm.pct[k]||0)/100));if(pm.flat[k])v+=pm.flat[k];o[k]=Math.max(0,v);});
+o.atk=Math.floor(o.atk*(1+tb.atk/100));o.def=Math.floor(o.def*(1+tb.def/100));o.hp=Math.floor(o.hp*(1+tb.hp/100));
+if(c.awakened)STAT_KEYS.forEach(k=>o[k]=Math.floor(o[k]*1.05));
+if(c.reinc)STAT_KEYS.forEach(k=>o[k]=Math.floor(o[k]*(1+0.10*c.reinc)));
+const hi=si.maxSer>=50;
+if(si.sc>=2)o.def=Math.floor(o.def*(1+(hi?8:5)/100));
+if(si.sc>=3){o.atk=Math.floor(o.atk*(1+(hi?8:5)/100));o.matk=Math.floor(o.matk*(1+(hi?8:5)/100));}
+if(si.sc>=4){o.hp=Math.floor(o.hp*(1+(hi?10:8)/100));pm.flags.critRate=(pm.flags.critRate||0)+5;}
+if(si.sameRar>=4)pm.flags.critDmg=(pm.flags.critDmg||0)+10;
+o._flags=pm.flags;return o;}
+function nextExp(lv){return Math.floor(20*Math.pow(lv,1.6)+50);}
+function gainExp(c,amt){c.exp=(c.exp||0)+amt;while(c.level<100&&c.exp>=nextExp(c.level)){c.exp-=nextExp(c.level);c.level++;c.sp=(c.sp||0)+1;}}
+function makeEnemy(id,lv){const m=MON_INDEX[id];if(!m)return makeEnemy("slime",lv);const r=RACES[m.type];const scale=1+0.15*Math.max(0,(game.characters.length-2));
+const s={hp:Math.round((40+lv*14)*r.hp*scale),mp:20,atk:Math.round((8+lv*2.2)*r.atk),def:Math.round((6+lv*1.6)*r.def),matk:Math.round((6+lv*1.8)*r.matk),mdef:Math.round((6+lv*1.5)*r.mdef),agi:Math.round((6+lv*1.2)*r.agi),luk:Math.round((5+lv)*r.luk),hit:Math.round((8+lv*1.4)*r.hit),eva:Math.round((4+lv*.9)*r.eva)};
+return{id,name:m.nm,race:m.type,type:"enemy",rar:m.rar,level:lv,stats:s};}
+
+function newGame(){return{v:9,settings:{showDamage:true,autoItem:true},party:{combo:0,comboMax:100},characters:[],inv:[],gold:100,items:{potion:2,ether:1},tower:1,kills:0,bossKills:0,flags:{}};}
+function dedupeEquip(){const seen=new Set();(game.characters||[]).forEach(c=>{c.equip=(c.equip||[]).filter(u=>{if(seen.has(u))return false;seen.add(u);return true;});});}
+function saveGame(){try{game.updatedAt=new Date().toISOString();storage.set(SAVE_KEY,JSON.stringify(game));return true;}catch(e){return false;}}
+function loadGame(){try{const r=storage.get(SAVE_KEY);if(!r)return false;game=JSON.parse(r);game.inv=game.inv||[];game.items=game.items||{potion:0,ether:1};game.gold=game.gold??100;game.tower=game.tower||1;game.kills=game.kills||0;game.bossKills=game.bossKills||0;game.party=game.party||{combo:0,comboMax:100};dedupeEquip();return true;}catch(e){return false;}}
+const exportSave=()=>btoa(unescape(encodeURIComponent(JSON.stringify(game))));
+function importSave(s){try{game=JSON.parse(decodeURIComponent(escape(atob(s.trim()))));game.inv=game.inv||[];game.items=game.items||{};dedupeEquip();saveGame();return true;}catch(e){return false;}}
+
+function log(t){const el=$("battleLog");const d=document.createElement("div");d.innerHTML=t;el.appendChild(d);el.scrollTop=el.scrollHeight;}
+const clearLog=()=>$("battleLog").innerHTML="";
+const showDmg=t=>{if(game.settings.showDamage)log(t);};
+const pct=(c,m)=>clamp(Math.round(c/m*100),0,100);
+const bar=(c,m,cls)=>`<div class="bar ${cls||""}" style="flex:1"><i style="width:${pct(c,m)}%"></i></div>`;
+
+function seriesFor(lv){let s=SERIES[0];SERIES.forEach(x=>{if(lv>=x[0])s=x;});return s;}
+function rollRarity(){const roll=Math.random()*100;let acc=0;for(const[k,v]of Object.entries(RARITY)){acc+=v.ch;if(roll<acc)return k;}return"common";}
+function genEquip(lv,jobId){const pool=EQ_TYPES.filter(t=>t[4]==="all"||t[4].includes(jobId));const type=pick(pool);const ser=seriesFor(lv);const rar=rollRarity();
+const mult=ser[2]*RARITY[rar].mult;const stats={};Object.entries(type[3]).forEach(([k,v])=>{stats[k]=Math.max(1,Math.round(v*mult));});
+for(let i=0;i<RARITY[rar].opt;i++){const k=pick(STAT_KEYS);stats[k]=(stats[k]||0)+Math.max(1,Math.round(lv/5+2));}
+return{uid:"eq"+(uidSeq++)+"_"+(Date.now()%1e5),name:ser[1]+"の"+type[2],series:ser[1],type:type[0],slot:type[1],lv:ser[0],rar,enh:0,stats,jobs:type[4]};}
+const enhCost=it=>Math.floor(50*(1+(it.enh||0))*seriesFor(it.lv)[2]);
+const enhChance=it=>clamp(100-(it.enh||0)*8,30,100);
+const sellVal=it=>Math.floor(10*seriesFor(it.lv)[2]*RARITY[it.rar].mult);
+
+function switchTab(n){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".tabbtn").forEach(b=>b.classList.remove("active"));$("tab-"+n).classList.add("active");document.querySelector(`[data-tab="${n}"]`).classList.add("active");
+if(n==="party")renderParty();if(n==="skill")renderSkills();if(n==="battle")renderStatus();if(n==="save")renderSave();if(n==="shop")renderShop();}
+function renderGold(){$("goldView").textContent=game.gold;$("goldView2").textContent=game.gold;}
+function renderParty(){renderGold();const el=$("partyList");if(!game.characters.length){el.innerHTML='<div class="card">未作成</div>';$("invList").innerHTML="";return;}
+el.innerHTML=game.characters.map((c,i)=>{const t=calcTotal(c);const si=setInfo(c);
+const usedBy={};game.characters.forEach((o,oi)=>{if(oi!==i)(o.equip||[]).forEach(u=>{usedBy[u]=o.name;});});
+const slots=["weapon","sub","armor","accessory"].map(sl=>{const all=(game.inv||[]).filter(it=>it.slot===sl);
+const cur=(c.equip||[]).find(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot===sl;})||"";
+const ok=all.filter(it=>!usedBy[it.uid]&&c.level>=it.lv&&(it.jobs==="all"||it.jobs.includes(c.jobId))).map(o=>`<option value="${o.uid}" ${o.uid===cur?"selected":""}>${o.name}+${o.enh||0}</option>`).join("");
+const ng=all.filter(it=>usedBy[it.uid]||!(c.level>=it.lv&&(it.jobs==="all"||it.jobs.includes(c.jobId)))).map(o=>{const r=[];if(usedBy[o.uid])r.push(usedBy[o.uid]+"装備中");if(c.level<o.lv)r.push("Lv"+o.lv+"必要");if(!(o.jobs==="all"||o.jobs.includes(c.jobId)))r.push("職業違い");return `<option disabled>${o.name}+${o.enh||0}（${r.join("/")}）</option>`;}).join("");
+return `<label>${sl}<select data-c="${i}" data-s="${sl}" class="eqsel"><option value="">なし</option>${ok}${ng}</select></label>`;}).join("");
+let btns="";
+if(c.level>=50&&!c.adv&&ADV_MAP[c.jobId])btns+=`<button data-c="${i}" class="promoBtn"><span class="adv">上級職転職：${JOBS[ADV_MAP[c.jobId]].nm}</span></button>`;
+if(c.level>=100&&c.adv&&(c.reinc||0)<5)btns+=`<button data-c="${i}" class="reincBtn"><span class="rc">転生（${(c.reinc||0)+1}回目）</span></button>`;
+return `<div class="card"><h3>${c.name}</h3><div class="mini">${JOBS[c.jobId].nm} Lv${c.level} / SP${c.sp||0} / 転生${c.reinc||0} / セット${si.sc}</div>
+<div class="mini bw">HP ${c.currentHp??t.hp}/${t.hp} ${bar(c.currentHp??t.hp,t.hp)}</div>
+<div class="mini bw">MP ${c.currentMp??t.mp}/${t.mp} ${bar(c.currentMp??t.mp,t.mp,"mp")}</div>
+<div class="mini">物攻${t.atk} 物防${t.def} 魔攻${t.matk} 魔防${t.mdef} 素早${t.agi} 運${t.luk} 命中${t.hit} 回避${t.eva}</div>
+<div class="two">${slots}</div>${btns}</div>`;}).join("");
+document.querySelectorAll(".eqsel").forEach(sel=>sel.addEventListener("change",e=>{const c=game.characters[+e.target.dataset.c];const sl=e.target.dataset.s;const v=e.target.value;
+if(v)game.characters.forEach(o=>{o.equip=(o.equip||[]).filter(u=>u!==v);});
+c.equip=(c.equip||[]).filter(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot!==sl;});if(v)c.equip.push(v);saveGame();renderParty();}));
+document.querySelectorAll(".promoBtn").forEach(b=>b.onclick=e=>{const c=game.characters[+e.target.closest(".card").querySelector(".promoBtn").dataset.c];promote(c);});
+document.querySelectorAll(".reincBtn").forEach(b=>b.onclick=e=>{const c=game.characters[+e.target.closest(".card").querySelector(".reincBtn").dataset.c];reincarnate(c);});
+$("invList").innerHTML=(game.inv||[]).map(it=>`<div class="mini">${it.name}+${it.enh||0} [${RARITY[it.rar].nm}] Lv${it.lv} <button data-e="${it.uid}" class="enhBtn" ${game.gold>=enhCost(it)&&it.enh<10?"":"disabled"}>強化${enhCost(it)}G(${enhChance(it)}%)</button> <button data-e="${it.uid}" class="sellBtn">売${sellVal(it)}G</button></div>`).join("")||'<div class="mini">なし</div>';
+document.querySelectorAll(".enhBtn").forEach(b=>b.onclick=e=>{const it=game.inv.find(x=>x.uid===e.target.dataset.e);const cost=enhCost(it);if(game.gold>=cost&&it.enh<10){game.gold-=cost;
+if(Math.random()*100<enhChance(it)){it.enh=(it.enh||0)+1;alert("強化成功！ +"+it.enh);}else alert("強化失敗…");saveGame();renderParty();}});
+document.querySelectorAll(".sellBtn").forEach(b=>b.onclick=e=>{const it=game.inv.find(x=>x.uid===e.target.dataset.e);game.gold+=sellVal(it);game.inv=game.inv.filter(x=>x.uid!==it.uid);game.characters.forEach(c=>c.equip=(c.equip||[]).filter(u=>u!==it.uid));saveGame();renderParty();});}
+function promote(c){const oldJob=c.jobId;const advId=ADV_MAP[oldJob];if(!advId)return;
+const jobIds=(SKILLS[oldJob]||[]).map(s=>s.id);const kept=(c.skills||[]).filter(id=>jobIds.includes(id)).slice(0,3);
+const shared=(c.skills||[]).filter(id=>!jobIds.includes(id));
+c.skills=[...shared,...kept];c.jobId=advId;c.level=1;c.exp=0;c.sp=(c.sp||0)+10;c.adv=true;
+const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();alert(c.name+"は"+JOBS[advId].nm+"に転職！");}
+function reincarnate(c){if(c.level<100||!c.adv||(c.reinc||0)>=5)return;c.reinc=(c.reinc||0)+1;c.level=1;c.exp=0;c.sp=(c.sp||0)+20;
+const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();alert(c.name+"は転生した！（"+c.reinc+"回目）");}
+
+let pendingLearn=null;
+function skillRow(c,i,s){const learned=(c.skills||[]).includes(s.id);const can=!learned&&c.level>=s.lv&&(c.sp||0)>=s.sp;
+return `<div class="mini">${s.nm} [${s.ty==="P"?"被":"主"}] SP${s.sp} Lv${s.lv} ${learned?'<b style="color:#9fe8a8">習得済</b>':`<button data-c="${i}" data-s="${s.id}" class="learnBtn" ${can?"":"disabled"}>習得</button>`}</div>`;}
+function renderSkills(){const el=$("skillList");if(!game.characters.length){el.innerHTML='<div class="card">未作成</div>';return;}
+el.innerHTML=game.characters.map((c,i)=>{let h=`<div class="card"><h3>${c.name}（SP ${c.sp||0}）${c.adv?' <span class="adv">上級</span>':""}${c.reinc?` <span class="rc">転生${c.reinc}</span>`:""}</h3><div class="mini">― 職業 ―</div>`+(SKILLS[c.jobId]||[]).map(s=>skillRow(c,i,s)).join("");
+[["spec_offense","攻撃"],["spec_defense","防御"],["spec_support","支援"],["spec_speed","速度"]].forEach(([k,nm])=>{h+=`<div class="mini"><b>${nm}系統</b></div>`+(SKILLS[k]||[]).map(s=>skillRow(c,i,s)).join("");});
+h+=`<div class="mini"><b>才能</b></div>`+(SKILLS.talent||[]).map(s=>skillRow(c,i,s)).join("");
+if(c.adv){const pool=COMBAT_JOBS.has(c.jobId)?"adv_attack":"adv_support";h+=`<hr><div class="mini adv"><b>上級スキル</b></div>`+(SKILLS[pool]||[]).map(s=>skillRow(c,i,s)).join("");
+h+=`<div class="mini adv"><b>奥義</b></div>`+(SKILLS["ult_"+c.jobId]||[]).map(s=>skillRow(c,i,s)).join("");}
+if(c.reinc)h+=`<hr><div class="mini rc"><b>転生スキル</b></div>`+(SKILLS.reinc_pool||[]).map(s=>skillRow(c,i,s)).join("");
+return h+"</div>";}).join("");
+document.querySelectorAll(".learnBtn").forEach(b=>b.addEventListener("click",e=>{const c=game.characters[+e.target.dataset.c];const s=SKILL_INDEX[e.target.dataset.s];
+pendingLearn={c,s};$("lmName").textContent=s.nm;$("lmFl").textContent=FLAVOR[s.id]||"";$("lmDesc").textContent=skillDesc(s);$("learnModal").style.display="block";}));}
+function confirmLearn(){if(!pendingLearn)return;const{c,s}=pendingLearn;if(c.level>=s.lv&&(c.sp||0)>=s.sp){c.sp-=s.sp;c.skills=c.skills||[];c.skills.push(s.id);saveGame();renderSkills();renderParty();}
+pendingLearn=null;$("learnModal").style.display="none";}
+
+function renderShop(){renderGold();const items=[["potion","ポーション（HP40%回復）",50],["ether","エーテル（MP40%回復）",60],["elixir","エリクサー（全回復）",300],["respec","スキルリセット券",800],["box","装備箱",200]];
+$("shopList").innerHTML=items.map(([id,nm,pr])=>`<div class="card"><div class="mini">${nm} 所持:${game.items[id]||0}</div><button data-i="${id}" data-p="${pr}" class="buyBtn" ${game.gold>=pr?"":"disabled"}>購入 ${pr}G</button></div>`).join("");
+document.querySelectorAll(".buyBtn").forEach(b=>b.onclick=e=>{const id=e.target.dataset.i,pr=+e.target.dataset.p;if(game.gold>=pr){game.gold-=pr;game.items[id]=(game.items[id]||0)+1;saveGame();renderShop();}});}
+function renderSave(){$("storageType").textContent="保存方式："+storage.type+(storage.err?"（理由："+storage.err+"）":"");$("savePreview").textContent=JSON.stringify(game,null,1).slice(0,2500);}
+function renderStatus(){const el=$("battleStatus");if(!battle){el.innerHTML="戦闘未開始 / タワー階層："+game.tower+" / 撃破："+(game.kills||0);return;}
+el.innerHTML=battle.enemies.map(e=>`<div class="mini"><b>${e.name}</b> Lv${e.level} ${e.hp}/${e.stats.hp} <span class="bw" style="flex:1">${bar(e.hp,e.stats.hp,"en")}</span> <span class="brk">Brk${e.break||0}</span>${e.charge?' <span class="brk">溜め!</span>':""}</div>`).join("")+
+`<div class="mini">連携${battle.combo}/${game.party.comboMax} / 速度${speed}x</div><hr>`+battle.party.map(m=>`<div class="mini bw">${m.name} HP${m.hp}/${m.maxHp} ${bar(m.hp,m.maxHp)} MP${m.mp}/${m.maxMp} ${bar(m.mp,m.maxMp,"mp")}</div>`).join("");}
+
+function makeChar(id,slot,name,job){const t=jobStats(job,1);return{id,slot,name,jobId:job,level:1,exp:0,sp:0,skills:[],equip:[],currentHp:t.hp,currentMp:t.mp,adv:false,reinc:0};}
+function createParty(){const names=[],jobs=[];for(let i=1;i<=4;i++){names.push($("name"+i).value.trim());jobs.push($("job"+i).value);}
+if(names.some(n=>!n))return alert("全キャラ名前を入力");if(new Set(names).size!==4)return alert("同じ名前は不可");
+game=newGame();game.settings.showDamage=$("showDamage").checked;game.characters=names.map((n,idx)=>makeChar("c"+(idx+1),idx+1,n,jobs[idx]));saveGame();switchTab("party");}
+
+function weaponTypeOf(c){const uid=(c.equip||[]).find(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot==="weapon";});const it=game.inv.find(x=>x.uid===uid);return it?it.type:null;}
+function startBattle(enemyArr){stopAuto();if(!game||game.characters.length<2){alert("先にキャラ作成");return;}
+const comp={tank:game.characters.some(c=>TANK_JOBS.has(c.jobId)),heal:game.characters.some(c=>HEAL_JOBS.has(c.jobId))};
+battle={turn:0,active:true,combo:game.party.combo||0,comp,
+enemies:enemyArr.map(e=>Object.assign(e,{hp:e.stats.hp,states:{},break:0,charge:false,enraged:false,healed:false})),
+party:game.characters.map(c=>{const t=calcTotal(c);if(comp.tank)t.def=Math.floor(t.def*1.1);if(comp.heal)t.mdef=Math.floor(t.mdef*1.1);
+return{ref:c.id,name:c.name,jobId:c.jobId,weaponType:weaponTypeOf(c),stats:t,flags:t._flags||{},hp:c.currentHp??t.hp,mp:c.currentMp??t.mp,maxHp:t.hp,maxMp:t.mp,states:{},guard:0,shield:0,shieldPct:0,chant:0,summons:[],type:"char"};})};
+clearLog();log(`=== ${battle.enemies.map(e=>e.name).join(" / ")} が現れた。 ===`);
+if(comp.tank)log("編成ボーナス：全体物防+10%");if(comp.heal)log("編成ボーナス：全体魔防+10%");
+battle.enemies.forEach(e=>{const re=RACE_ELEM[e.race]||{};if(re.weak)log(`${e.name} 弱点：<span class="eff">${EL_NM[re.weak]}</span>`);});renderStatus();}
+const aliveE=()=>battle.enemies.filter(e=>e.hp>0);
+const pickE=()=>{const a=aliveE();return a.length?a[rnd(a.length)]:null;};
+function explore(){const a=AREAS.find(x=>x[0]===$("areaSelect").value);const lv=a[2]+rnd(a[3]-a[2]+1);startBattle([makeEnemy(Math.random()<.15?a[5]:pick(a[4]),lv)]);if(battle)battle.mode="explore";}
+function boss(){const a=AREAS.find(x=>x[0]===$("areaSelect").value);if(!a[6])return alert("ボスなし");startBattle([makeEnemy(a[6],a[3])]);if(battle)battle.mode="boss";}
+function tower(){const lv=5+game.tower*3;startBattle([makeEnemy(pick(["stone_golem","death_knight","dragon_whelp","void_watcher","shadow_wraith","star_beast"]),lv)]);if(battle)battle.tower=true;}
+function raid(){const n=2+(Math.random()<.5?0:1);const lv=50+rnd(40);const pool=["gargoyle","death_knight","chimera","lake_dragon","chaos_beast","dragon_whelp","void_watcher"];
+const arr=[];for(let i=0;i<n;i++)arr.push(makeEnemy(pick(pool),lv));startBattle(arr);if(battle)battle.raid=true;}
+function lowestAlly(){return battle.party.filter(m=>m.hp>0).sort((x,y)=>x.hp/x.maxHp-y.hp/y.maxHp)[0];}
+const mpCost=(s,c)=>Math.floor((s.mp||0)*(c.flags.mpReduce?.8:1));
+const hitCh=(a,d,m=0)=>clamp(75+a.stats.hit-d.stats.eva+m,20,98);
+function dealDamage(t,amt){if(t.shield>0&&t.shieldPct>=100){t.shield--;log(`${t.name}の身代わりの影が攻撃を弾いた。`);return 0;}
+if(t.guard>0)amt=Math.floor(amt*.5);if(t.shield>0)amt=Math.floor(amt*(1-t.shieldPct/100));if(t.states.vulnerable)amt=Math.floor(amt*1.1);if(t.states.broken)amt=Math.floor(amt*1.3);
+if(t.flags&&t.flags.dmgReduce)amt=Math.floor(amt*(1-t.flags.dmgReduce/100));t.hp=Math.max(0,t.hp-amt);return amt;}
+function addBreak(e,v){if(!v||e.type!=="enemy")return;e.break=(e.break||0)+v;if(e.break>=100){e.break=0;e.states.broken={turns:2};log(`<span class="brk">=== ${e.name}は体勢を崩した！ ===</span>`);}}
+function pickAttackText(c,opt){if(opt.mg)return pick(TEXT.magic);
+const wt=c.weaponType;if(wt&&WEAPON_TEXT[wt]&&Math.random()<.5)return pick(WEAPON_TEXT[wt]);
+const bj=BASE_OF[c.jobId]||c.jobId;if(JOB_TEXT[bj]&&Math.random()<.6)return pick(JOB_TEXT[bj]);
+return pick(TEXT.phys);}
+function attack(c,t,opt={}){if(!t||t.hp<=0)return;for(let i=0;i<(opt.hits||1);i++){if(t.hp<=0)break;
+if(Math.random()*100>=hitCh(c,t,opt.hm||0)+(c.flags.enemyHit||0)){log(fill(pick(TEXT.miss),{a:c.name,e:t.name}));showDmg(`→ ${t.name}は回避した。`);continue;}
+let atk=opt.mg?c.stats.matk:c.stats.atk;if(c.chant>0){atk=Math.floor(atk*(1+c.chant/100));c.chant=0;}
+let def=opt.mg?t.stats.mdef:t.stats.def;def=Math.floor(def*(1-((opt.pen||0)+(c.flags.defPen||0))/100));
+let dmg=Math.max(1,Math.floor(atk*(opt.power||100)/100-def*.5+Math.random()*5));
+let em=1;if(opt.el&&t.type==="enemy"){const re=RACE_ELEM[t.race]||{};if(re.weak===opt.el)em=1.5+(c.flags.elemPow||0)/100;else if(re.resist===opt.el)em=.5;}
+dmg=Math.floor(dmg*em);
+const critCh=c.stats.luk/4+(c.flags.critRate||0)+(opt.crit||0);const crit=Math.random()*100<critCh;if(crit)dmg=Math.floor(dmg*(1.5+(c.flags.critDmg||0)/100));
+const dealt=dealDamage(t,dmg);addBreak(t,opt.brk);
+log(fill(crit?pick(TEXT.crit):pickAttackText(c,opt),{a:c.name,e:t.name}));
+const extra=em>1?` <span class="eff">効果あり！</span>`:em<1?` <span class="res">耐性…</span>`:"";
+showDmg(`→ ${t.name}に${dealt}ダメージ${crit?"（会心）":""}${extra}`);
+if(opt.st&&t.hp>0&&Math.random()<.8){t.states[opt.st]={turns:3};log(fill(pick(TEXT.status),{e:t.name}));}}}
+function useSkill(c,s){c.mp-=mpCost(s,c);
+if(s.hpCost){const cost=Math.floor(c.maxHp*s.hpCost/100);c.hp=Math.max(1,c.hp-cost);log(`${c.name}は自らの血を代償に力を解放する。`);}
+switch(s.k){
+case"dmg":case"drain":{const targets=s.tg==="all"?aliveE():[pickE()];targets.forEach(t=>attack(c,t,{power:s.pw,hits:s.hits,mg:s.mg,hm:s.hm,crit:s.crit,pen:s.pen,st:s.st,el:s.el,brk:s.brk}));
+if(s.k==="drain"){const h=Math.floor(c.stats.matk*.5);c.hp=Math.min(c.maxHp,c.hp+h);showDmg(`→ ${c.name}のHPが${h}回復。`);}break;}
+case"heal":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[lowestAlly()].filter(Boolean);tg.forEach(t=>{const h=Math.floor(c.stats.matk*(s.pw||100)/100*(1+(c.flags.healPow||0)/100)*(1+(t.flags.healRecv||0)/100));t.hp=Math.min(t.maxHp,t.hp+h);log(fill(pick(TEXT.heal),{a:c.name,t:t.name}));showDmg(`→ ${t.name}のHPが${h}回復。`);});break;}
+case"revive":{const d=battle.party.find(m=>m.hp<=0);if(d){d.hp=Math.floor(d.maxHp*(s.pw||30)/100);log(`${c.name}の祈りが${d.name}の意識を呼び戻す。`);}break;}
+case"buff":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[c];tg.forEach(t=>t.stats[s.stat]=Math.floor(t.stats[s.stat]*(1+s.pct/100)));log(fill(pick(TEXT.buff),{a:c.name}));break;}
+case"debuff":{const t=pickE();if(t){t.stats[s.stat]=Math.floor(t.stats[s.stat]*(1-s.pct/100));log(fill(pick(TEXT.debuff),{a:c.name,e:t.name}));}break;}
+case"status":{const t=pickE();if(t){t.states[s.st]={turns:2};log(fill(pick(TEXT.status),{e:t.name}));}break;}
+case"guard":c.guard=2;log(fill(pick(TEXT.guard),{a:c.name}));break;
+case"shield":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[lowestAlly()].filter(Boolean);tg.forEach(t=>{t.shield=2;t.shieldPct=s.pct;});log(fill(pick(TEXT.guard),{a:c.name}));break;}
+case"summon":if(c.summons.length<(1+(c.flags.summonMax||0)))c.summons.push({pw:s.pw,turns:s.tn});log(fill(pick(TEXT.summon),{a:c.name}));break;
+case"chant":{const t=s.tg==="ally"?lowestAlly():c;if(t)t.chant=(t.chant||0)+s.pct;log(`${c.name}が力を込める。`);break;}
+case"cleanse":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[lowestAlly()].filter(Boolean);tg.forEach(t=>t.states={});log(`${c.name}が清らかな光で仲間を包む。`);break;}
+case"mp":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[lowestAlly()].filter(Boolean);tg.forEach(t=>t.mp=Math.min(t.maxMp,t.mp+s.pw));log(`${c.name}が魔力を供給する。`);break;}}}
+function basicAttack(c){const t=pickE();if(!t)return;if(c.flags.double)attack(c,t,{power:60,hits:2,brk:5});else attack(c,t,{power:100,brk:5});}
+function chooseAction(c){const L=(c.refSkills||[]).filter(s=>s.ty==="A");const can=s=>c.mp>=mpCost(s,c);let s;
+const dead=battle.party.find(m=>m.hp<=0);s=L.find(x=>x.k==="revive");if(dead&&s&&can(s))return s;
+const low=lowestAlly();if(low&&low.hp<low.maxHp*.75){s=L.find(x=>x.k==="heal");if(s&&can(s))return s;}
+s=L.find(x=>x.k==="summon");if(s&&can(s)&&c.summons.length<(1+(c.flags.summonMax||0))&&Math.random()<.5)return s;
+s=L.find(x=>x.k==="buff");if(s&&can(s)&&battle.turn%3===1)return s;
+s=L.find(x=>x.k==="debuff"||x.k==="status");if(s&&can(s)&&Math.random()<.4)return s;
+s=L.find(x=>x.k==="chant");if(s&&can(s)&&Math.random()<.4)return s;
+const d=L.filter(x=>x.k==="dmg"||x.k==="drain");if(d.length&&Math.random()<.7){s=d.reduce((a,b)=>(b.pw||0)>(a.pw||0)?b:a);if(can(s))return s;}return null;}
+function bossAI(e,targets){const t=targets[rnd(targets.length)];
+if(e.charge){e.charge=false;const dmg=Math.max(1,Math.floor(e.stats.atk*2-t.stats.def*.5));const d=dealDamage(t,dmg);log(`<span class="brk">${e.name}の溜め攻撃が${t.name}を打ち砕く！</span>`);showDmg(`→ ${t.name}に${d}ダメージ。`);return;}
+switch(e.id){
+case"primordial_dragon":if(battle.turn%3===0){e.charge=true;log(`<span class="brk">${e.name}が炎を溜め始めた…！</span>`);return;}break;
+case"cursed_king":if(e.hp<e.stats.hp*.5&&!e.healed){e.healed=true;const h=Math.floor(e.stats.hp*.2);e.hp=Math.min(e.stats.hp,e.hp+h);log(`${e.name}は闇を纏い、傷を再生した。`);return;}
+if(Math.random()<.4){battle.party.filter(m=>m.hp>0).forEach(m=>m.states.curse={turns:3});log(`${e.name}の呪いがパーティを縛る。`);return;}break;
+case"lake_dragon":if(Math.random()<.4){battle.party.filter(m=>m.hp>0).forEach(m=>{const d=dealDamage(m,Math.max(1,Math.floor(e.stats.matk*.8-m.stats.mdef*.4)));m.states.slow={turns:2};showDmg(`→ ${m.name}に${d}水属性ダメージ。`);});log(`${e.name}は濁流を巻き起こした！`);return;}break;
+case"chaos_beast":if(e.hp<e.stats.hp*.5&&!e.enraged){e.enraged=true;e.stats.atk=Math.floor(e.stats.atk*1.3);log(`<span class="brk">${e.name}が憤怒した！</span>`);return;}break;
+case"king_slime":if(Math.random()<.3){const d=dealDamage(t,Math.max(1,Math.floor(e.stats.atk*.6)));log(`${e.name}は分裂しながら${t.name}に飛びかかる！`);showDmg(`→ ${t.name}に${d}ダメージ。`);return;}break;}
+enemyNormal(e,t);}
+function enemyNormal(e,t){if(Math.random()*100>=hitCh(e,t)){log(fill(pick(TEXT.miss),{a:e.name,e:t.name}));showDmg(`→ ${t.name}はかわした。`);return;}
+let dmg=Math.max(1,Math.floor(e.stats.atk-t.stats.def*.5+Math.random()*5));const d=dealDamage(t,dmg);
+log(fill(pick(TEXT.enemy),{a:e.name,t:t.name}));showDmg(`→ ${t.name}に${d}ダメージ。`);}
+function enemyAct(e){if(e.states.broken){log(`${e.name}は崩れた体勢を立て直せない。`);return;}
+const tg=battle.party.filter(m=>m.hp>0);if(!tg.length)return;
+if(e.rar==="boss"||e.rar==="rare")bossAI(e,tg);else enemyNormal(e,tg[rnd(tg.length)]);}
+function tickStates(m){const s=m.states;if(!s)return;["poison","burn","bleed"].forEach(k=>{if(s[k]&&m.hp>0){const d=Math.max(1,Math.floor(m.maxHp*.05));m.hp=Math.max(0,m.hp-d);showDmg(`→ ${m.name}は${k}で${d}ダメージ。`);}});
+if(s.regen&&m.hp>0){const h=Math.floor(m.maxHp*.06);m.hp=Math.min(m.maxHp,m.hp+h);}Object.keys(s).forEach(k=>{s[k].turns--;if(s[k].turns<=0)delete s[k];});}
+function autoItems(){if(!game.settings.autoItem)return;battle.party.forEach(m=>{if(m.hp>0&&m.hp<m.maxHp*.4&&(game.items.potion||0)>0){game.items.potion--;const h=Math.floor(m.maxHp*.4);m.hp=Math.min(m.maxHp,m.hp+h);log(`${m.name}はポーションを飲み干した。`);showDmg(`→ HP${h}回復。`);}});}
+function checkEnd(){if(!battle||!battle.active)return true;
+if(aliveE().length===0){battle.active=false;stopAuto();victory();return true;}
+if(battle.party.every(m=>m.hp<=0)){battle.active=false;stopAuto();log("パーティは力尽きた……かろうじて離脱する。");sync();return true;}return false;}
+function victory(){const es=battle.enemies;log(`=== ${es.map(e=>e.name).join(" / ")} を倒した。 ===`);
+const maxLv=Math.max(...es.map(e=>e.level));const cnt=es.length;const anyBoss=es.some(e=>e.rar==="boss"||e.rar==="rare");
+game.kills=(game.kills||0)+cnt;if(anyBoss)game.bossKills=(game.bossKills||0)+1;
+const mult=anyBoss?2:1;const exp=Math.floor((maxLv*12+8)*mult*(1+0.5*(cnt-1)));const gold=Math.floor(maxLv*5*mult*cnt);
+game.gold+=gold;log(`→ 経験値${exp} / <span class="gold">${gold}G</span> を獲得。`);
+battle.party.forEach(m=>{const c=game.characters.find(x=>x.id===m.ref);if(c){gainExp(c,exp);c.currentHp=Math.max(1,m.hp);c.currentMp=Math.max(0,m.mp);}});
+if(battle.tower){game.tower++;log(`→ タワー ${game.tower} 階へ進んだ。`);}
+const area=AREAS.find(a=>a[0]===$("areaSelect").value);
+for(let i=0;i<cnt;i++){if(Math.random()*100<25+battle.party[0].stats.luk/2){const it=genEquip(area?area[7]:maxLv,pick(game.characters).jobId);game.inv.push(it);log(`→ ${it.name} を入手！`);}}
+game.party.combo=battle.combo;saveGame();renderParty();renderStatus();}
+function sync(){battle.party.forEach(m=>{const c=game.characters.find(x=>x.id===m.ref);if(c){c.currentHp=Math.max(1,m.hp);c.currentMp=Math.max(0,m.mp);}});saveGame();renderParty();renderStatus();}
+function playTurn(){if(!battle||!battle.active)return;if(checkEnd())return;battle.turn++;log(`--- ターン${battle.turn} ---`);autoItems();
+const actors=[...battle.party.filter(m=>m.hp>0),...aliveE()].map(a=>({a,v:a.stats.agi+rnd(6)})).sort((x,y)=>y.v-x.v).map(x=>x.a);
+for(const act of actors){if(!battle.active)break;if(act.hp<=0)continue;
+if(act.type==="char"){if(aliveE().length===0)break;
+if(act.states.stun){log(`${act.name}はしびれて動けない。`);}else{const c=game.characters.find(x=>x.id===act.ref);act.refSkills=(c.skills||[]).map(id=>SKILL_INDEX[id]).filter(Boolean);
+const s=chooseAction(act);if(s)useSkill(act,s);else basicAttack(act);
+act.summons.forEach(sm=>{const t=pickE();if(t){const d=Math.max(1,Math.floor(act.stats.matk*sm.pw/100*(1+(act.flags.summonPow||0)/100)-t.stats.mdef*.3));t.hp=Math.max(0,t.hp-d);log(`召喚獣が${t.name}を攻撃。`);showDmg(`→ ${d}ダメージ。`);}});
+battle.combo=Math.min(game.party.comboMax,battle.combo+6);
+if(battle.combo>=game.party.comboMax&&aliveE().length>0){battle.combo=0;log("=== パーティ連携 ===");aliveE().forEach(e=>{const dmg=battle.party.filter(m=>m.hp>0).reduce((s,m)=>s+Math.max(1,Math.floor(m.stats.atk*.5)),0);e.hp=Math.max(0,e.hp-dmg);showDmg(`→ ${e.name}に${dmg}連携ダメージ。`);});log("全員の息が重なり、敵陣を打ち抜く。");}}}
+else enemyAct(act);
+tickStates(act);renderStatus();if(checkEnd())break;}
+battle.party.forEach(m=>{if(m.guard>0)m.guard--;if(m.shield>0)m.shield--;});renderStatus();}
+function stopAuto(){if(autoTimer){clearInterval(autoTimer);autoTimer=null;}$("autoBtn").textContent="オート開始";}
+function toggleAuto(){if(!battle||!battle.active)explore();if(!battle||!battle.active)return;if(autoTimer){stopAuto();return;}
+autoTimer=setInterval(()=>{if(battle&&battle.active)playTurn();else stopAuto();},1000/speed);$("autoBtn").textContent="オート停止";}
+
+function init(){
+$("createBoxes").innerHTML=[1,2,3,4].map(i=>`<div class="card"><div class="two"><div><label>キャラ${i}名前</label><input id="name${i}" maxlength="12" value="${["アキラ","ヒスイ","レン","ユキ"][i-1]}"></div><div><label>職業</label><select id="job${i}"></select></div></div></div>`).join("");
+Object.entries(JOBS).forEach(([id,j])=>{if(Object.values(ADV_MAP).includes(id))return;for(let i=1;i<=4;i++){const o=document.createElement("option");o.value=id;o.textContent=j.nm;$("job"+i).appendChild(o);}});
+$("job2").value="healer";AREAS.forEach(a=>{const o=document.createElement("option");o.value=a[0];o.textContent=`${a[1]} Lv${a[2]}-${a[3]}`;$("areaSelect").appendChild(o);});
+if(!loadGame())game=newGame();$("showDamage").checked=!!game.settings.showDamage;$("autoItem").checked=!!game.settings.autoItem;
+document.querySelectorAll(".tabbtn").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
+$("createBtn").onclick=createParty;
+$("restBtn").onclick=()=>{game.characters.forEach(c=>{const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;});saveGame();renderParty();alert("全回復した。");};
+$("towerViewBtn").onclick=()=>alert("タワー："+game.tower+" / 撃破："+game.kills+" / ボス："+game.bossKills);
+$("respecBtn").onclick=()=>{if(game.gold>=500||(game.items.respec||0)>0){if(game.items.respec>0)game.items.respec--;else game.gold-=500;game.characters.forEach(c=>{const jobIds=(SKILLS[c.jobId]||[]).map(s=>s.id);c.skills=(c.skills||[]).filter(id=>!jobIds.includes(id));c.sp=c.level-1;});saveGame();renderSkills();renderParty();alert("職スキルをリセットした。");}else alert("Gまたは券が不足");};
+$("lmYes").onclick=confirmLearn;$("lmNo").onclick=()=>{pendingLearn=null;$("learnModal").style.display="none";};
+$("speedSel").onchange=e=>{speed=+e.target.value;renderStatus();if(autoTimer){stopAuto();toggleAuto();}};
+$("exploreBtn").onclick=explore;$("bossBtn").onclick=boss;$("towerBtn").onclick=tower;$("raidBtn").onclick=raid;$("turnBtn").onclick=playTurn;$("autoBtn").onclick=toggleAuto;$("stopBtn").onclick=stopAuto;
+$("showDamage").onchange=e=>{game.settings.showDamage=e.target.checked;saveGame();};
+$("autoItem").onchange=e=>{game.settings.autoItem=e.target.checked;saveGame();};
+$("saveBtn").onclick=()=>{$("saveMsg").textContent=saveGame()?"セーブした":"失敗";renderSave();};
+$("loadBtn").onclick=()=>{if(loadGame()){$("saveMsg").textContent="ロードした";renderParty();renderSkills();renderSave();}else $("saveMsg").textContent="セーブなし";};
+$("deleteBtn").onclick=()=>{storage.del(SAVE_KEY);game=newGame();renderParty();renderSave();};
+$("exportBtn").onclick=()=>{$("saveText").value=exportSave();};
+$("importBtn").onclick=()=>{if(importSave($("saveText").value)){$("saveMsg").textContent="インポート成功";renderParty();renderSkills();renderSave();}else $("saveMsg").textContent="失敗";};
+renderParty();renderSave();}
+document.addEventListener("DOMContentLoaded",init);
+</script>
+</body>
+</html>
