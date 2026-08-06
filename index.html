@@ -9,7 +9,7 @@
 h1{font-size:19px;margin:6px 0 12px}h2{font-size:16px;margin:6px 0}h3{font-size:14px;margin:6px 0}
 button,select,input,textarea{font-size:13px;padding:8px;border-radius:9px;border:1px solid #44505c;background:#1b232c;color:#eef3f8;width:100%}
 button{cursor:pointer;background:#24313d;font-weight:bold}button:disabled{opacity:.4;cursor:not-allowed}
-.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:10px}
+.tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:10px}
 .tabbtn{padding:8px 2px;font-size:11px}.tabbtn.active{background:#35506b}
 .tab{display:none}.tab.active{display:block}
 .card{background:#161d26;border:1px solid #2c3b4a;border-radius:12px;padding:10px;margin-bottom:10px}
@@ -34,11 +34,14 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 <button class="tabbtn" data-tab="party">パーティ</button>
 <button class="tabbtn" data-tab="skill">スキル</button>
 <button class="tabbtn" data-tab="battle">戦闘</button>
+<button class="tabbtn" data-tab="smith">鍛冶</button>
 <button class="tabbtn" data-tab="shop">ショップ</button>
 <button class="tabbtn" data-tab="save">セーブ</button>
 </div>
 
-<section id="tab-create" class="tab"><h2>キャラ作成（4人/Lv1）</h2><div id="createBoxes"></div><button id="createBtn">4人パーティ作成してセーブ</button></section>
+<section id="tab-create" class="tab"><h2>キャラ作成（4人/Lv1＋鍛冶師）</h2><div id="createBoxes"></div>
+<div class="card"><div class="two"><div><label>鍛冶師（職人）名前</label><input id="name5" maxlength="12" value="ドゥカン"></div><div class="mini" style="align-self:end">戦闘には不参加。採掘/精錬/鍛冶でパーティを支援する5人目。</div></div></div>
+<button id="createBtn">パーティ＋鍛冶師を作成してセーブ</button></section>
 
 <section id="tab-party" class="tab"><h2>パーティ/装備</h2>
 <div class="mini">ゴールド：<span class="gold" id="goldView">0</span> G</div>
@@ -65,6 +68,19 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 <div id="battleStatus" class="card">戦闘未開始</div>
 <div id="battleLog" class="log"></div></section>
 
+<section id="tab-smith" class="tab"><h2>鍛冶師工房</h2>
+<div class="card" id="smithStatus"></div>
+<div class="card"><h3>採掘（鉱山に入る）</h3><div class="row"><div><label>鉱山</label><select id="mineSelect"></select></div>
+<div class="two"><button id="mineBtn">採掘する</button><button id="mine5Btn">5回採掘</button></div></div>
+<div id="smithLog" class="log" style="min-height:90px;max-height:150px"></div></div>
+<div class="card"><h3>所持素材</h3><div id="holdList"></div></div>
+<div class="card"><h3>精錬（鉱石3→インゴット1）</h3><div class="two"><div><label>鉱石</label><select id="refineSelect"></select></div><button id="refineBtn">精錬する</button></div></div>
+<div class="card"><h3>鍛冶（装備作成）</h3><div class="row">
+<div class="two"><div><label>金属（インゴット）</label><select id="craftMetal"></select></div><div><label>装備種</label><select id="craftType"></select></div></div>
+<div class="two"><div><label>宝石（任意）</label><select id="craftGem"></select></div><button id="craftBtn">鍛冶する</button></div>
+<div class="mini" id="craftInfo"></div></div></div>
+</section>
+
 <section id="tab-shop" class="tab"><h2>ショップ</h2><div class="mini">G：<span class="gold" id="goldView2">0</span></div><div id="shopList"></div></section>
 
 <section id="tab-save" class="tab"><h2>セーブ</h2>
@@ -83,10 +99,18 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const pick=a=>a[Math.floor(Math.r
 const fill=(t,p={})=>t.replace(/\{(\w+)\}/g,(_,k)=>p[k]??"");
 const STAT_KEYS=["hp","mp","atk","def","matk","mdef","agi","luk","hit","eva"];
 const STAT_NM={hp:"HP",mp:"MP",atk:"物攻",def:"物防",matk:"魔攻",mdef:"魔防",agi:"素早",luk:"運",hit:"命中",eva:"回避"};
-const ST_NM={poison:"毒",burn:"燃焼",bleed:"出血",confuse:"混乱",blind:"暗闇",stun:"スタン",curse:"呪い",slow:"鈍足",vulnerable:"脆弱",defdown:"防御低下",regen:"再生"};
+const ST_NM={poison:"毒",burn:"燃焼",bleed:"出血",confuse:"混乱",blind:"暗闇",stun:"スタン",curse:"呪い",slow:"鈍足",vulnerable:"脆弱",defdown:"防御低下",regen:"再生",broken:"崩壊"};
 const ST_BAD=["poison","burn","bleed","confuse","blind","stun","curse","slow","vulnerable","defdown"];
 const EL_NM={fire:"火",water:"水",wind:"風",earth:"地",light:"光",dark:"闇",none:"無"};
 const SK_CLS={dmg:"ska",drain:"ska",heal:"skh",revive:"skh",cleanse:"skh",buff:"skb",shield:"skb",guard:"skb",debuff:"skd",status:"skd",summon:"sks",chant:"skm",mp:"skm"};
+const DUAL_TYPES=new Set(["one_hand_sword","dagger","twin_daggers"]);
+const ORES=[["copper","銅鉱石",3],["iron","鉄鉱石",5],["silver","銀鉱石",8],["gold","金鉱石",12],["mithril","ミスリル鉱石",18],["dragon","竜骨鉱石",26]];
+const ORE_NM={},ORE_EXP={};ORES.forEach(o=>{ORE_NM[o[0]]=o[1];ORE_EXP[o[0]]=o[2];});
+const ING_NM={copper:"銅インゴット",iron:"鉄インゴット",silver:"銀インゴット",gold:"金インゴット",mithril:"ミスリルインゴット",dragon:"竜骨インゴット"};
+const METALS=[["copper","銅",1,1,1],["iron","鉄",5,1.4,2],["silver","銀",15,1.8,3],["gold","金",30,2.5,4],["mithril","ミスリル",50,3.5,5],["dragon","竜骨",75,5,6]];
+const GEMS=[["ruby","ルビー",60],["sapphire","サファイア",80],["emerald","エメラルド",100],["diamond","ダイヤ",150]];
+const MINES=[["mine1","古い鉱山",1,["copper","iron"]],["mine2","銀脈鉱山",10,["iron","silver"]],["mine3","金脈鉱山",25,["silver","gold"]],["mine4","ミスリル鉱山",50,["gold","mithril"]],["mine5","竜骨鉱山",75,["mithril","dragon"]]];
+const RAR_ORDER=["common","uncommon","rare","epic","legend"];
 
 const FLAVOR={
 ss01:"剣と盾の基礎を鍛える。",ss02:"盾が身体の一部となる。",ss03:"盾で打ちつけ敵の注意を引く。",ss04:"守りを固め攻撃に備える。",ss05:"仲間の前に立ち攻撃を肩代わりする。",ss06:"聖なる光で仲間の守りを強める。",ss07:"窮地でこそ守りは輝く。",ss08:"絶対の聖盾が仲間を包む。",
@@ -108,7 +132,8 @@ on01:"呪力が高まる。",on02:"火炎の術。",on03:"氷で縛る術。",on
 u01:"不動の聖域が展開される。",u02:"軍神の裁きが下る。",u03:"無心の連斬が敵を刻む。",u04:"影の絶技が急所を貫く。",u05:"絶対の城塞が守り抜く。",u06:"聖母の祝福が全てを癒やす。",u07:"天地が交響する。",u08:"神霊が降臨する。",u09:"百獣の咆哮が敵を薙ぐ。",u10:"大星脈が味方を満たす。",u11:"禁じられた隕石が落ちる。",u12:"影の領域が敵を支配する。",u13:"冥界の軍勢が溢れる。",u14:"極限の連射が敵を穿つ。",u15:"戦鬼の血祭りが始まる。",u16:"陰陽転生の陣が回る。",
 va01:"攻撃が一段階上がる。",va02:"会心が研ぎ澄まされる。",va03:"上級の強打。",va04:"上級の貫通。",va05:"上級の連斬。",va06:"上級の体力。",va07:"上級の溜め。",va08:"上級の会心威力。",
 vs01:"魔攻が一段階上がる。",vs02:"回復が深くなる。",vs03:"上級の全体治癒。",vs04:"上級の魔力。",vs05:"上級の結界。",vs06:"上級の強化。",vs07:"上級の蘇生。",vs08:"上級の軽減。",
-rc01:"転生の肉体。",rc02:"転生の会心。",rc03:"転生の一撃。",rc04:"転生の軽減。"};
+rc01:"転生の肉体。",rc02:"転生の会心。",rc03:"転生の一撃。",rc04:"転生の軽減。",
+w01:"鉱脈の匂いを嗅ぎ分ける。",w02:"原石の輝きを見逃さない。",w03:"無駄なく鉱石を溶かし切る。",w04:"良品を見抜く職人の眼。",w05:"燃料と素材の無駄を省く。",w06:"宝石の輝きを最大限に引き出す。",w07:"魂を込めた一打が品質を変える。",w08:"一子相伝の鍛冶術。"};
 
 const JOBS={
 sword_shield:{nm:"ソード＆シールド",base:{hp:60,mp:22,atk:12,def:14,matk:6,mdef:10,agi:9,luk:8,hit:10,eva:7},g:{hp:10,mp:3,atk:2,def:2.4,matk:.8,mdef:1.4,agi:1,luk:.9,hit:1.2,eva:.8}},
@@ -176,28 +201,71 @@ talent:[{id:"tl01",nm:"才能:HP+5%",ty:"P",sp:2,lv:1,k:"stat",stat:"hp",pct:5},
 adv_attack:[{id:"va01",nm:"上級:攻撃+12%",ty:"P",sp:6,lv:50,k:"stat",stat:"atk",pct:12},{id:"va02",nm:"上級:会心+12",ty:"P",sp:6,lv:50,k:"flag",fl:"critRate",val:12},{id:"va03",nm:"上級撃",ty:"A",sp:7,lv:55,mp:20,k:"dmg",pw:240,brk:35},{id:"va04",nm:"上級:貫通+15",ty:"P",sp:7,lv:60,k:"flag",fl:"defPen",val:15},{id:"va05",nm:"上級連斬",ty:"A",sp:8,lv:65,mp:24,k:"dmg",pw:110,hits:3},{id:"va06",nm:"上級:HP+12%",ty:"P",sp:7,lv:70,k:"stat",stat:"hp",pct:12},{id:"va07",nm:"上級:溜め+70",ty:"A",sp:8,lv:75,mp:18,k:"chant",pct:70},{id:"va08",nm:"上級:会心威力+30",ty:"P",sp:9,lv:80,k:"flag",fl:"critDmg",val:30}],
 adv_support:[{id:"vs01",nm:"上級:魔攻+12%",ty:"P",sp:6,lv:50,k:"stat",stat:"matk",pct:12},{id:"vs02",nm:"上級:回復+20",ty:"P",sp:6,lv:50,k:"flag",fl:"healPow",val:20},{id:"vs03",nm:"上級治癒",ty:"A",sp:7,lv:55,mp:24,k:"heal",pw:140,tg:"party"},{id:"vs04",nm:"上級:MP+20%",ty:"P",sp:7,lv:60,k:"stat",stat:"mp",pct:20},{id:"vs05",nm:"上級結界",ty:"A",sp:8,lv:65,mp:28,k:"shield",pct:35,tn:2,tg:"party"},{id:"vs06",nm:"上級:強化+15",ty:"P",sp:7,lv:70,k:"flag",fl:"buffPow",val:15},{id:"vs07",nm:"上級蘇生",ty:"A",sp:9,lv:75,mp:32,k:"revive",pw:60},{id:"vs08",nm:"上級:軽減+10",ty:"P",sp:9,lv:80,k:"flag",fl:"dmgReduce",val:10}],
 ult_holy_knight:[{id:"u01",nm:"聖域不動陣",ty:"A",sp:10,lv:70,mp:40,k:"shield",pct:50,tn:3,tg:"party"}],ult_war_god:[{id:"u02",nm:"軍神の断罪",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:350,crit:25,brk:50}],ult_sword_saint:[{id:"u03",nm:"無想連斬",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:120,hits:4,crit:20}],ult_assassin:[{id:"u04",nm:"影殺・絶",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:300,crit:40}],ult_bastion:[{id:"u05",nm:"絶対城塞",ty:"A",sp:10,lv:70,mp:40,k:"guard"}],ult_saint:[{id:"u06",nm:"聖母の祝福",ty:"A",sp:10,lv:70,mp:40,k:"heal",pw:200,tg:"party"}],ult_maestro:[{id:"u07",nm:"天地交響曲",ty:"A",sp:10,lv:70,mp:40,k:"buff",stat:"atk",pct:25,tn:3,tg:"party"}],ult_arch_summoner:[{id:"u08",nm:"神霊降臨",ty:"A",sp:10,lv:70,mp:40,k:"summon",pw:250,tn:3}],ult_beast_lord:[{id:"u09",nm:"百獣の咆哮",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:200,tg:"all",brk:40}],ult_arch_sage:[{id:"u10",nm:"大星脈陣",ty:"A",sp:10,lv:70,mp:40,k:"mp",pw:30,tg:"party"}],ult_archmage:[{id:"u11",nm:"禁呪・隕石",ty:"A",sp:10,lv:70,mp:40,k:"dmg",mg:1,pw:220,tg:"all",el:"fire"}],ult_shadow_master:[{id:"u12",nm:"影域支配",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:280,st:"stun",el:"dark"}],ult_death_lord:[{id:"u13",nm:"冥界の軍勢",ty:"A",sp:10,lv:70,mp:40,k:"summon",pw:150,tn:3}],ult_gunslinger:[{id:"u14",nm:"乱れ撃ち・極",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:90,hits:5,crit:20}],ult_war_demon:[{id:"u15",nm:"戦鬼の血祭",ty:"A",sp:10,lv:70,mp:0,k:"dmg",pw:350,hpCost:12,brk:50}],ult_grand_onmyoji:[{id:"u16",nm:"陰陽転生陣",ty:"A",sp:10,lv:70,mp:40,k:"dmg",mg:1,pw:200,tg:"all",el:"light"}],
-reinc_pool:[{id:"rc01",nm:"転生:全ステ+8%",ty:"P",sp:8,lv:1,k:"stat",stat:"hp",pct:8},{id:"rc02",nm:"転生:会心+15",ty:"P",sp:8,lv:1,k:"flag",fl:"critRate",val:15},{id:"rc03",nm:"転生撃",ty:"A",sp:9,lv:1,mp:20,k:"dmg",pw:260,tg:"all",brk:40},{id:"rc04",nm:"転生:軽減+12",ty:"P",sp:9,lv:1,k:"flag",fl:"dmgReduce",val:12}]
+reinc_pool:[{id:"rc01",nm:"転生:全ステ+8%",ty:"P",sp:8,lv:1,k:"stat",stat:"hp",pct:8},{id:"rc02",nm:"転生:会心+15",ty:"P",sp:8,lv:1,k:"flag",fl:"critRate",val:15},{id:"rc03",nm:"転生撃",ty:"A",sp:9,lv:1,mp:20,k:"dmg",pw:260,tg:"all",brk:40},{id:"rc04",nm:"転生:軽減+12",ty:"P",sp:9,lv:1,k:"flag",fl:"dmgReduce",val:12}],
+smith:[{id:"w01",nm:"採掘知識",ty:"P",sp:2,lv:1,k:"flag",fl:"mineYield",val:1},{id:"w02",nm:"宝石の勘",ty:"P",sp:2,lv:5,k:"flag",fl:"gemFind",val:8},{id:"w03",nm:"精錬知識",ty:"P",sp:3,lv:10,k:"flag",fl:"refineSave",val:20},{id:"w04",nm:"名匠の眼",ty:"P",sp:3,lv:15,k:"flag",fl:"smithLuck",val:10},{id:"w05",nm:"効率鍛造",ty:"P",sp:3,lv:20,k:"flag",fl:"craftSave",val:20},{id:"w06",nm:"宝石研磨",ty:"P",sp:4,lv:30,k:"flag",fl:"gemPow",val:2},{id:"w07",nm:"会心の一打",ty:"P",sp:5,lv:40,k:"flag",fl:"smithCrit",val:15},{id:"w08",nm:"伝承鍛冶",ty:"P",sp:6,lv:60,k:"flag",fl:"smithLuck2",val:15}]
 };
 const SKILL_INDEX={};Object.values(SKILLS).forEach(a=>a.forEach(s=>SKILL_INDEX[s.id]=s));
 
-function flagDesc(fl,v){const m={critRate:`会心率+${v}`,critDmg:`会心威力+${v}`,eva:`回避+${v}`,hit:`命中+${v}`,defPen:`防御無視+${v}%`,healPow:`回復量+${v}%`,extraAct:`追加行動率+${v}%`,double:`通常攻撃が2回`,mpReduce:`MP消費-20%`,summonMax:`召喚数+1`,summonPow:`召喚威力+${v}%`,dmgReduce:`被ダメ-${v}%`,healRecv:`被回復+${v}%`,buffPow:`強化効果+${v}%`,elemPow:`属性威力+${v}%`,enemyHit:`敵命中${v}`,corpse:`撃破時死体カウント`,firstStrike:`先制ダメージ+${v}%`,hpCostPow:`血代償威力+${v}%`,debHit:`妨害命中率+${v}`};return m[fl]||"";}
-function skillDesc(s){const p=[];p.push(s.ty==="P"?"【パッシブ】常に発動。":"【アクティブ】MP"+(s.mp||0)+"消費。");
-switch(s.k){case"stat":p.push(`${STAT_NM[s.stat]}+${s.pct}%${s.cond?"(HP低下時発動)":""}。`);break;
-case"flag":p.push(flagDesc(s.fl,s.val)+"。");break;
-case"dmg":p.push(`${s.mg?"魔法":"物理"}攻撃 威力${s.pw}${s.hits>1?`×${s.hits}回`:""}${s.tg==="all"?"(全体)":""}${s.el?` 属性[${EL_NM[s.el]}]`:""}${s.st?` ${ST_NM[s.st]}付与`:""}${s.brk?` ブレイク+${s.brk}`:""}${s.pen?` 防御無視${s.pen}%`:""}。`);break;
-case"drain":p.push(`魔法威力${s.pw}+与ダメの半分を吸収。`);break;
-case"heal":p.push(`HP回復 威力${s.pw}${s.tg==="party"?"(全体)":""}${s.st?" +再生付与":""}。`);break;
-case"revive":p.push(`戦闘不能をHP${s.pw}%で蘇生。`);break;
-case"buff":p.push(`${STAT_NM[s.stat]}+${s.pct}%(${s.tn}T)${s.tg==="party"?" 全体":""}。`);break;
-case"debuff":p.push(`敵の${STAT_NM[s.stat]}-${s.pct}%(${s.tn||3}T)${s.tg==="all"?" 全体":""}。`);break;
-case"status":p.push(`敵に${ST_NM[s.st]||"状態異常"}を付与。`);break;
-case"guard":p.push("ガードし被ダメ軽減・ヘイト上昇。");break;
-case"shield":p.push(`味方に${s.pct}%ダメ軽減シールド(${s.tn}T)${s.tg==="party"?"全体":""}。`);break;
-case"summon":p.push(`召喚獣を呼ぶ(追撃威力${s.pw}/${s.tn}T)。`);break;
-case"chant":p.push(`次の攻撃威力+${s.pct}%。`);break;
-case"cleanse":p.push("状態異常を解除。");break;
-case"mp":p.push(`MPを${s.pw}回復。`);break;}
-return p.join("");}
+function flagDesc(fl,v){switch(fl){
+case"critRate":return`感覚を研ぎ澄まし、会心率を${v}上げる。`;
+case"critDmg":return`急所を貫く術を修め、会心時の威力を${v}上げる。`;
+case"eva":return`体捌きを軽くし、回避を${v}上げる。`;
+case"hit":return`狙いを安定させ、命中を${v}上げる。`;
+case"defPen":return`敵の守りの隙を見抜き、防御を${v}%無視して攻撃できる。`;
+case"healPow":return`祈りの力を深くし、回復量を${v}上げる。`;
+case"extraAct":return`目にも留まらぬ動きで、行動後に${v}%の確率で再行動できる。`;
+case"double":return`両手に刃を構え、通常攻撃が2回になる。サブに軽量武器を装備可能。`;
+case"mpReduce":return`魔力を効率よく循環させ、MP消費を20%減らす。`;
+case"summonMax":return`契約を強め、同時に従えられる召喚数を1増やす。`;
+case"summonPow":return`従者との絆を深め、召喚攻撃の威力を${v}上げる。`;
+case"dmgReduce":return`体幹を鍛え抜き、受けるダメージを${v}%減らす。`;
+case"healRecv":return`癒やしを受け入れやすい体になり、受ける回復量を${v}上げる。`;
+case"buffPow":return`支援の力を増幅し、強化効果を${v}上げる。`;
+case"elemPow":return`属性を目覚めさせ、弱点属性のダメージを${v}上げる。`;
+case"enemyHit":return`気配を消し、敵の命中率を${Math.abs(v)}下げる。`;
+case"corpse":return`討ち取った死体を集め、死霊術の糧とする。`;
+case"firstStrike":return`先手を奪う戦術で、1ターン目のダメージを${v}上げる。`;
+case"hpCostPow":return`血を力に変え、HP消費スキルの威力を${v}上げる。`;
+case"debHit":return`敵の抵抗力を見抜き、弱体・状態異常の成功率を${v}上げる。`;
+case"mineYield":return`採掘の収量が増え、1回の採掘で鉱石が+${v}個得られる。`;
+case"gemFind":return`原石の輝きを見逃さず、宝石発見率が+${v}%される。`;
+case"refineSave":return`精錬の技術が高まり、${v}%の確率でインゴットが+1個得られる。`;
+case"smithLuck":return`作品の品質が上がり、鍛冶時の高レアリティ出現率+${v}%。`;
+case"smithLuck2":return`刃に魂が宿り、高レアリティ出現率がさらに+${v}%。`;
+case"craftSave":return`素材の無駄を省き、鍛冶のゴールド費用を${v}%減らす。`;
+case"gemPow":return`宝石の輝きを最大限に引き出し、宝石オプションの数値+${v}。`;
+case"smithCrit":return`集中した一打が大成功を呼び、${v}%でオプション+1＆強化+1。`;}
+return"";}
+function skillDesc(s){const ELFX={fire:"灼熱の炎が敵を焼き尽くす。",water:"凍てつく冷気が敵を縛る。",wind:"疾風の斬撃が敵を裂く。",earth:"大地の衝撃が敵を揺さぶる。",light:"聖なる光が降り注ぐ。",dark:"蝕む闇が敵を呑み込む。"};
+const STF={poison:"刃に仕込んだ毒が傷口から回る",burn:"炎が纏わりつき灼き続ける",bleed:"裂かれた傷から血が流れ続ける",confuse:"術音が精神を掻き乱す",blind:"影が視界を塗りつぶす",stun:"衝撃が体を痺れさせる",slow:"動きが泥のように鈍くなる",defdown:"守りが崩れ防御が下がる"};
+const EFE={stun:"痺れた敵は行動できない。",confuse:"混乱した敵は味方を襲うこともある。",blind:"暗闇の敵は攻撃が当たらなくなる。",slow:"鈍足の敵は行動順が遅くなる。"};
+const who=s.tg==="all"?"敵全体":s.tg==="party"?"味方全体":s.tg==="self"?"自身":s.tg==="ally"?"最も弱った味方":"敵";
+const out=[s.ty==="P"?"【パッシブ】常に発動。":"【アクティブ】"];
+switch(s.k){
+case"stat":out.push(`鍛錬により${STAT_NM[s.stat]}を常に${s.pct}%高める。${s.cond?"HPが低い窮地でこそ真価を発揮する。":""}`);break;
+case"flag":out.push(flagDesc(s.fl,s.val));break;
+case"dmg":{let t=s.mg?`${who}へ${s.el?EL_NM[s.el]+"属性の":""}魔法を解き放つ`:`${who}に強烈な一撃を叩き込む`;
+if(s.hits>1)t+=`。連続${s.hits}回攻撃`;
+t+="。";
+if(s.el&&ELFX[s.el])t+=ELFX[s.el];
+if(s.st&&STF[s.st])t+=`命中すると${STF[s.st]}ことがある。`;
+t+=`威力${s.pw}の${s.mg?"魔法":"物理"}攻撃。`;
+const ex=[];if(s.crit)ex.push(`会心+${s.crit}`);if(s.brk)ex.push(`ブレイク+${s.brk}`);if(s.pen)ex.push(`防御無視${s.pen}%`);if(s.hm)ex.push(`命中${s.hm>0?"+":""}${s.hm}`);if(s.hpCost)ex.push(`自身のHPを消費して威力増強`);
+if(ex.length)t+=`特徴：${ex.join("、")}。`;
+out.push(t);break;}
+case"drain":out.push(`蝕む魔法で敵の生気を奪う。威力${s.pw}の魔法攻撃で、与えたダメージの半分だけHPを吸収する。`);break;
+case"heal":out.push(`${who}を柔らかな光で包み、傷を縫い合わせる。回復威力${s.pw}。${s.st==="regen"?"さらに毎ターン癒やし続ける「再生」を付与。":""}`);break;
+case"revive":out.push(`命の光を集め、倒れた仲間を死の淵から引き戻す。戦闘不能1体をHP${s.pw}%で蘇生する。`);break;
+case"buff":out.push(`${who}に力を貸し、刃の切れを鋭くする。${s.tn}ターンの間、${STAT_NM[s.stat]}を${s.pct}%上げる。`);break;
+case"debuff":out.push(`縛めの術で${who}の動きを重くする。${s.tn||3}ターンの間、${STAT_NM[s.stat]}を${s.pct}%下げる。`);break;
+case"status":out.push(`${who}に取り憑き「${ST_NM[s.st]}」を与える。${EFE[s.st]||""}`);break;
+case"guard":out.push("守りの構えを取り、仲間を守る壁となる。次のターンまで被ダメージを半減し、敵の攻撃を引きつける。");break;
+case"shield":out.push(`${who}を覆う光の障壁を展開する。${s.tn}ターンの間、受けるダメージを${s.pct}%軽減する。`);break;
+case"summon":out.push(`契約により従者を戦場へ召喚する。毎ターン威力${s.pw}で敵を追撃し、${s.tn}ターン留まる。`);break;
+case"chant":{const tg2=s.tg==="ally"?"味方1体":"自身";out.push(`静かに魔力を練り、${tg2}の次の攻撃を増幅する。次の攻撃威力+${s.pct}%。`);break;}
+case"cleanse":out.push(`清らかな光で${who}の悪しき状態を洗い流す。`);break;
+case"mp":out.push(`自身の魔力を${who}へ分け与える。MPを${s.pw}回復。`);break;}
+return out.join("");}
 
 const RACES={slime:{hp:1.1,atk:.9,def:1,matk:.8,mdef:1,agi:.7,luk:.8,hit:.9,eva:.6},beast:{hp:.95,atk:1.1,def:.9,matk:.6,mdef:.8,agi:1.3,luk:1,hit:1.1,eva:1.2},humanoid:{hp:1,atk:1,def:1,matk:1,mdef:1,agi:1,luk:1,hit:1,eva:1},undead:{hp:1,atk:1,def:1,matk:1.2,mdef:1.3,agi:.8,luk:.8,hit:1,eva:.8},golem:{hp:1.3,atk:1.1,def:1.5,matk:.7,mdef:1.2,agi:.5,luk:.7,hit:.9,eva:.4},magic:{hp:.85,atk:.7,def:.8,matk:1.5,mdef:1.3,agi:1,luk:1,hit:1.1,eva:.9},dragon:{hp:1.4,atk:1.3,def:1.3,matk:1.3,mdef:1.2,agi:1.1,luk:1.1,hit:1.2,eva:1},bird:{hp:.8,atk:.9,def:.7,matk:.9,mdef:.8,agi:1.5,luk:1,hit:1.1,eva:1.5},ghost:{hp:.85,atk:.8,def:.7,matk:1.3,mdef:1.5,agi:1.2,luk:1.1,hit:1,eva:1.4},insect:{hp:.9,atk:1,def:1.1,matk:.7,mdef:.8,agi:1.1,luk:.8,hit:1,eva:1}};
 const MONSTERS=[["slime","スライム","slime","normal"],["horn_rabbit","角ウサギ","beast","normal"],["giant_bee","巨大ハチ","insect","normal"],["king_slime","キングスライム","slime","rare"],["goblin","ゴブリン","humanoid","normal"],["wolf","オオカミ","beast","normal"],["treant","トレアント","golem","normal"],["goblin_shaman","ゴブリンシャーマン","magic","rare"],["boar","鎧イノシシ","beast","normal"],["bandit","盗賊","humanoid","normal"],["bandit_leader","盗賊頭","humanoid","rare"],["skeleton","スケルトン兵","undead","normal"],["orc","オーク兵","humanoid","normal"],["stone_golem","ストーンゴーレム","golem","normal"],["cursed_knight","呪われし騎士","undead","rare"],["mimic","ミミック","golem","rare"],["cave_lizard","洞窟トカゲ","beast","normal"],["bat_swarm","コウモリ群","bird","normal"],["gargoyle","ガーゴイル","golem","normal"],["harpy","ハーピー","bird","normal"],["wind_spirit","風の精","magic","normal"],["storm_harpy","嵐のハーピー","bird","rare"],["shadow_wraith","影霊","ghost","normal"],["chimera","キマイラ","beast","normal"],["dark_priest","闇の司祭","magic","rare"],["lizardman","リザードマン","humanoid","normal"],["mist_snake","霧ヘビ","beast","normal"],["sahaugin","サハギン","humanoid","normal"],["lake_dragon","湖竜","dragon","rare"],["death_knight","死霊騎士","undead","normal"],["undead_horde","アンデッド群","undead","normal"],["cursed_king","呪縛の王","undead","rare"],["star_beast","星獣","magic","normal"],["dragon_whelp","竜の子","dragon","normal"],["void_watcher","虚ろの監視者","ghost","normal"],["chaos_beast","混沌獣","dragon","rare"],["primordial_dragon","原初竜","dragon","boss"]];
@@ -206,7 +274,7 @@ const AREAS=[["area01","始まりの草原",1,6,["slime","horn_rabbit","giant_be
 
 const SERIES=[[1,"始まり",.8],[5,"見習い",1],[10,"銅",1.2],[15,"鉄",1.4],[20,"鋼",1.6],[25,"白銀",1.8],[30,"精霊",2],[35,"騎士",2.2],[40,"ミスリル",2.5],[45,"守護",2.8],[50,"英雄",3.2],[55,"聖銀",3.6],[60,"竜骨",4],[65,"妖魔",4.5],[70,"王宮",5],[75,"神代",5.5],[80,"星霜",6],[85,"天啓",6.6],[90,"神話",7.2],[95,"創世",8],[100,"原初",9]];
 const RARITY={common:{nm:"普通",mult:1,opt:0,ch:60},uncommon:{nm:"上級",mult:1.1,opt:1,ch:25},rare:{nm:"レア",mult:1.25,opt:2,ch:10},epic:{nm:"エピック",mult:1.4,opt:3,ch:4},legend:{nm:"レジェンド",mult:1.6,opt:4,ch:1}};
-const EQ_TYPES=[["one_hand_sword","weapon","剣",{atk:8,hit:2},["sword_shield","guardian","blade_master","shadow_user","holy_knight","bastion","sword_saint","assassin"]],["shield","sub","盾",{def:6,hp:10},["sword_shield","guardian","healer","holy_knight","bastion","saint"]],["great_sword","weapon","大剣",{atk:14,hit:-2,agi:-1},["great_sword","berserker","war_god","war_demon"]],["light_two_hand","weapon","両手剣",{atk:10,agi:3,hit:2},["blade_master","great_sword","berserker","sword_saint","war_god","war_demon"]],["twin_daggers","weapon","双剣",{atk:6,agi:3,luk:2},["twin_dagger","blade_master","shadow_user","assassin","shadow_master"]],["dagger","weapon","短剣",{atk:6,agi:2,luk:2},["shadow_user","twin_dagger","assassin","shadow_master"]],["great_shield","sub","大盾",{def:12,hp:20,agi:-2},["guardian","bastion"]],["staff","weapon","杖",{matk:10,mp:10},["healer","sage","attack_mage","necromancer","onmyoji","saint","arch_sage","archmage","death_lord","grand_onmyoji","maestro","arch_summoner"]],["grimoire","sub","魔導書",{matk:6,mp:10},["buffer_debuffer","summoner","sage","attack_mage","necromancer","onmyoji","maestro","arch_summoner","arch_sage","archmage","death_lord","grand_onmyoji","saint"]],["orb","weapon","宝玉",{matk:9,mp:12},["summoner","sage","attack_mage","necromancer","onmyoji","arch_summoner","arch_sage","archmage","death_lord","grand_onmyoji"]],["instrument","weapon","楽器",{matk:8,luk:2},["buffer_debuffer","maestro"]],["whip","weapon","鞭",{atk:6,luk:3},["tamer","beast_lord"]],["horn","sub","角笛",{matk:4,hp:6},["tamer","beast_lord"]],["astrolabe","weapon","星盤",{matk:10,hit:2},["sage","arch_sage"]],["gun","weapon","銃",{atk:12,hit:4},["gunner","gunslinger"]],["axe","weapon","戦斧",{atk:13,luk:-1},["berserker","war_demon"]],["heavy_armor","armor","重鎧",{def:10,hp:15,agi:-1},["sword_shield","great_sword","guardian","berserker","holy_knight","war_god","bastion","war_demon"]],["medium_armor","armor","中鎧",{def:7,hp:8,agi:1},["blade_master","twin_dagger","tamer","sword_shield","gunner","sword_saint","assassin","gunslinger","beast_lord"]],["light_armor","armor","軽鎧",{def:4,agi:3,eva:3},["blade_master","twin_dagger","tamer","healer","buffer_debuffer","shadow_user","gunner","berserker","assassin","shadow_master","gunslinger","beast_lord","sword_saint"]],["cloth_armor","armor","法衣",{mdef:6,mp:12},["healer","buffer_debuffer","summoner","sage","attack_mage","necromancer","onmyoji","saint","maestro","arch_summoner","beast_lord","arch_sage","archmage","death_lord","grand_onmyoji"]],["accessory","accessory","装飾品",{hp:5,mp:5,agi:1,luk:1},"all"]];
+const EQ_TYPES=[["one_hand_sword","weapon","剣",{atk:8,hit:2},["sword_shield","guardian","blade_master","shadow_user","holy_knight","bastion","sword_saint","assassin","twin_dagger","shadow_master"]],["shield","sub","盾",{def:6,hp:10},["sword_shield","guardian","healer","holy_knight","bastion","saint"]],["great_sword","weapon","大剣",{atk:14,hit:-2,agi:-1},["great_sword","berserker","war_god","war_demon"]],["light_two_hand","weapon","両手剣",{atk:10,agi:3,hit:2},["blade_master","great_sword","berserker","sword_saint","war_god","war_demon"]],["twin_daggers","weapon","双剣",{atk:6,agi:3,luk:2},["twin_dagger","blade_master","shadow_user","assassin","shadow_master"]],["dagger","weapon","短剣",{atk:6,agi:2,luk:2},["shadow_user","twin_dagger","assassin","shadow_master"]],["great_shield","sub","大盾",{def:12,hp:20,agi:-2},["guardian","bastion"]],["staff","weapon","杖",{matk:10,mp:10},["healer","sage","attack_mage","necromancer","onmyoji","saint","arch_sage","archmage","death_lord","grand_onmyoji","maestro","arch_summoner"]],["grimoire","sub","魔導書",{matk:6,mp:10},["buffer_debuffer","summoner","sage","attack_mage","necromancer","onmyoji","maestro","arch_summoner","arch_sage","archmage","death_lord","grand_onmyoji","saint"]],["orb","weapon","宝玉",{matk:9,mp:12},["summoner","sage","attack_mage","necromancer","onmyoji","arch_summoner","arch_sage","archmage","death_lord","grand_onmyoji"]],["instrument","weapon","楽器",{matk:8,luk:2},["buffer_debuffer","maestro"]],["whip","weapon","鞭",{atk:6,luk:3},["tamer","beast_lord"]],["horn","sub","角笛",{matk:4,hp:6},["tamer","beast_lord"]],["astrolabe","weapon","星盤",{matk:10,hit:2},["sage","arch_sage"]],["gun","weapon","銃",{atk:12,hit:4},["gunner","gunslinger"]],["axe","weapon","戦斧",{atk:13,luk:-1},["berserker","war_demon"]],["heavy_armor","armor","重鎧",{def:10,hp:15,agi:-1},["sword_shield","great_sword","guardian","berserker","holy_knight","war_god","bastion","war_demon"]],["medium_armor","armor","中鎧",{def:7,hp:8,agi:1},["blade_master","twin_dagger","tamer","sword_shield","gunner","sword_saint","assassin","gunslinger","beast_lord"]],["light_armor","armor","軽鎧",{def:4,agi:3,eva:3},["blade_master","twin_dagger","tamer","healer","buffer_debuffer","shadow_user","gunner","berserker","assassin","shadow_master","gunslinger","beast_lord","sword_saint"]],["cloth_armor","armor","法衣",{mdef:6,mp:12},["healer","buffer_debuffer","summoner","sage","attack_mage","necromancer","onmyoji","saint","maestro","arch_summoner","beast_lord","arch_sage","archmage","death_lord","grand_onmyoji"]],["accessory","accessory","装飾品",{hp:5,mp:5,agi:1,luk:1},"all"]];
 
 const TEXT={
 phys:["{a}は間合いを測り、{e}の懐へ踏み込む。確かな手応えが残った。","{a}の足音が一つ。刃が閃き、{e}の体勢が崩れる。","息を殺して地を蹴る。{a}の一撃が{e}を捉えた。","{a}は体重を乗せた一撃を{e}へ叩き込む。","{a}の連動した踏み込みから繰り出された攻撃が{e}を打つ。","低く構えた{a}が、瞬間的に距離を詰めて{e}を裂く。"],
@@ -231,10 +299,12 @@ if(k>=50)b.atk+=3;if(k>=200)b.atk+=5;if(bk>=5)b.hp+=5;if(bk>=20)b.hp+=8;if(tw>=1
 function passiveMods(c){const m={pct:{},flat:{},flags:{}};(c.skills||[]).forEach(id=>{const s=SKILL_INDEX[id];if(!s||s.ty!=="P")return;
 if(s.k==="stat"&&!s.cond)m.pct[s.stat]=(m.pct[s.stat]||0)+s.pct;
 if(s.k==="flag"){if(s.fl==="hit"||s.fl==="eva")m.flat[s.fl]=(m.flat[s.fl]||0)+s.val;else m.flags[s.fl]=(m.flags[s.fl]||0)+s.val;}});return m;}
-function setInfo(c){const cnt={},rc={};let maxSer=0;(c.equip||[]).forEach(uid=>{const it=(game.inv||[]).find(x=>x.uid===uid);if(!it)return;
+function canDual(c){return (c.skills||[]).includes("td01")||["twin_dagger","assassin","shadow_master"].includes(c.jobId);}
+function equippedUids(c){const u=[...(c.equip||[])];if(c.subW)u.push(c.subW);return u;}
+function setInfo(c){const cnt={},rc={};let maxSer=0;equippedUids(c).forEach(uid=>{const it=(game.inv||[]).find(x=>x.uid===uid);if(!it)return;
 if(it.series)cnt[it.series]=(cnt[it.series]||0)+1;rc[it.rar]=(rc[it.rar]||0)+1;maxSer=Math.max(maxSer,it.lv);});
 return{sc:Math.max(0,...Object.values(cnt),0),maxSer,sameRar:Math.max(0,...Object.values(rc),0)};}
-function equipSum(c){const t={};STAT_KEYS.forEach(k=>t[k]=0);(c.equip||[]).forEach(uid=>{const it=(game.inv||[]).find(x=>x.uid===uid);if(it){const enh=1+(it.enh||0)*.04;Object.entries(it.stats).forEach(([k,v])=>t[k]+=Math.round(v*enh));}});return t;}
+function equipSum(c){const t={};STAT_KEYS.forEach(k=>t[k]=0);equippedUids(c).forEach(uid=>{const it=(game.inv||[]).find(x=>x.uid===uid);if(it){const enh=1+(it.enh||0)*.04;Object.entries(it.stats).forEach(([k,v])=>t[k]+=Math.round(v*enh));}});return t;}
 function calcTotal(c){const base=jobStats(c.jobId,c.level),eq=equipSum(c),pm=passiveMods(c),tb=titleBonus(),si=setInfo(c);const o={};
 STAT_KEYS.forEach(k=>{let v=base[k]+eq[k];v=Math.floor(v*(1+(pm.pct[k]||0)/100));if(pm.flat[k])v+=pm.flat[k];o[k]=Math.max(0,v);});
 o.atk=Math.floor(o.atk*(1+tb.atk/100));o.def=Math.floor(o.def*(1+tb.def/100));o.hp=Math.floor(o.hp*(1+tb.hp/100));
@@ -252,8 +322,9 @@ function makeEnemy(id,lv){const m=MON_INDEX[id];if(!m)return makeEnemy("slime",l
 const s={hp:Math.round((40+lv*14)*r.hp*scale),mp:20,atk:Math.round((8+lv*2.2)*r.atk),def:Math.round((6+lv*1.6)*r.def),matk:Math.round((6+lv*1.8)*r.matk),mdef:Math.round((6+lv*1.5)*r.mdef),agi:Math.round((6+lv*1.2)*r.agi),luk:Math.round((5+lv)*r.luk),hit:Math.round((8+lv*1.4)*r.hit),eva:Math.round((4+lv*.9)*r.eva)};
 return{id,name:m.nm,race:m.type,type:"enemy",rar:m.rar,level:lv,stats:s};}
 
-function newGame(){return{v:8,settings:{showDamage:true,autoItem:true},party:{combo:0,comboMax:100},characters:[],inv:[],gold:100,items:{potion:2,ether:1},tower:1,kills:0,bossKills:0,flags:{}};}
-function normalizeGame(g){g.inv=g.inv||[];g.items=g.items||{};g.gold=g.gold??100;g.tower=g.tower||1;g.kills=g.kills||0;g.bossKills=g.bossKills||0;g.party=g.party||{combo:0,comboMax:100};g.settings=Object.assign({showDamage:true,autoItem:true},g.settings||{});g.characters=g.characters||[];return g;}
+function newSmith(nm){return{name:nm,level:1,exp:0,sp:0,skills:[],ore:{},ingot:{},gem:{}};}
+function newGame(){return{v:8,settings:{showDamage:true,autoItem:true},party:{combo:0,comboMax:100},characters:[],smith:newSmith("ドゥカン"),smithLog:[],inv:[],gold:100,items:{potion:2,ether:1},tower:1,kills:0,bossKills:0,flags:{}};}
+function normalizeGame(g){g.inv=g.inv||[];g.items=g.items||{};g.gold=g.gold??100;g.tower=g.tower||1;g.kills=g.kills||0;g.bossKills=g.bossKills||0;g.party=g.party||{combo:0,comboMax:100};g.settings=Object.assign({showDamage:true,autoItem:true},g.settings||{});g.characters=g.characters||[];g.smith=g.smith||newSmith("ドゥカン");g.smith.ore=g.smith.ore||{};g.smith.ingot=g.smith.ingot||{};g.smith.gem=g.smith.gem||{};g.smithLog=g.smithLog||[];return g;}
 function saveGame(){try{game.updatedAt=new Date().toISOString();storage.set(SAVE_KEY,JSON.stringify(game));return true;}catch(e){return false;}}
 function loadGame(){try{const r=storage.get(SAVE_KEY);if(!r)return false;game=normalizeGame(JSON.parse(r));return true;}catch(e){return false;}}
 const exportSave=()=>btoa(unescape(encodeURIComponent(JSON.stringify(game))));
@@ -267,6 +338,7 @@ const bar=(c,m,cls)=>`<div class="bar ${cls||""}" style="flex:1"><i style="width
 
 function seriesFor(lv){let s=SERIES[0];SERIES.forEach(x=>{if(lv>=x[0])s=x;});return s;}
 function rollRarity(){const roll=Math.random()*100;let acc=0;for(const[k,v]of Object.entries(RARITY)){acc+=v.ch;if(roll<acc)return k;}return"common";}
+const upRar=r=>RAR_ORDER[Math.min(RAR_ORDER.indexOf(r)+1,4)];
 function genEquip(lv,jobId){const pool=EQ_TYPES.filter(t=>t[4]==="all"||t[4].includes(jobId));const type=pick(pool);const ser=seriesFor(lv);const rar=rollRarity();
 const mult=ser[2]*RARITY[rar].mult;const stats={};Object.entries(type[3]).forEach(([k,v])=>{stats[k]=Math.max(1,Math.round(v*mult));});
 for(let i=0;i<RARITY[rar].opt;i++){const k=pick(STAT_KEYS);stats[k]=(stats[k]||0)+Math.max(1,Math.round(lv/5+2));}
@@ -275,21 +347,90 @@ const enhCost=it=>Math.floor(50*(1+(it.enh||0))*seriesFor(it.lv)[2]);
 const enhChance=it=>clamp(100-(it.enh||0)*8,30,100);
 const sellVal=it=>Math.floor(10*seriesFor(it.lv)[2]*RARITY[it.rar].mult);
 
+function smithFlags(){const m={};(game.smith.skills||[]).forEach(id=>{const s=SKILL_INDEX[id];if(s&&s.ty==="P"&&s.k==="flag")m[s.fl]=(m[s.fl]||0)+s.val;});return m;}
+function gainSmithExp(amt){const s=game.smith;s.exp=(s.exp||0)+amt;while(s.level<100&&s.exp>=nextExp(s.level)){s.exp-=nextExp(s.level);s.level++;s.sp=(s.sp||0)+1;}}
+function smithLog(t){game.smithLog=game.smithLog||[];game.smithLog.unshift(t);game.smithLog=game.smithLog.slice(0,30);}
+function doMine(times){const s=game.smith;const mine=MINES.find(x=>x[0]===$("mineSelect").value);if(!mine)return;
+if(s.level<mine[2])return alert("鍛冶師Lv"+mine[2]+"が必要");
+const F=smithFlags();
+for(let i=0;i<times;i++){const out=[];const y=1+(F.mineYield||0)+(Math.random()<.3?1:0);
+for(let j=0;j<y;j++){const o=pick(mine[3]);s.ore[o]=(s.ore[o]||0)+1;out.push(ORE_NM[o]);gainSmithExp(ORE_EXP[o]);}
+if(Math.random()*100<8+(F.gemFind||0)){const g=pick(GEMS);s.gem[g[0]]=(s.gem[g[0]]||0)+1;out.push(g[1]+"！");}
+gainSmithExp(mine[2]===1?4:mine[2]);
+smithLog(`${mine[1]}：${out.join("、")} を採取`);}
+saveGame();renderSmith();}
+function refine(){const s=game.smith;const F=smithFlags();const o=$("refineSelect").value;
+if((s.ore[o]||0)<3)return alert("鉱石が3個必要");
+s.ore[o]-=3;let n=1;if(Math.random()*100<(F.refineSave||0))n++;
+s.ingot[o]=(s.ingot[o]||0)+n;gainSmithExp(ORE_EXP[o]*2);
+smithLog(`${ORE_NM[o]}を精錬 → ${ING_NM[o]}×${n}${n>1?"（ボーナス！）":""}`);
+saveGame();renderSmith();}
+function craftNeed(){const type=EQ_TYPES.find(t=>t[0]===$("craftType").value);if(!type)return 3;return type[1]==="weapon"||type[1]==="armor"?3:type[1]==="sub"?2:1;}
+function updateCraftInfo(){const M=METALS.find(m=>m[0]===$("craftMetal").value)||METALS[0];const F=smithFlags();const cost=Math.floor(30*M[4]*(1-(F.craftSave||0)/100));
+$("craftInfo").textContent=`必要：${ING_NM[M[0]]}×${craftNeed()}＋${cost}G / レア上昇${(F.smithLuck||0)+(F.smithLuck2||0)}% / 大成功${F.smithCrit||0}%`;}
+function craft(){const s=game.smith;const F=smithFlags();const M=METALS.find(m=>m[0]===$("craftMetal").value);const type=EQ_TYPES.find(t=>t[0]===$("craftType").value);const gem=$("craftGem").value;
+if(!M||!type)return;
+if(s.level<M[2])return alert("鍛冶師Lv"+M[2]+"が必要");
+const need=craftNeed();if((s.ingot[M[0]]||0)<need)return alert(ING_NM[M[0]]+"が"+need+"個必要");
+const cost=Math.floor(30*M[4]*(1-(F.craftSave||0)/100));if(game.gold<cost)return alert("ゴールド不足");
+s.ingot[M[0]]-=need;game.gold-=cost;if(gem)s.gem[gem]=(s.gem[gem]||0)-1;
+let rar=rollRarity();const up=(F.smithLuck||0)+(F.smithLuck2||0)+(gem?10:0);
+while(Math.random()*100<up)rar=upRar(rar);
+const great=Math.random()*100<(F.smithCrit||0);
+const stats={};Object.entries(type[3]).forEach(([k,v])=>{stats[k]=Math.max(1,Math.round(v*M[3]));});
+const opts=RARITY[rar].opt+(gem?1:0)+(great?1:0);
+for(let i=0;i<opts;i++){const k=pick(STAT_KEYS);stats[k]=(stats[k]||0)+Math.max(1,Math.round(M[2]/5+2))+(gem?(F.gemPow||0):0);}
+const it={uid:"eq"+(uidSeq++)+"_"+(Date.now()%1e5),name:M[1]+"鍛の"+type[2],series:M[1]+"鍛",type:type[0],slot:type[1],lv:M[2],rar,enh:great?1:0,stats,jobs:type[4]};
+game.inv.push(it);gainSmithExp(15*M[4]);
+smithLog(`${it.name}（${RARITY[rar].nm}）を鍛造！${great?" 大成功+1！":""}`);
+saveGame();renderSmith();renderParty();}
+function renderSmith(){const s=game.smith;const F=smithFlags();
+$("smithStatus").innerHTML=`<div class="mini"><b>${s.name}</b> 鍛冶師 Lv${s.level} / SP${s.sp||0}</div>
+<div class="mini bw">EXP ${s.exp}/${nextExp(s.level)} ${bar(s.exp,nextExp(s.level))}</div>
+<div class="mini">採掘+${F.mineYield||0} / 宝石+${F.gemFind||0}% / 精錬ボーナス${F.refineSave||0}% / レア+${(F.smithLuck||0)+(F.smithLuck2||0)}% / 大成功${F.smithCrit||0}% / 費用-${F.craftSave||0}%</div>`;
+$("mineSelect").innerHTML=MINES.map(m=>`<option value="${m[0]}" ${s.level<m[2]?"disabled":""}>${m[1]}（鍛冶Lv${m[2]}〜）</option>`).join("");
+let h=`<div class="mini"><b>鉱石</b> ${ORES.map(o=>`${o[1]}:${s.ore[o[0]]||0}`).join(" / ")}</div>
+<div class="mini"><b>インゴット</b> ${ORES.map(o=>`${ING_NM[o[0]]}:${s.ingot[o[0]]||0}`).join(" / ")}</div>
+<div class="mini"><b>宝石</b> ${GEMS.map(g=>`${g[1]}:${s.gem[g[0]]||0} <button data-g="${g[0]}" class="gemSellBtn" ${(s.gem[g[0]]||0)>0?"":"disabled"} style="width:auto;padding:2px 6px">売${g[2]}G</button>`).join(" ")}</div>`;
+$("holdList").innerHTML=h;
+document.querySelectorAll(".gemSellBtn").forEach(b=>b.onclick=e=>{const g=GEMS.find(x=>x[0]===e.currentTarget.dataset.g);if((s.gem[g[0]]||0)>0){s.gem[g[0]]--;game.gold+=g[2];smithLog(`${g[1]}を${g[2]}Gで売却`);saveGame();renderSmith();renderGold();}});
+$("refineSelect").innerHTML=ORES.map(o=>`<option value="${o[0]}">${o[1]}（${s.ore[o[0]]||0}）</option>`).join("");
+$("craftMetal").innerHTML=METALS.map(m=>`<option value="${m[0]}" ${s.level<m[2]?"disabled":""}>${m[1]}インゴット（${s.ingot[m[0]]||0}）Lv${m[2]}〜</option>`).join("");
+if(!$("craftType").options.length)$("craftType").innerHTML=EQ_TYPES.map(t=>`<option value="${t[0]}">${t[2]}（${t[1]==="weapon"?"武器":t[1]==="armor"?"防具":t[1]==="sub"?"サブ":"装飾"}）</option>`).join("");
+$("craftGem").innerHTML=`<option value="">なし</option>`+GEMS.map(g=>`<option value="${g[0]}" ${(s.gem[g[0]]||0)>0?"":"disabled"}>${g[1]}（${s.gem[g[0]]||0}）</option>`).join("");
+updateCraftInfo();
+$("smithLog").innerHTML=(game.smithLog||[]).map(t=>`<div>${t}</div>`).join("")||"<div>まだ記録なし</div>";}
+
 function switchTab(n){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".tabbtn").forEach(b=>b.classList.remove("active"));$("tab-"+n).classList.add("active");document.querySelector(`[data-tab="${n}"]`).classList.add("active");
-if(n==="party")renderParty();if(n==="skill")renderSkills();if(n==="battle"){renderAreas();renderStatus();}if(n==="save")renderSave();if(n==="shop")renderShop();}
+if(n==="party")renderParty();if(n==="skill")renderSkills();if(n==="battle"){renderAreas();renderStatus();}if(n==="save")renderSave();if(n==="shop")renderShop();if(n==="smith")renderSmith();}
 function renderGold(){$("goldView").textContent=game.gold;$("goldView2").textContent=game.gold;}
 function renderAreas(){const sel=$("areaSelect");const prev=sel.value;sel.innerHTML="";let firstOk="";
 AREAS.forEach(a=>{const locked=(game.kills||0)<a[7];const o=document.createElement("option");o.value=a[0];
 o.textContent=`${a[1]} Lv${a[2]}-${a[3]}${locked?"（撃破"+a[7]+"必要）":""}`;o.disabled=locked;
 if(!locked&&!firstOk)firstOk=a[0];sel.appendChild(o);});
 const prevOk=prev&&AREAS.find(a=>a[0]===prev&&(game.kills||0)>=a[7]);sel.value=prevOk?prev:firstOk;}
+function tempEquip(c,sl,uid){const inv=u=>game.inv.find(x=>x.uid===u);let eq=[...(c.equip||[])],subW=c.subW;
+if(sl==="sub"){eq=eq.filter(u=>{const it=inv(u);return it&&it.slot!=="sub";});subW=undefined;
+if(uid){const it=inv(uid);if(it&&it.slot==="weapon")subW=uid;else eq.push(uid);}}
+else{eq=eq.filter(u=>{const it=inv(u);return it&&it.slot!==sl;});if(subW===uid)subW=undefined;if(uid)eq.push(uid);}
+return{eq,subW};}
+function diffText(c,sl,uid){const cur=calcTotal(c);const te=tempEquip(c,sl,uid);const tmp=Object.assign({},c,{equip:te.eq,subW:te.subW});const nt=calcTotal(tmp);
+const p=[];STAT_KEYS.forEach(k=>{const d=nt[k]-cur[k];if(d)p.push(`${STAT_NM[k]}${d>0?"+":""}${d}`);});return p.length?p.join(" "):"変化なし";}
 function renderParty(){renderGold();const el=$("partyList");if(!game.characters.length){el.innerHTML='<div class="card">未作成</div>';$("invList").innerHTML="";renderItems();return;}
 el.innerHTML=game.characters.map((c,i)=>{const t=calcTotal(c);const si=setInfo(c);
-const slots=["weapon","sub","armor","accessory"].map(sl=>{const all=(game.inv||[]).filter(it=>it.slot===sl);
-const cur=(c.equip||[]).find(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot===sl;})||"";
-const ok=all.filter(it=>c.level>=it.lv&&(it.jobs==="all"||it.jobs.includes(c.jobId))).map(o=>`<option value="${o.uid}" ${o.uid===cur?"selected":""}>${o.name}+${o.enh||0}</option>`).join("");
-const ng=all.filter(it=>!(c.level>=it.lv&&(it.jobs==="all"||it.jobs.includes(c.jobId)))).map(o=>{const r=[];if(c.level<o.lv)r.push("Lv"+o.lv+"必要");if(!(o.jobs==="all"||o.jobs.includes(c.jobId)))r.push("職業違い");return `<option disabled>${o.name}+${o.enh||0}（${r.join("/")}）</option>`;}).join("");
-return `<label>${sl}<select data-c="${i}" data-s="${sl}" class="eqsel"><option value="">なし</option>${ok}${ng}</select></label>`;}).join("");
+const others=new Set();game.characters.forEach((oc,oi)=>{if(oi!==i)equippedUids(oc).forEach(u=>others.add(u));});
+const slots=["weapon","sub","armor","accessory"].map(sl=>{
+const all=(game.inv||[]).filter(it=>it.slot===sl||(sl==="sub"&&canDual(c)&&it.slot==="weapon"&&DUAL_TYPES.has(it.type)));
+const curUid=sl==="sub"?((c.equip||[]).find(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot==="sub";})||c.subW):(c.equip||[]).find(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot===sl;})||"";
+const usable=it=>c.level>=it.lv&&(it.jobs==="all"||it.jobs.includes(c.jobId));
+const ok=all.filter(it=>!others.has(it.uid)&&usable(it));
+const ng=all.filter(it=>!(ok.includes(it)));
+const okOpts=ok.map(o=>`<option value="${o.uid}" ${o.uid===curUid?"selected":""}>${o.name}+${o.enh||0}〔${diffText(c,sl,o.uid)}〕</option>`).join("");
+const ngOpts=ng.map(o=>{const r=[];if(others.has(o.uid)){const ow=game.characters.find((oc,oi)=>oi!==i&&equippedUids(oc).includes(o.uid));r.push((ow?ow.name:"他")+"が装備中");}
+if(c.level<o.lv)r.push("Lv"+o.lv+"必要");if(!(o.jobs==="all"||o.jobs.includes(c.jobId)))r.push("職業違い");
+if(sl==="sub"&&o.slot==="weapon"&&!canDual(c))r.push("二刀流が必要");return `<option disabled>${o.name}+${o.enh||0}（${r.join("/")}）</option>`;}).join("");
+const note=sl==="sub"&&canDual(c)?' <span class="mini" style="color:#7fd7ff">二刀流:軽量武器OK</span>':"";
+return `<label>${sl}${note}<select data-c="${i}" data-s="${sl}" class="eqsel"><option value="">なし${curUid?"〔"+diffText(c,sl,"")+"〕":""}</option>${okOpts}${ngOpts}</select></label>`;}).join("");
 let btns="";
 if(c.level>=50&&!c.adv&&ADV_MAP[c.jobId])btns+=`<button data-c="${i}" class="promoBtn"><span class="adv">上級職転職：${JOBS[ADV_MAP[c.jobId]].nm}</span></button>`;
 if(c.level>=100&&c.adv&&(c.reinc||0)<5)btns+=`<button data-c="${i}" class="reincBtn"><span class="rc">転生（${(c.reinc||0)+1}回目）</span></button>`;
@@ -299,13 +440,13 @@ return `<div class="card"><h3>${c.name}</h3><div class="mini">${JOBS[c.jobId].nm
 <div class="mini">物攻${t.atk} 物防${t.def} 魔攻${t.matk} 魔防${t.mdef} 素早${t.agi} 運${t.luk} 命中${t.hit} 回避${t.eva}</div>
 <div class="two">${slots}</div>${btns}</div>`;}).join("");
 document.querySelectorAll(".eqsel").forEach(sel=>sel.addEventListener("change",e=>{const c=game.characters[+e.target.dataset.c];const sl=e.target.dataset.s;const v=e.target.value;
-c.equip=(c.equip||[]).filter(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot!==sl;});if(v)c.equip.push(v);saveGame();renderParty();}));
+const te=tempEquip(c,sl,v||undefined);c.equip=te.eq;c.subW=te.subW;saveGame();renderParty();}));
 document.querySelectorAll(".promoBtn").forEach(b=>b.onclick=e=>{promote(game.characters[+e.currentTarget.dataset.c]);});
 document.querySelectorAll(".reincBtn").forEach(b=>b.onclick=e=>{reincarnate(game.characters[+e.currentTarget.dataset.c]);});
 $("invList").innerHTML=(game.inv||[]).map(it=>`<div class="mini">${it.name}+${it.enh||0} [${RARITY[it.rar].nm}] Lv${it.lv} <button data-e="${it.uid}" class="enhBtn" ${game.gold>=enhCost(it)&&(it.enh||0)<10?"":"disabled"}>強化${enhCost(it)}G(${enhChance(it)}%)</button> <button data-e="${it.uid}" class="sellBtn">売${sellVal(it)}G</button></div>`).join("")||'<div class="mini">なし</div>';
 document.querySelectorAll(".enhBtn").forEach(b=>b.onclick=e=>{const it=game.inv.find(x=>x.uid===e.currentTarget.dataset.e);if(!it)return;const cost=enhCost(it);if(game.gold>=cost&&(it.enh||0)<10){game.gold-=cost;
 if(Math.random()*100<enhChance(it)){it.enh=(it.enh||0)+1;alert("強化成功！ +"+it.enh);}else alert("強化失敗…");saveGame();renderParty();}});
-document.querySelectorAll(".sellBtn").forEach(b=>b.onclick=e=>{const it=game.inv.find(x=>x.uid===e.currentTarget.dataset.e);if(!it)return;game.gold+=sellVal(it);game.inv=game.inv.filter(x=>x.uid!==it.uid);game.characters.forEach(c=>c.equip=(c.equip||[]).filter(u=>u!==it.uid));saveGame();renderParty();});
+document.querySelectorAll(".sellBtn").forEach(b=>b.onclick=e=>{const it=game.inv.find(x=>x.uid===e.currentTarget.dataset.e);if(!it)return;game.gold+=sellVal(it);game.inv=game.inv.filter(x=>x.uid!==it.uid);game.characters.forEach(c=>{c.equip=(c.equip||[]).filter(u=>u!==it.uid);if(c.subW===it.uid)c.subW=undefined;});saveGame();renderParty();});
 renderItems();}
 function renderItems(){const nm={potion:"ポーション",ether:"エーテル",elixir:"エリクサー",respec:"リセット券",box:"装備箱"};
 $("itemList").innerHTML='<div class="card">'+Object.entries(nm).map(([k,n])=>`<span class="mini" style="margin-right:12px">${n}：${game.items[k]||0}</span>`).join("")+`<button id="openBoxBtn" ${(game.items.box||0)>0?"":"disabled"}>装備箱を開ける</button><div class="mini">※ポーション/エーテル/エリクサーは戦闘中に自動使用されます</div></div>`;
@@ -330,9 +471,10 @@ if(c.adv){const pool=COMBAT_JOBS.has(c.jobId)?"adv_attack":"adv_support";h+=`<hr
 h+=`<div class="mini adv"><b>奥義</b></div>`+(SKILLS["ult_"+c.jobId]||[]).map(s=>skillRow(c,i,s)).join("");}
 if(c.reinc)h+=`<hr><div class="mini rc"><b>転生スキル</b></div>`+(SKILLS.reinc_pool||[]).map(s=>skillRow(c,i,s)).join("");
 return h+"</div>";}).join("");
-document.querySelectorAll(".learnBtn").forEach(b=>b.addEventListener("click",e=>{const c=game.characters[+e.currentTarget.dataset.c];const s=SKILL_INDEX[e.currentTarget.dataset.s];
+el.innerHTML+=`<div class="card"><h3>${game.smith.name}（鍛冶師 SP ${game.smith.sp||0}）</h3><div class="mini"><b>鍛冶スキル</b></div>`+(SKILLS.smith||[]).map(s=>skillRow(game.smith,"smith",s)).join("")+"</div>";
+document.querySelectorAll(".learnBtn").forEach(b=>b.addEventListener("click",e=>{const dc=e.currentTarget.dataset.c;const c=dc==="smith"?game.smith:game.characters[+dc];const s=SKILL_INDEX[e.currentTarget.dataset.s];
 pendingLearn={c,s};$("lmName").textContent=s.nm;$("lmFl").textContent=FLAVOR[s.id]||"";$("lmDesc").textContent=skillDesc(s);$("learnModal").style.display="block";}));}
-function confirmLearn(){if(!pendingLearn)return;const{c,s}=pendingLearn;if(c.level>=s.lv&&(c.sp||0)>=s.sp){c.sp-=s.sp;c.skills=c.skills||[];c.skills.push(s.id);saveGame();renderSkills();renderParty();}
+function confirmLearn(){if(!pendingLearn)return;const{c,s}=pendingLearn;if(c.level>=s.lv&&(c.sp||0)>=s.sp){c.sp-=s.sp;c.skills=c.skills||[];c.skills.push(s.id);saveGame();renderSkills();renderParty();renderSmith();}
 pendingLearn=null;$("learnModal").style.display="none";}
 
 function renderShop(){renderGold();const items=[["potion","ポーション（HP40%回復）",50],["ether","エーテル（MP40%回復）",60],["elixir","エリクサー（全回復）",300],["respec","スキルリセット券",800],["box","装備箱",200]];
@@ -344,11 +486,12 @@ function renderStatus(){const el=$("battleStatus");if(!battle){el.innerHTML="戦
 el.innerHTML=battle.enemies.map(e=>`<div class="mini"><b>${e.name}</b> Lv${e.level} ${e.hp}/${e.stats.hp} <span class="bw" style="flex:1">${bar(e.hp,e.stats.hp,"en")}</span> <span class="brk">Brk${e.break||0}</span>${e.charge?' <span class="brk">溜め!</span>':""}${statesText(e)}</div>`).join("")+
 `<div class="mini">連携${battle.combo}/${game.party.comboMax} / 速度${speed}x / ターン${battle.turn}</div><hr>`+battle.party.map(m=>`<div class="mini bw">${m.name}${m.guard>0?"🛡":""} HP${m.hp}/${m.maxHp} ${bar(m.hp,m.maxHp)} MP${m.mp}/${m.maxMp} ${bar(m.mp,m.maxMp,"mp")}${statesText(m)}</div>`).join("");}
 
-function makeChar(id,slot,name,job){const t=jobStats(job,1);return{id,slot,name,jobId:job,level:1,exp:0,sp:0,skills:[],equip:[],currentHp:t.hp,currentMp:t.mp,adv:false,reinc:0};}
+function makeChar(id,slot,name,job){const t=jobStats(job,1);return{id,slot,name,jobId:job,level:1,exp:0,sp:0,skills:[],equip:[],subW:undefined,currentHp:t.hp,currentMp:t.mp,adv:false,reinc:0};}
 function createParty(){const names=[],jobs=[];for(let i=1;i<=4;i++){names.push($("name"+i).value.trim());jobs.push($("job"+i).value);}
-if(names.some(n=>!n))return alert("全キャラ名前を入力");if(new Set(names).size!==4)return alert("同じ名前は不可");
+const sn=$("name5").value.trim()||"ドゥカン";
+if(names.some(n=>!n))return alert("全キャラ名前を入力");const allN=[...names,sn];if(new Set(allN).size!==5)return alert("同じ名前は不可");
 if(game&&(game.characters.length||(game.kills||0)>0)&&!confirm("既存データを上書きして新規パーティを作成しますか？"))return;
-game=newGame();game.settings.showDamage=$("showDamage").checked;game.characters=names.map((n,idx)=>makeChar("c"+(idx+1),idx+1,n,jobs[idx]));saveGame();renderAreas();switchTab("party");}
+game=newGame();game.settings.showDamage=$("showDamage").checked;game.characters=names.map((n,idx)=>makeChar("c"+(idx+1),idx+1,n,jobs[idx]));game.smith=newSmith(sn);saveGame();renderAreas();switchTab("party");}
 
 function weaponTypeOf(c){const uid=(c.equip||[]).find(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot==="weapon";});const it=game.inv.find(x=>x.uid===uid);return it?it.type:null;}
 function startBattle(enemyArr){stopAuto();if(!game||game.characters.length<2){alert("先にキャラ作成");return;}
@@ -378,7 +521,7 @@ const mpCost=(s,c)=>Math.floor((s.mp||0)*((c.flags&&c.flags.mpReduce)?0.8:1));
 const hitCh=(a,d,m=0)=>clamp(75+a.stats.hit-d.stats.eva+m,20,98);
 function condPct(m,stat){if(!m||m.hp<=0||m.maxHp<=0)return 0;const r=m.hp/m.maxHp;let p=0;
 (m.refSkills||[]).forEach(s=>{if(!s||s.ty!=="P"||s.k!=="stat"||!s.cond||s.stat!==stat)return;
-if((s.cond==="hp50"&&r<.5)||(s.cond==="hp30"&&r<.3)||(s.cond==="hp20"&&r<.2))p+=s.pct;});return p;}
+if((s.cond==="hp50"&&r<.5)||(s.cond==="hp30"&&r<.3)||(s.cond==="hp20"&&r<..2))p+=s.pct;});return p;}
 function dealDamage(t,amt){if(t.shield>0&&t.shieldPct>=100){t.shield--;log(`${t.name}の身代わりの影が攻撃を弾いた。`);return 0;}
 if(t.guard>0)amt=Math.floor(amt*.5);if(t.shield>0)amt=Math.floor(amt*(1-t.shieldPct/100));if(t.states.vulnerable)amt=Math.floor(amt*1.1);if(t.states.broken)amt=Math.floor(amt*1.3);
 if(t.type==="char"){const dp=condPct(t,"def");if(dp>0)amt=Math.floor(amt*(1-dp/100));}
@@ -390,10 +533,11 @@ const bj=BASE_OF[c.jobId]||c.jobId;if(JOB_TEXT[bj]&&Math.random()<.6)return pick
 return pick(TEXT.phys);}
 function attack(c,t,opt={}){if(!t||t.hp<=0)return;for(let i=0;i<(opt.hits||1);i++){if(t.hp<=0)break;
 const blind=c.states.blind?-25:0;
-if(Math.random()*100>=hitCh(c,t,(opt.hm||0)+blind)+(c.flags.enemyHit||0)){log(fill(pick(TEXT.miss),{a:c.name,e:t.name}));showDmg(`→ ${t.name}は回避した。`);continue;}
+if(Math.random()*100>=hitCh(c,t,opt.hm||0)+blind){log(fill(pick(TEXT.miss),{a:c.name,e:t.name}));showDmg(`→ ${t.name}は回避した。`);continue;}
 let atk=opt.mg?c.stats.matk:c.stats.atk;if(c.chant>0){atk=Math.floor(atk*(1+c.chant/100));c.chant=0;}
 const cp=condPct(c,opt.mg?"matk":"atk");if(cp>0)atk=Math.floor(atk*(1+cp/100));
 let def=opt.mg?t.stats.mdef:t.stats.def;def=Math.floor(def*(1-((opt.pen||0)+(c.flags.defPen||0))/100));
+if(t.states.defdown)def=Math.floor(def*.85);
 let dmg=Math.max(1,Math.floor(atk*(opt.power||100)/100-def*.5+Math.random()*5));
 let em=1;if(opt.el&&t.type==="enemy"){const re=RACE_ELEM[t.race]||{};if(re.weak===opt.el)em=1.5+(c.flags.elemPow||0)/100;else if(re.resist===opt.el)em=.5;}
 dmg=Math.floor(dmg*em);
@@ -404,7 +548,7 @@ const dealt=dealDamage(t,dmg);addBreak(t,opt.brk);
 log(fill(crit?pick(TEXT.crit):pickAttackText(c,opt),{a:c.name,e:t.name}));
 const extra=em>1?` <span class="eff">効果あり！</span>`:em<1?` <span class="res">耐性…</span>`:"";
 showDmg(`→ ${t.name}に${dealt}ダメージ${crit?"（会心）":""}${extra}`);
-if(opt.st&&t.hp>0&&Math.random()*100<80+(c.flags.debHit||0)){t.states[opt.st]={turns:3};log(fill(pick(TEXT.status),{e:t.name}))+`（${ST_NM[opt.st]}）`;}
+if(opt.st&&t.hp>0&&Math.random()*100<80+(c.flags.debHit||0)){t.states[opt.st]={turns:3};log(fill(pick(TEXT.status),{e:t.name})+` <span class="skd">${ST_NM[opt.st]}を付与！</span>`);}
 if(t.hp<=0&&t.type==="enemy")log(`<span class="gold">${t.name}を倒した！</span>`);}}
 function applyMod(t,stat,pctV,turns){if(!t||!t.stats)return;const mult=1+pctV/100;t.stats[stat]=Math.max(1,Math.floor(t.stats[stat]*mult));(t.timers=t.timers||[]).push({stat,mult,turns:turns||3});}
 function useSkill(c,s){const cost=mpCost(s,c);c.mp-=cost;
@@ -418,7 +562,7 @@ case"heal":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[lowestAlly()
 case"revive":{const d=battle.party.find(m=>m.hp<=0);if(d){d.hp=Math.floor(d.maxHp*(s.pw||30)/100);log(`${c.name}の祈りが${d.name}の意識を呼び戻す。`);}else log("蘇生の対象がいない。");break;}
 case"buff":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[c];const pw=Math.floor(s.pct*(1+(c.flags.buffPow||0)/100));tg.forEach(t=>applyMod(t,s.stat,pw,s.tn));log(fill(pick(TEXT.buff),{a:c.name}));break;}
 case"debuff":{const list=s.tg==="all"?aliveE():[pickE()].filter(Boolean);list.forEach(t=>{if(Math.random()*100<85+(c.flags.debHit||0)){applyMod(t,s.stat,-s.pct,s.tn||3);log(fill(pick(TEXT.debuff),{a:c.name,e:t.name}));}else log(`${t.name}は妨害に耐えきった。`);});break;}
-case"status":{const t=pickE();if(t){if(Math.random()*100<85+(c.flags.debHit||0)){t.states[s.st]={turns:3};log(fill(pick(TEXT.status),{e:t.name}))+`（${ST_NM[s.st]}）`;}else log(`${t.name}は状態異常に耐えきった。`);}break;}
+case"status":{const t=pickE();if(t){if(Math.random()*100<85+(c.flags.debHit||0)){t.states[s.st]={turns:3};log(fill(pick(TEXT.status),{e:t.name})+` <span class="skd">${ST_NM[s.st]}を付与！</span>`);}else log(`${t.name}は状態異常に耐えきった。`);}break;}
 case"guard":c.guard=2;log(fill(pick(TEXT.guard),{a:c.name}));break;
 case"shield":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[lowestAlly()].filter(Boolean);tg.forEach(t=>{t.shield=2;t.shieldPct=s.pct;});log(fill(pick(TEXT.guard),{a:c.name}));break;}
 case"summon":{const cap=1+(c.flags.summonMax||0);if(c.summons.length<cap){c.summons.push({pw:s.pw,turns:s.tn||3});log(fill(pick(TEXT.summon),{a:c.name}));}else log(`${c.name}の従者は上限に達している。`);break;}
@@ -444,8 +588,8 @@ case"lake_dragon":if(Math.random()<.4){battle.party.filter(m=>m.hp>0).forEach(m=
 case"chaos_beast":if(e.hp<e.stats.hp*.5&&!e.enraged){e.enraged=true;e.stats.atk=Math.floor(e.stats.atk*1.3);log(`<span class="ska">◆ ${e.name}の【憤怒】</span> 攻撃力が上昇した！`);return;}break;
 case"king_slime":if(Math.random()<.3){const d=dealDamage(t,Math.max(1,Math.floor(e.stats.atk*.6)));log(`<span class="ska">◆ ${e.name}の【分裂突撃】が${t.name}を襲う！</span>`);showDmg(`→ ${t.name}に${d}ダメージ。`);return;}break;}
 enemyNormal(e,t);}
-function enemyNormal(e,t){const blind=e.states.blind?-25:0;
-if(Math.random()*100>=hitCh(e,t,blind)){log(fill(pick(TEXT.miss),{a:e.name,e:t.name}));showDmg(`→ ${t.name}はかわした。`);return;}
+function enemyNormal(e,t){const blind=e.states.blind?-25:0;const sup=(t.flags&&t.flags.enemyHit)||0;
+if(Math.random()*100>=hitCh(e,t,blind+sup)){log(fill(pick(TEXT.miss),{a:e.name,e:t.name}));showDmg(`→ ${t.name}はかわした。`);return;}
 let dmg=Math.max(1,Math.floor(e.stats.atk-t.stats.def*.5+Math.random()*5));const d=dealDamage(t,dmg);
 log(fill(pick(TEXT.enemy),{a:e.name,t:t.name}));showDmg(`→ ${t.name}に${d}ダメージ。`);}
 function enemyAct(e){if(!e||e.hp<=0)return;
@@ -485,7 +629,10 @@ for(const act of actors){if(!battle.active)break;if(act.hp<=0)continue;
 if(act.type==="char"){if(aliveE().length===0)break;
 if(act.states.stun){log(`${act.name}はしびれて動けない。`);}
 else if(act.states.confuse&&Math.random()<.4){log(`${act.name}は混乱して攻撃の機会を逃した。`);}
-else{const s=chooseAction(act);if(s)useSkill(act,s);else basicAttack(act);
+else{
+const actOnce=()=>{const s=chooseAction(act);if(s)useSkill(act,s);else basicAttack(act);};
+actOnce();
+if((act.flags.extraAct||0)>0&&aliveE().length>0&&Math.random()*100<act.flags.extraAct){log(`<span class="eff">◆ ${act.name}の連撃！</span>`);actOnce();}
 act.summons.forEach(sm=>{const t=pickE();if(t){const d=Math.max(1,Math.floor(act.stats.matk*sm.pw/100*(1+(act.flags.summonPow||0)/100)-t.stats.mdef*.3));t.hp=Math.max(0,t.hp-d);log(`召喚獣が${t.name}を攻撃。`);showDmg(`→ ${d}ダメージ。`);if(t.hp<=0)log(`<span class="gold">${t.name}を倒した！</span>`);}});
 act.summons.forEach(sm=>sm.turns--);act.summons=act.summons.filter(sm=>sm.turns>0);
 battle.combo=Math.min(game.party.comboMax,battle.combo+6);
@@ -509,17 +656,22 @@ $("createBtn").onclick=createParty;
 $("restBtn").onclick=()=>{game.characters.forEach(c=>{const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;});saveGame();renderParty();alert("全回復した。");};
 $("towerViewBtn").onclick=()=>alert("タワー："+game.tower+" 階 / 撃破："+game.kills+" / ボス撃破："+game.bossKills);
 $("respecBtn").onclick=()=>{if(game.gold>=500||(game.items.respec||0)>0){if((game.items.respec||0)>0)game.items.respec--;else game.gold-=500;
-game.characters.forEach(c=>{c.skills=[];c.sp=(c.level-1)+(c.adv?10:0)+(c.reinc||0)*20;});saveGame();renderSkills();renderParty();alert("スキルを全てリセットし、SPを返還した。");}else alert("Gまたは券が不足");};
+game.characters.forEach(c=>{c.skills=[];c.sp=(c.level-1)+(c.adv?10:0)+(c.reinc||0)*20;});
+game.smith.skills=[];game.smith.sp=game.smith.level-1;
+saveGame();renderSkills();renderParty();renderSmith();alert("スキルを全てリセットし、SPを返還した。");}else alert("Gまたは券が不足");};
 $("lmYes").onclick=confirmLearn;$("lmNo").onclick=()=>{pendingLearn=null;$("learnModal").style.display="none";};
 $("speedSel").onchange=e=>{speed=+e.target.value;if(autoTimer){stopAuto();autoTimer=setInterval(()=>{if(battle&&battle.active)playTurn();else stopAuto();},1000/speed);$("autoBtn").textContent="オート停止";}if(battle)renderStatus();};
 $("exploreBtn").onclick=explore;$("bossBtn").onclick=boss;$("towerBtn").onclick=tower;$("raidBtn").onclick=raid;$("turnBtn").onclick=playTurn;$("autoBtn").onclick=toggleAuto;$("stopBtn").onclick=stopAuto;
+$("mineBtn").onclick=()=>doMine(1);$("mine5Btn").onclick=()=>doMine(5);
+$("refineBtn").onclick=refine;$("craftBtn").onclick=craft;
+$("craftMetal").onchange=updateCraftInfo;$("craftType").onchange=updateCraftInfo;
 $("showDamage").onchange=e=>{game.settings.showDamage=e.target.checked;saveGame();};
 $("autoItem").onchange=e=>{game.settings.autoItem=e.target.checked;saveGame();};
 $("saveBtn").onclick=()=>{$("saveMsg").textContent=saveGame()?"セーブした":"失敗";renderSave();};
-$("loadBtn").onclick=()=>{if(loadGame()){$("saveMsg").textContent="ロードした";renderAreas();renderParty();renderSkills();renderSave();}else $("saveMsg").textContent="セーブなし";};
-$("deleteBtn").onclick=()=>{if(!confirm("セーブデータを削除しますか？"))return;storage.del(SAVE_KEY);game=newGame();renderAreas();renderParty();renderSave();};
+$("loadBtn").onclick=()=>{if(loadGame()){$("saveMsg").textContent="ロードした";renderAreas();renderParty();renderSkills();renderSave();renderSmith();}else $("saveMsg").textContent="セーブなし";};
+$("deleteBtn").onclick=()=>{if(!confirm("セーブデータを削除しますか？"))return;storage.del(SAVE_KEY);game=newGame();renderAreas();renderParty();renderSave();renderSmith();};
 $("exportBtn").onclick=()=>{$("saveText").value=exportSave();};
-$("importBtn").onclick=()=>{if(importSave($("saveText").value)){$("saveMsg").textContent="インポート成功";renderAreas();renderParty();renderSkills();renderSave();}else $("saveMsg").textContent="インポート失敗（文字列を確認）";};
+$("importBtn").onclick=()=>{if(importSave($("saveText").value)){$("saveMsg").textContent="インポート成功";renderAreas();renderParty();renderSkills();renderSave();renderSmith();}else $("saveMsg").textContent="インポート失敗（文字列を確認）";};
 renderParty();renderSave();}
 document.addEventListener("DOMContentLoaded",init);
 </script>
