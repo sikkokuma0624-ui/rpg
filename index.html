@@ -20,6 +20,7 @@ label{display:block;font-size:11px;color:#b8c4d0;margin-bottom:4px}
 .check{display:flex;align-items:center;gap:7px;font-size:12px;margin:6px 0}.check input{width:auto}
 .pre{background:#0a0e12;border:1px solid #2c3b4a;border-radius:12px;padding:8px;font-size:10px;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
 .msg{margin:6px 0;font-size:12px;color:#9fe8a8}.gold{color:#ffd76a;font-weight:bold}.eff{color:#7fd7ff}.res{color:#93a1af}.brk{color:#ff9f6a}.aw{color:#e6b3ff}.adv{color:#ffd76a}.rc{color:#7fffd4}
+.ska{color:#ff9f6a;font-weight:bold}.skh{color:#9fe8a8;font-weight:bold}.skb{color:#7fd7ff;font-weight:bold}.skd{color:#e6b3ff;font-weight:bold}.sks{color:#7fffd4;font-weight:bold}.skm{color:#ffd76a;font-weight:bold}
 hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 .bar{height:7px;background:#22303c;border-radius:4px;overflow:hidden;margin:2px 0;min-width:60px}
 .bar i{display:block;height:100%;background:#4caf7d}.bar.mp i{background:#42a5f5}.bar.en i{background:#ef5350}
@@ -37,12 +38,13 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 <button class="tabbtn" data-tab="save">セーブ</button>
 </div>
 
-<section id="tab-create" class="tab active"><h2>キャラ作成（4人/Lv1）</h2><div id="createBoxes"></div><button id="createBtn">4人パーティ作成してセーブ</button></section>
+<section id="tab-create" class="tab"><h2>キャラ作成（4人/Lv1）</h2><div id="createBoxes"></div><button id="createBtn">4人パーティ作成してセーブ</button></section>
 
 <section id="tab-party" class="tab"><h2>パーティ/装備</h2>
 <div class="mini">ゴールド：<span class="gold" id="goldView">0</span> G</div>
 <div id="partyList"></div>
 <div class="two"><button id="restBtn">休憩して全回復</button><button id="towerViewBtn">実績/タワー</button></div>
+<h3>アイテム</h3><div id="itemList"></div>
 <h3>所持装備</h3><div id="invList"></div></section>
 
 <section id="tab-skill" class="tab"><h2>スキル</h2>
@@ -55,7 +57,7 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 <div><label>エリア</label><select id="areaSelect"></select></div>
 <div class="two"><label>速度<select id="speedSel"><option value="1">1x</option><option value="2">2x</option><option value="4">4x</option></select></label>
 <div class="check"><input type="checkbox" id="showDamage" checked><span>ダメージ表示</span></div></div>
-<div class="check"><input type="checkbox" id="autoItem" checked><span>ポーション自動</span></div>
+<div class="check"><input type="checkbox" id="autoItem" checked><span>アイテム自動使用</span></div>
 <div class="three"><button id="exploreBtn">探索</button><button id="bossBtn">ボス</button><button id="towerBtn">タワー</button></div>
 <div class="two"><button id="raidBtn">レイド</button><button id="autoBtn">オート開始</button></div>
 <div class="two"><button id="turnBtn">1ターン</button><button id="stopBtn">停止</button></div>
@@ -74,19 +76,17 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 
 <script>
 "use strict";
-const storage=(()=>{let err="";
-try{localStorage.setItem("__t","1");localStorage.removeItem("__t");
-return{type:"local",err,get:k=>localStorage.getItem(k),set:(k,v)=>localStorage.setItem(k,v),del:k=>localStorage.removeItem(k)};}
-catch(e){err=(e&&e.name||"Error")+":"+(e&&e.message||"");const m={};
-return{type:"memory",err,get:k=>m[k]??null,set:(k,v)=>{m[k]=v},del:k=>{delete m[k]}};}})();
-const SAVE_KEY="text_rpg_v9";
+const storage=(()=>{try{localStorage.setItem("__t","1");localStorage.removeItem("__t");return{type:"local",get:k=>localStorage.getItem(k),set:(k,v)=>localStorage.setItem(k,v),del:k=>localStorage.removeItem(k)};}catch(e){const m={};return{type:"memory",get:k=>m[k]??null,set:(k,v)=>{m[k]=v},del:k=>{delete m[k]}};}})();
+const SAVE_KEY="text_rpg_v8";
 const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const pick=a=>a[Math.floor(Math.random()*a.length)];const rnd=n=>Math.floor(Math.random()*n);
 const fill=(t,p={})=>t.replace(/\{(\w+)\}/g,(_,k)=>p[k]??"");
 const STAT_KEYS=["hp","mp","atk","def","matk","mdef","agi","luk","hit","eva"];
 const STAT_NM={hp:"HP",mp:"MP",atk:"物攻",def:"物防",matk:"魔攻",mdef:"魔防",agi:"素早",luk:"運",hit:"命中",eva:"回避"};
 const ST_NM={poison:"毒",burn:"燃焼",bleed:"出血",confuse:"混乱",blind:"暗闇",stun:"スタン",curse:"呪い",slow:"鈍足",vulnerable:"脆弱",defdown:"防御低下",regen:"再生"};
+const ST_BAD=["poison","burn","bleed","confuse","blind","stun","curse","slow","vulnerable","defdown"];
 const EL_NM={fire:"火",water:"水",wind:"風",earth:"地",light:"光",dark:"闇",none:"無"};
+const SK_CLS={dmg:"ska",drain:"ska",heal:"skh",revive:"skh",cleanse:"skh",buff:"skb",shield:"skb",guard:"skb",debuff:"skd",status:"skd",summon:"sks",chant:"skm",mp:"skm"};
 
 const FLAVOR={
 ss01:"剣と盾の基礎を鍛える。",ss02:"盾が身体の一部となる。",ss03:"盾で打ちつけ敵の注意を引く。",ss04:"守りを固め攻撃に備える。",ss05:"仲間の前に立ち攻撃を肩代わりする。",ss06:"聖なる光で仲間の守りを強める。",ss07:"窮地でこそ守りは輝く。",ss08:"絶対の聖盾が仲間を包む。",
@@ -180,8 +180,8 @@ reinc_pool:[{id:"rc01",nm:"転生:全ステ+8%",ty:"P",sp:8,lv:1,k:"stat",stat:"
 };
 const SKILL_INDEX={};Object.values(SKILLS).forEach(a=>a.forEach(s=>SKILL_INDEX[s.id]=s));
 
-function flagDesc(fl,v){const m={critRate:`会心率+${v}`,critDmg:`会心威力+${v}`,eva:`回避+${v}`,hit:`命中+${v}`,defPen:`防御無視+${v}%`,healPow:`回復量+${v}%`,extraAct:`追加行動率+${v}%`,double:`通常攻撃が2回`,mpReduce:`MP消費-20%`,summonMax:`召喚数+1`,summonPow:`召喚威力+${v}%`,dmgReduce:`被ダメ-${v}%`,healRecv:`被回復+${v}%`,buffPow:`強化効果+${v}%`,elemPow:`属性威力+${v}%`,enemyHit:`敵命中${v}`,corpse:`撃破時死体カウント`,firstStrike:`先制ダメージ+${v}%`,hpCostPow:`血代償威力+${v}%`};return m[fl]||"";}
-function skillDesc(s){const p=[];p.push(s.ty==="P"?"【被动】常に発動。":"【主动】"+`MP${s.mp||0}消費。`);
+function flagDesc(fl,v){const m={critRate:`会心率+${v}`,critDmg:`会心威力+${v}`,eva:`回避+${v}`,hit:`命中+${v}`,defPen:`防御無視+${v}%`,healPow:`回復量+${v}%`,extraAct:`追加行動率+${v}%`,double:`通常攻撃が2回`,mpReduce:`MP消費-20%`,summonMax:`召喚数+1`,summonPow:`召喚威力+${v}%`,dmgReduce:`被ダメ-${v}%`,healRecv:`被回復+${v}%`,buffPow:`強化効果+${v}%`,elemPow:`属性威力+${v}%`,enemyHit:`敵命中${v}`,corpse:`撃破時死体カウント`,firstStrike:`先制ダメージ+${v}%`,hpCostPow:`血代償威力+${v}%`,debHit:`妨害命中率+${v}`};return m[fl]||"";}
+function skillDesc(s){const p=[];p.push(s.ty==="P"?"【パッシブ】常に発動。":"【アクティブ】MP"+(s.mp||0)+"消費。");
 switch(s.k){case"stat":p.push(`${STAT_NM[s.stat]}+${s.pct}%${s.cond?"(HP低下時発動)":""}。`);break;
 case"flag":p.push(flagDesc(s.fl,s.val)+"。");break;
 case"dmg":p.push(`${s.mg?"魔法":"物理"}攻撃 威力${s.pw}${s.hits>1?`×${s.hits}回`:""}${s.tg==="all"?"(全体)":""}${s.el?` 属性[${EL_NM[s.el]}]`:""}${s.st?` ${ST_NM[s.st]}付与`:""}${s.brk?` ブレイク+${s.brk}`:""}${s.pen?` 防御無視${s.pen}%`:""}。`);break;
@@ -189,12 +189,12 @@ case"drain":p.push(`魔法威力${s.pw}+与ダメの半分を吸収。`);break;
 case"heal":p.push(`HP回復 威力${s.pw}${s.tg==="party"?"(全体)":""}${s.st?" +再生付与":""}。`);break;
 case"revive":p.push(`戦闘不能をHP${s.pw}%で蘇生。`);break;
 case"buff":p.push(`${STAT_NM[s.stat]}+${s.pct}%(${s.tn}T)${s.tg==="party"?" 全体":""}。`);break;
-case"debuff":p.push(`敵の${STAT_NM[s.stat]}-${s.pct}%(${s.tn||3}T)。`);break;
+case"debuff":p.push(`敵の${STAT_NM[s.stat]}-${s.pct}%(${s.tn||3}T)${s.tg==="all"?" 全体":""}。`);break;
 case"status":p.push(`敵に${ST_NM[s.st]||"状態異常"}を付与。`);break;
 case"guard":p.push("ガードし被ダメ軽減・ヘイト上昇。");break;
 case"shield":p.push(`味方に${s.pct}%ダメ軽減シールド(${s.tn}T)${s.tg==="party"?"全体":""}。`);break;
-case"summon":p.push(`召喚獣を呼ぶ(追撃威力${s.pw})。`);break;
-case"chant":p.push(`次の魔法威力+${s.pct}%。`);break;
+case"summon":p.push(`召喚獣を呼ぶ(追撃威力${s.pw}/${s.tn}T)。`);break;
+case"chant":p.push(`次の攻撃威力+${s.pct}%。`);break;
 case"cleanse":p.push("状態異常を解除。");break;
 case"mp":p.push(`MPを${s.pw}回復。`);break;}
 return p.join("");}
@@ -231,8 +231,6 @@ if(k>=50)b.atk+=3;if(k>=200)b.atk+=5;if(bk>=5)b.hp+=5;if(bk>=20)b.hp+=8;if(tw>=1
 function passiveMods(c){const m={pct:{},flat:{},flags:{}};(c.skills||[]).forEach(id=>{const s=SKILL_INDEX[id];if(!s||s.ty!=="P")return;
 if(s.k==="stat"&&!s.cond)m.pct[s.stat]=(m.pct[s.stat]||0)+s.pct;
 if(s.k==="flag"){if(s.fl==="hit"||s.fl==="eva")m.flat[s.fl]=(m.flat[s.fl]||0)+s.val;else m.flags[s.fl]=(m.flags[s.fl]||0)+s.val;}});return m;}
-function condMods(c,r){const m={};(c.skills||[]).forEach(id=>{const s=SKILL_INDEX[id];if(!s||s.ty!=="P"||s.k!=="stat"||!s.cond)return;
-if(s.cond==="hp30"&&r<.3)m[s.stat]=(m[s.stat]||0)+s.pct;if(s.cond==="hp50"&&r<.5)m[s.stat]=(m[s.stat]||0)+s.pct;if(s.cond==="hp20"&&r<.2)m[s.stat]=(m[s.stat]||0)+s.pct;});return m;}
 function setInfo(c){const cnt={},rc={};let maxSer=0;(c.equip||[]).forEach(uid=>{const it=(game.inv||[]).find(x=>x.uid===uid);if(!it)return;
 if(it.series)cnt[it.series]=(cnt[it.series]||0)+1;rc[it.rar]=(rc[it.rar]||0)+1;maxSer=Math.max(maxSer,it.lv);});
 return{sc:Math.max(0,...Object.values(cnt),0),maxSer,sameRar:Math.max(0,...Object.values(rc),0)};}
@@ -254,12 +252,12 @@ function makeEnemy(id,lv){const m=MON_INDEX[id];if(!m)return makeEnemy("slime",l
 const s={hp:Math.round((40+lv*14)*r.hp*scale),mp:20,atk:Math.round((8+lv*2.2)*r.atk),def:Math.round((6+lv*1.6)*r.def),matk:Math.round((6+lv*1.8)*r.matk),mdef:Math.round((6+lv*1.5)*r.mdef),agi:Math.round((6+lv*1.2)*r.agi),luk:Math.round((5+lv)*r.luk),hit:Math.round((8+lv*1.4)*r.hit),eva:Math.round((4+lv*.9)*r.eva)};
 return{id,name:m.nm,race:m.type,type:"enemy",rar:m.rar,level:lv,stats:s};}
 
-function newGame(){return{v:9,settings:{showDamage:true,autoItem:true},party:{combo:0,comboMax:100},characters:[],inv:[],gold:100,items:{potion:2,ether:1},tower:1,kills:0,bossKills:0,flags:{}};}
-function dedupeEquip(){const seen=new Set();(game.characters||[]).forEach(c=>{c.equip=(c.equip||[]).filter(u=>{if(seen.has(u))return false;seen.add(u);return true;});});}
+function newGame(){return{v:8,settings:{showDamage:true,autoItem:true},party:{combo:0,comboMax:100},characters:[],inv:[],gold:100,items:{potion:2,ether:1},tower:1,kills:0,bossKills:0,flags:{}};}
+function normalizeGame(g){g.inv=g.inv||[];g.items=g.items||{};g.gold=g.gold??100;g.tower=g.tower||1;g.kills=g.kills||0;g.bossKills=g.bossKills||0;g.party=g.party||{combo:0,comboMax:100};g.settings=Object.assign({showDamage:true,autoItem:true},g.settings||{});g.characters=g.characters||[];return g;}
 function saveGame(){try{game.updatedAt=new Date().toISOString();storage.set(SAVE_KEY,JSON.stringify(game));return true;}catch(e){return false;}}
-function loadGame(){try{const r=storage.get(SAVE_KEY);if(!r)return false;game=JSON.parse(r);game.inv=game.inv||[];game.items=game.items||{potion:0,ether:1};game.gold=game.gold??100;game.tower=game.tower||1;game.kills=game.kills||0;game.bossKills=game.bossKills||0;game.party=game.party||{combo:0,comboMax:100};dedupeEquip();return true;}catch(e){return false;}}
+function loadGame(){try{const r=storage.get(SAVE_KEY);if(!r)return false;game=normalizeGame(JSON.parse(r));return true;}catch(e){return false;}}
 const exportSave=()=>btoa(unescape(encodeURIComponent(JSON.stringify(game))));
-function importSave(s){try{game=JSON.parse(decodeURIComponent(escape(atob(s.trim()))));game.inv=game.inv||[];game.items=game.items||{};dedupeEquip();saveGame();return true;}catch(e){return false;}}
+function importSave(s){try{game=normalizeGame(JSON.parse(decodeURIComponent(escape(atob(s.trim())))));saveGame();return true;}catch(e){return false;}}
 
 function log(t){const el=$("battleLog");const d=document.createElement("div");d.innerHTML=t;el.appendChild(d);el.scrollTop=el.scrollHeight;}
 const clearLog=()=>$("battleLog").innerHTML="";
@@ -278,15 +276,19 @@ const enhChance=it=>clamp(100-(it.enh||0)*8,30,100);
 const sellVal=it=>Math.floor(10*seriesFor(it.lv)[2]*RARITY[it.rar].mult);
 
 function switchTab(n){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".tabbtn").forEach(b=>b.classList.remove("active"));$("tab-"+n).classList.add("active");document.querySelector(`[data-tab="${n}"]`).classList.add("active");
-if(n==="party")renderParty();if(n==="skill")renderSkills();if(n==="battle")renderStatus();if(n==="save")renderSave();if(n==="shop")renderShop();}
+if(n==="party")renderParty();if(n==="skill")renderSkills();if(n==="battle"){renderAreas();renderStatus();}if(n==="save")renderSave();if(n==="shop")renderShop();}
 function renderGold(){$("goldView").textContent=game.gold;$("goldView2").textContent=game.gold;}
-function renderParty(){renderGold();const el=$("partyList");if(!game.characters.length){el.innerHTML='<div class="card">未作成</div>';$("invList").innerHTML="";return;}
+function renderAreas(){const sel=$("areaSelect");const prev=sel.value;sel.innerHTML="";let firstOk="";
+AREAS.forEach(a=>{const locked=(game.kills||0)<a[7];const o=document.createElement("option");o.value=a[0];
+o.textContent=`${a[1]} Lv${a[2]}-${a[3]}${locked?"（撃破"+a[7]+"必要）":""}`;o.disabled=locked;
+if(!locked&&!firstOk)firstOk=a[0];sel.appendChild(o);});
+const prevOk=prev&&AREAS.find(a=>a[0]===prev&&(game.kills||0)>=a[7]);sel.value=prevOk?prev:firstOk;}
+function renderParty(){renderGold();const el=$("partyList");if(!game.characters.length){el.innerHTML='<div class="card">未作成</div>';$("invList").innerHTML="";renderItems();return;}
 el.innerHTML=game.characters.map((c,i)=>{const t=calcTotal(c);const si=setInfo(c);
-const usedBy={};game.characters.forEach((o,oi)=>{if(oi!==i)(o.equip||[]).forEach(u=>{usedBy[u]=o.name;});});
 const slots=["weapon","sub","armor","accessory"].map(sl=>{const all=(game.inv||[]).filter(it=>it.slot===sl);
 const cur=(c.equip||[]).find(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot===sl;})||"";
-const ok=all.filter(it=>!usedBy[it.uid]&&c.level>=it.lv&&(it.jobs==="all"||it.jobs.includes(c.jobId))).map(o=>`<option value="${o.uid}" ${o.uid===cur?"selected":""}>${o.name}+${o.enh||0}</option>`).join("");
-const ng=all.filter(it=>usedBy[it.uid]||!(c.level>=it.lv&&(it.jobs==="all"||it.jobs.includes(c.jobId)))).map(o=>{const r=[];if(usedBy[o.uid])r.push(usedBy[o.uid]+"装備中");if(c.level<o.lv)r.push("Lv"+o.lv+"必要");if(!(o.jobs==="all"||o.jobs.includes(c.jobId)))r.push("職業違い");return `<option disabled>${o.name}+${o.enh||0}（${r.join("/")}）</option>`;}).join("");
+const ok=all.filter(it=>c.level>=it.lv&&(it.jobs==="all"||it.jobs.includes(c.jobId))).map(o=>`<option value="${o.uid}" ${o.uid===cur?"selected":""}>${o.name}+${o.enh||0}</option>`).join("");
+const ng=all.filter(it=>!(c.level>=it.lv&&(it.jobs==="all"||it.jobs.includes(c.jobId)))).map(o=>{const r=[];if(c.level<o.lv)r.push("Lv"+o.lv+"必要");if(!(o.jobs==="all"||o.jobs.includes(c.jobId)))r.push("職業違い");return `<option disabled>${o.name}+${o.enh||0}（${r.join("/")}）</option>`;}).join("");
 return `<label>${sl}<select data-c="${i}" data-s="${sl}" class="eqsel"><option value="">なし</option>${ok}${ng}</select></label>`;}).join("");
 let btns="";
 if(c.level>=50&&!c.adv&&ADV_MAP[c.jobId])btns+=`<button data-c="${i}" class="promoBtn"><span class="adv">上級職転職：${JOBS[ADV_MAP[c.jobId]].nm}</span></button>`;
@@ -297,14 +299,18 @@ return `<div class="card"><h3>${c.name}</h3><div class="mini">${JOBS[c.jobId].nm
 <div class="mini">物攻${t.atk} 物防${t.def} 魔攻${t.matk} 魔防${t.mdef} 素早${t.agi} 運${t.luk} 命中${t.hit} 回避${t.eva}</div>
 <div class="two">${slots}</div>${btns}</div>`;}).join("");
 document.querySelectorAll(".eqsel").forEach(sel=>sel.addEventListener("change",e=>{const c=game.characters[+e.target.dataset.c];const sl=e.target.dataset.s;const v=e.target.value;
-if(v)game.characters.forEach(o=>{o.equip=(o.equip||[]).filter(u=>u!==v);});
 c.equip=(c.equip||[]).filter(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot!==sl;});if(v)c.equip.push(v);saveGame();renderParty();}));
-document.querySelectorAll(".promoBtn").forEach(b=>b.onclick=e=>{const c=game.characters[+e.target.closest(".card").querySelector(".promoBtn").dataset.c];promote(c);});
-document.querySelectorAll(".reincBtn").forEach(b=>b.onclick=e=>{const c=game.characters[+e.target.closest(".card").querySelector(".reincBtn").dataset.c];reincarnate(c);});
-$("invList").innerHTML=(game.inv||[]).map(it=>`<div class="mini">${it.name}+${it.enh||0} [${RARITY[it.rar].nm}] Lv${it.lv} <button data-e="${it.uid}" class="enhBtn" ${game.gold>=enhCost(it)&&it.enh<10?"":"disabled"}>強化${enhCost(it)}G(${enhChance(it)}%)</button> <button data-e="${it.uid}" class="sellBtn">売${sellVal(it)}G</button></div>`).join("")||'<div class="mini">なし</div>';
-document.querySelectorAll(".enhBtn").forEach(b=>b.onclick=e=>{const it=game.inv.find(x=>x.uid===e.target.dataset.e);const cost=enhCost(it);if(game.gold>=cost&&it.enh<10){game.gold-=cost;
+document.querySelectorAll(".promoBtn").forEach(b=>b.onclick=e=>{promote(game.characters[+e.currentTarget.dataset.c]);});
+document.querySelectorAll(".reincBtn").forEach(b=>b.onclick=e=>{reincarnate(game.characters[+e.currentTarget.dataset.c]);});
+$("invList").innerHTML=(game.inv||[]).map(it=>`<div class="mini">${it.name}+${it.enh||0} [${RARITY[it.rar].nm}] Lv${it.lv} <button data-e="${it.uid}" class="enhBtn" ${game.gold>=enhCost(it)&&(it.enh||0)<10?"":"disabled"}>強化${enhCost(it)}G(${enhChance(it)}%)</button> <button data-e="${it.uid}" class="sellBtn">売${sellVal(it)}G</button></div>`).join("")||'<div class="mini">なし</div>';
+document.querySelectorAll(".enhBtn").forEach(b=>b.onclick=e=>{const it=game.inv.find(x=>x.uid===e.currentTarget.dataset.e);if(!it)return;const cost=enhCost(it);if(game.gold>=cost&&(it.enh||0)<10){game.gold-=cost;
 if(Math.random()*100<enhChance(it)){it.enh=(it.enh||0)+1;alert("強化成功！ +"+it.enh);}else alert("強化失敗…");saveGame();renderParty();}});
-document.querySelectorAll(".sellBtn").forEach(b=>b.onclick=e=>{const it=game.inv.find(x=>x.uid===e.target.dataset.e);game.gold+=sellVal(it);game.inv=game.inv.filter(x=>x.uid!==it.uid);game.characters.forEach(c=>c.equip=(c.equip||[]).filter(u=>u!==it.uid));saveGame();renderParty();});}
+document.querySelectorAll(".sellBtn").forEach(b=>b.onclick=e=>{const it=game.inv.find(x=>x.uid===e.currentTarget.dataset.e);if(!it)return;game.gold+=sellVal(it);game.inv=game.inv.filter(x=>x.uid!==it.uid);game.characters.forEach(c=>c.equip=(c.equip||[]).filter(u=>u!==it.uid));saveGame();renderParty();});
+renderItems();}
+function renderItems(){const nm={potion:"ポーション",ether:"エーテル",elixir:"エリクサー",respec:"リセット券",box:"装備箱"};
+$("itemList").innerHTML='<div class="card">'+Object.entries(nm).map(([k,n])=>`<span class="mini" style="margin-right:12px">${n}：${game.items[k]||0}</span>`).join("")+`<button id="openBoxBtn" ${(game.items.box||0)>0?"":"disabled"}>装備箱を開ける</button><div class="mini">※ポーション/エーテル/エリクサーは戦闘中に自動使用されます</div></div>`;
+$("openBoxBtn").onclick=()=>{if((game.items.box||0)<=0)return;if(!game.characters.length)return alert("先にキャラを作成してください");
+game.items.box--;const c=pick(game.characters);const lv=Math.max(...game.characters.map(x=>x.level));const it=genEquip(lv,c.jobId);game.inv.push(it);saveGame();renderParty();alert(it.name+"（"+RARITY[it.rar].nm+"）を入手！");};}
 function promote(c){const oldJob=c.jobId;const advId=ADV_MAP[oldJob];if(!advId)return;
 const jobIds=(SKILLS[oldJob]||[]).map(s=>s.id);const kept=(c.skills||[]).filter(id=>jobIds.includes(id)).slice(0,3);
 const shared=(c.skills||[]).filter(id=>!jobIds.includes(id));
@@ -315,7 +321,7 @@ const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();
 
 let pendingLearn=null;
 function skillRow(c,i,s){const learned=(c.skills||[]).includes(s.id);const can=!learned&&c.level>=s.lv&&(c.sp||0)>=s.sp;
-return `<div class="mini">${s.nm} [${s.ty==="P"?"被":"主"}] SP${s.sp} Lv${s.lv} ${learned?'<b style="color:#9fe8a8">習得済</b>':`<button data-c="${i}" data-s="${s.id}" class="learnBtn" ${can?"":"disabled"}>習得</button>`}</div>`;}
+return `<div class="mini">${s.nm} [${s.ty==="P"?"P":"A"}] SP${s.sp} Lv${s.lv} ${learned?'<b style="color:#9fe8a8">習得済</b>':`<button data-c="${i}" data-s="${s.id}" class="learnBtn" ${can?"":"disabled"}>習得</button>`}</div>`;}
 function renderSkills(){const el=$("skillList");if(!game.characters.length){el.innerHTML='<div class="card">未作成</div>';return;}
 el.innerHTML=game.characters.map((c,i)=>{let h=`<div class="card"><h3>${c.name}（SP ${c.sp||0}）${c.adv?' <span class="adv">上級</span>':""}${c.reinc?` <span class="rc">転生${c.reinc}</span>`:""}</h3><div class="mini">― 職業 ―</div>`+(SKILLS[c.jobId]||[]).map(s=>skillRow(c,i,s)).join("");
 [["spec_offense","攻撃"],["spec_defense","防御"],["spec_support","支援"],["spec_speed","速度"]].forEach(([k,nm])=>{h+=`<div class="mini"><b>${nm}系統</b></div>`+(SKILLS[k]||[]).map(s=>skillRow(c,i,s)).join("");});
@@ -324,46 +330,58 @@ if(c.adv){const pool=COMBAT_JOBS.has(c.jobId)?"adv_attack":"adv_support";h+=`<hr
 h+=`<div class="mini adv"><b>奥義</b></div>`+(SKILLS["ult_"+c.jobId]||[]).map(s=>skillRow(c,i,s)).join("");}
 if(c.reinc)h+=`<hr><div class="mini rc"><b>転生スキル</b></div>`+(SKILLS.reinc_pool||[]).map(s=>skillRow(c,i,s)).join("");
 return h+"</div>";}).join("");
-document.querySelectorAll(".learnBtn").forEach(b=>b.addEventListener("click",e=>{const c=game.characters[+e.target.dataset.c];const s=SKILL_INDEX[e.target.dataset.s];
+document.querySelectorAll(".learnBtn").forEach(b=>b.addEventListener("click",e=>{const c=game.characters[+e.currentTarget.dataset.c];const s=SKILL_INDEX[e.currentTarget.dataset.s];
 pendingLearn={c,s};$("lmName").textContent=s.nm;$("lmFl").textContent=FLAVOR[s.id]||"";$("lmDesc").textContent=skillDesc(s);$("learnModal").style.display="block";}));}
 function confirmLearn(){if(!pendingLearn)return;const{c,s}=pendingLearn;if(c.level>=s.lv&&(c.sp||0)>=s.sp){c.sp-=s.sp;c.skills=c.skills||[];c.skills.push(s.id);saveGame();renderSkills();renderParty();}
 pendingLearn=null;$("learnModal").style.display="none";}
 
 function renderShop(){renderGold();const items=[["potion","ポーション（HP40%回復）",50],["ether","エーテル（MP40%回復）",60],["elixir","エリクサー（全回復）",300],["respec","スキルリセット券",800],["box","装備箱",200]];
 $("shopList").innerHTML=items.map(([id,nm,pr])=>`<div class="card"><div class="mini">${nm} 所持:${game.items[id]||0}</div><button data-i="${id}" data-p="${pr}" class="buyBtn" ${game.gold>=pr?"":"disabled"}>購入 ${pr}G</button></div>`).join("");
-document.querySelectorAll(".buyBtn").forEach(b=>b.onclick=e=>{const id=e.target.dataset.i,pr=+e.target.dataset.p;if(game.gold>=pr){game.gold-=pr;game.items[id]=(game.items[id]||0)+1;saveGame();renderShop();}});}
-function renderSave(){$("storageType").textContent="保存方式："+storage.type+(storage.err?"（理由："+storage.err+"）":"");$("savePreview").textContent=JSON.stringify(game,null,1).slice(0,2500);}
-function renderStatus(){const el=$("battleStatus");if(!battle){el.innerHTML="戦闘未開始 / タワー階層："+game.tower+" / 撃破："+(game.kills||0);return;}
-el.innerHTML=battle.enemies.map(e=>`<div class="mini"><b>${e.name}</b> Lv${e.level} ${e.hp}/${e.stats.hp} <span class="bw" style="flex:1">${bar(e.hp,e.stats.hp,"en")}</span> <span class="brk">Brk${e.break||0}</span>${e.charge?' <span class="brk">溜め!</span>':""}</div>`).join("")+
-`<div class="mini">連携${battle.combo}/${game.party.comboMax} / 速度${speed}x</div><hr>`+battle.party.map(m=>`<div class="mini bw">${m.name} HP${m.hp}/${m.maxHp} ${bar(m.hp,m.maxHp)} MP${m.mp}/${m.maxMp} ${bar(m.mp,m.maxMp,"mp")}</div>`).join("");}
+document.querySelectorAll(".buyBtn").forEach(b=>b.onclick=e=>{const id=e.currentTarget.dataset.i,pr=+e.currentTarget.dataset.p;if(game.gold>=pr){game.gold-=pr;game.items[id]=(game.items[id]||0)+1;saveGame();renderShop();}});}
+function renderSave(){$("storageType").textContent="保存方式："+storage.type;$("savePreview").textContent=JSON.stringify(game,null,1).slice(0,2500);}
+function statesText(m){const ks=Object.keys(m.states||{});if(!ks.length)return"";return " ["+ks.map(k=>ST_NM[k]||k).join(",")+"]";}
+function renderStatus(){const el=$("battleStatus");if(!battle){el.innerHTML="戦闘未開始 / タワー階層："+game.tower+" / 撃破："+(game.kills||0)+" / ボス撃破："+(game.bossKills||0);return;}
+el.innerHTML=battle.enemies.map(e=>`<div class="mini"><b>${e.name}</b> Lv${e.level} ${e.hp}/${e.stats.hp} <span class="bw" style="flex:1">${bar(e.hp,e.stats.hp,"en")}</span> <span class="brk">Brk${e.break||0}</span>${e.charge?' <span class="brk">溜め!</span>':""}${statesText(e)}</div>`).join("")+
+`<div class="mini">連携${battle.combo}/${game.party.comboMax} / 速度${speed}x / ターン${battle.turn}</div><hr>`+battle.party.map(m=>`<div class="mini bw">${m.name}${m.guard>0?"🛡":""} HP${m.hp}/${m.maxHp} ${bar(m.hp,m.maxHp)} MP${m.mp}/${m.maxMp} ${bar(m.mp,m.maxMp,"mp")}${statesText(m)}</div>`).join("");}
 
 function makeChar(id,slot,name,job){const t=jobStats(job,1);return{id,slot,name,jobId:job,level:1,exp:0,sp:0,skills:[],equip:[],currentHp:t.hp,currentMp:t.mp,adv:false,reinc:0};}
 function createParty(){const names=[],jobs=[];for(let i=1;i<=4;i++){names.push($("name"+i).value.trim());jobs.push($("job"+i).value);}
 if(names.some(n=>!n))return alert("全キャラ名前を入力");if(new Set(names).size!==4)return alert("同じ名前は不可");
-game=newGame();game.settings.showDamage=$("showDamage").checked;game.characters=names.map((n,idx)=>makeChar("c"+(idx+1),idx+1,n,jobs[idx]));saveGame();switchTab("party");}
+if(game&&(game.characters.length||(game.kills||0)>0)&&!confirm("既存データを上書きして新規パーティを作成しますか？"))return;
+game=newGame();game.settings.showDamage=$("showDamage").checked;game.characters=names.map((n,idx)=>makeChar("c"+(idx+1),idx+1,n,jobs[idx]));saveGame();renderAreas();switchTab("party");}
 
 function weaponTypeOf(c){const uid=(c.equip||[]).find(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot==="weapon";});const it=game.inv.find(x=>x.uid===uid);return it?it.type:null;}
 function startBattle(enemyArr){stopAuto();if(!game||game.characters.length<2){alert("先にキャラ作成");return;}
 const comp={tank:game.characters.some(c=>TANK_JOBS.has(c.jobId)),heal:game.characters.some(c=>HEAL_JOBS.has(c.jobId))};
 battle={turn:0,active:true,combo:game.party.combo||0,comp,
-enemies:enemyArr.map(e=>Object.assign(e,{hp:e.stats.hp,states:{},break:0,charge:false,enraged:false,healed:false})),
+enemies:enemyArr.map(e=>Object.assign(e,{hp:e.stats.hp,states:{},break:0,charge:false,enraged:false,healed:false,timers:[]})),
 party:game.characters.map(c=>{const t=calcTotal(c);if(comp.tank)t.def=Math.floor(t.def*1.1);if(comp.heal)t.mdef=Math.floor(t.mdef*1.1);
-return{ref:c.id,name:c.name,jobId:c.jobId,weaponType:weaponTypeOf(c),stats:t,flags:t._flags||{},hp:c.currentHp??t.hp,mp:c.currentMp??t.mp,maxHp:t.hp,maxMp:t.mp,states:{},guard:0,shield:0,shieldPct:0,chant:0,summons:[],type:"char"};})};
+return{ref:c.id,name:c.name,jobId:c.jobId,weaponType:weaponTypeOf(c),stats:t,flags:t._flags||{},
+refSkills:(c.skills||[]).map(id=>SKILL_INDEX[id]).filter(Boolean),timers:[],
+hp:c.currentHp??t.hp,mp:c.currentMp??t.mp,maxHp:t.hp,maxMp:t.mp,states:{},guard:0,shield:0,shieldPct:0,chant:0,summons:[],type:"char"};})};
 clearLog();log(`=== ${battle.enemies.map(e=>e.name).join(" / ")} が現れた。 ===`);
 if(comp.tank)log("編成ボーナス：全体物防+10%");if(comp.heal)log("編成ボーナス：全体魔防+10%");
 battle.enemies.forEach(e=>{const re=RACE_ELEM[e.race]||{};if(re.weak)log(`${e.name} 弱点：<span class="eff">${EL_NM[re.weak]}</span>`);});renderStatus();}
 const aliveE=()=>battle.enemies.filter(e=>e.hp>0);
 const pickE=()=>{const a=aliveE();return a.length?a[rnd(a.length)]:null;};
-function explore(){const a=AREAS.find(x=>x[0]===$("areaSelect").value);const lv=a[2]+rnd(a[3]-a[2]+1);startBattle([makeEnemy(Math.random()<.15?a[5]:pick(a[4]),lv)]);if(battle)battle.mode="explore";}
-function boss(){const a=AREAS.find(x=>x[0]===$("areaSelect").value);if(!a[6])return alert("ボスなし");startBattle([makeEnemy(a[6],a[3])]);if(battle)battle.mode="boss";}
+function explore(){const a=AREAS.find(x=>x[0]===$("areaSelect").value);if(!a)return;
+if((game.kills||0)<a[7])return alert("このエリアはまだ解放されていない（撃破"+a[7]+"体必要）");
+const lv=a[2]+rnd(a[3]-a[2]+1);startBattle([makeEnemy(Math.random()<.15?a[5]:pick(a[4]),lv)]);if(battle)battle.mode="explore";}
+function boss(){const a=AREAS.find(x=>x[0]===$("areaSelect").value);if(!a)return;
+if((game.kills||0)<a[7])return alert("このエリアはまだ解放されていない");
+if(!a[6])return alert("ボスなし");startBattle([makeEnemy(a[6],a[3])]);if(battle)battle.mode="boss";}
 function tower(){const lv=5+game.tower*3;startBattle([makeEnemy(pick(["stone_golem","death_knight","dragon_whelp","void_watcher","shadow_wraith","star_beast"]),lv)]);if(battle)battle.tower=true;}
 function raid(){const n=2+(Math.random()<.5?0:1);const lv=50+rnd(40);const pool=["gargoyle","death_knight","chimera","lake_dragon","chaos_beast","dragon_whelp","void_watcher"];
 const arr=[];for(let i=0;i<n;i++)arr.push(makeEnemy(pick(pool),lv));startBattle(arr);if(battle)battle.raid=true;}
 function lowestAlly(){return battle.party.filter(m=>m.hp>0).sort((x,y)=>x.hp/x.maxHp-y.hp/y.maxHp)[0];}
-const mpCost=(s,c)=>Math.floor((s.mp||0)*(c.flags.mpReduce?.8:1));
+const mpCost=(s,c)=>Math.floor((s.mp||0)*((c.flags&&c.flags.mpReduce)?0.8:1));
 const hitCh=(a,d,m=0)=>clamp(75+a.stats.hit-d.stats.eva+m,20,98);
+function condPct(m,stat){if(!m||m.hp<=0||m.maxHp<=0)return 0;const r=m.hp/m.maxHp;let p=0;
+(m.refSkills||[]).forEach(s=>{if(!s||s.ty!=="P"||s.k!=="stat"||!s.cond||s.stat!==stat)return;
+if((s.cond==="hp50"&&r<.5)||(s.cond==="hp30"&&r<.3)||(s.cond==="hp20"&&r<.2))p+=s.pct;});return p;}
 function dealDamage(t,amt){if(t.shield>0&&t.shieldPct>=100){t.shield--;log(`${t.name}の身代わりの影が攻撃を弾いた。`);return 0;}
 if(t.guard>0)amt=Math.floor(amt*.5);if(t.shield>0)amt=Math.floor(amt*(1-t.shieldPct/100));if(t.states.vulnerable)amt=Math.floor(amt*1.1);if(t.states.broken)amt=Math.floor(amt*1.3);
+if(t.type==="char"){const dp=condPct(t,"def");if(dp>0)amt=Math.floor(amt*(1-dp/100));}
 if(t.flags&&t.flags.dmgReduce)amt=Math.floor(amt*(1-t.flags.dmgReduce/100));t.hp=Math.max(0,t.hp-amt);return amt;}
 function addBreak(e,v){if(!v||e.type!=="enemy")return;e.break=(e.break||0)+v;if(e.break>=100){e.break=0;e.states.broken={turns:2};log(`<span class="brk">=== ${e.name}は体勢を崩した！ ===</span>`);}}
 function pickAttackText(c,opt){if(opt.mg)return pick(TEXT.magic);
@@ -371,33 +389,41 @@ const wt=c.weaponType;if(wt&&WEAPON_TEXT[wt]&&Math.random()<.5)return pick(WEAPO
 const bj=BASE_OF[c.jobId]||c.jobId;if(JOB_TEXT[bj]&&Math.random()<.6)return pick(JOB_TEXT[bj]);
 return pick(TEXT.phys);}
 function attack(c,t,opt={}){if(!t||t.hp<=0)return;for(let i=0;i<(opt.hits||1);i++){if(t.hp<=0)break;
-if(Math.random()*100>=hitCh(c,t,opt.hm||0)+(c.flags.enemyHit||0)){log(fill(pick(TEXT.miss),{a:c.name,e:t.name}));showDmg(`→ ${t.name}は回避した。`);continue;}
+const blind=c.states.blind?-25:0;
+if(Math.random()*100>=hitCh(c,t,(opt.hm||0)+blind)+(c.flags.enemyHit||0)){log(fill(pick(TEXT.miss),{a:c.name,e:t.name}));showDmg(`→ ${t.name}は回避した。`);continue;}
 let atk=opt.mg?c.stats.matk:c.stats.atk;if(c.chant>0){atk=Math.floor(atk*(1+c.chant/100));c.chant=0;}
+const cp=condPct(c,opt.mg?"matk":"atk");if(cp>0)atk=Math.floor(atk*(1+cp/100));
 let def=opt.mg?t.stats.mdef:t.stats.def;def=Math.floor(def*(1-((opt.pen||0)+(c.flags.defPen||0))/100));
 let dmg=Math.max(1,Math.floor(atk*(opt.power||100)/100-def*.5+Math.random()*5));
 let em=1;if(opt.el&&t.type==="enemy"){const re=RACE_ELEM[t.race]||{};if(re.weak===opt.el)em=1.5+(c.flags.elemPow||0)/100;else if(re.resist===opt.el)em=.5;}
 dmg=Math.floor(dmg*em);
+if(c.states.curse)dmg=Math.floor(dmg*.85);
+if(battle&&battle.turn===1&&c.flags.firstStrike)dmg=Math.floor(dmg*(1+c.flags.firstStrike/100));
 const critCh=c.stats.luk/4+(c.flags.critRate||0)+(opt.crit||0);const crit=Math.random()*100<critCh;if(crit)dmg=Math.floor(dmg*(1.5+(c.flags.critDmg||0)/100));
 const dealt=dealDamage(t,dmg);addBreak(t,opt.brk);
 log(fill(crit?pick(TEXT.crit):pickAttackText(c,opt),{a:c.name,e:t.name}));
 const extra=em>1?` <span class="eff">効果あり！</span>`:em<1?` <span class="res">耐性…</span>`:"";
 showDmg(`→ ${t.name}に${dealt}ダメージ${crit?"（会心）":""}${extra}`);
-if(opt.st&&t.hp>0&&Math.random()<.8){t.states[opt.st]={turns:3};log(fill(pick(TEXT.status),{e:t.name}));}}}
-function useSkill(c,s){c.mp-=mpCost(s,c);
-if(s.hpCost){const cost=Math.floor(c.maxHp*s.hpCost/100);c.hp=Math.max(1,c.hp-cost);log(`${c.name}は自らの血を代償に力を解放する。`);}
+if(opt.st&&t.hp>0&&Math.random()*100<80+(c.flags.debHit||0)){t.states[opt.st]={turns:3};log(fill(pick(TEXT.status),{e:t.name}))+`（${ST_NM[opt.st]}）`;}
+if(t.hp<=0&&t.type==="enemy")log(`<span class="gold">${t.name}を倒した！</span>`);}}
+function applyMod(t,stat,pctV,turns){if(!t||!t.stats)return;const mult=1+pctV/100;t.stats[stat]=Math.max(1,Math.floor(t.stats[stat]*mult));(t.timers=t.timers||[]).push({stat,mult,turns:turns||3});}
+function useSkill(c,s){const cost=mpCost(s,c);c.mp-=cost;
+log(`<span class="${SK_CLS[s.k]||"skb"}">◆ ${c.name}の【${s.nm}】</span>${cost>0?` <span class="res">MP${cost}</span>`:""}`);
+if(s.hpCost){const cost2=Math.floor(c.maxHp*s.hpCost/100);c.hp=Math.max(1,c.hp-cost2);log(`${c.name}は自らの血を代償に力を解放する。`);}
 switch(s.k){
-case"dmg":case"drain":{const targets=s.tg==="all"?aliveE():[pickE()];targets.forEach(t=>attack(c,t,{power:s.pw,hits:s.hits,mg:s.mg,hm:s.hm,crit:s.crit,pen:s.pen,st:s.st,el:s.el,brk:s.brk}));
+case"dmg":case"drain":{let pw=s.pw||100;if(s.hpCost&&c.flags.hpCostPow)pw=Math.floor(pw*(1+c.flags.hpCostPow/100));
+const targets=s.tg==="all"?aliveE():[pickE()].filter(Boolean);targets.forEach(t=>attack(c,t,{power:pw,hits:s.hits,mg:s.mg,hm:s.hm,crit:s.crit,pen:s.pen,st:s.st,el:s.el,brk:s.brk}));
 if(s.k==="drain"){const h=Math.floor(c.stats.matk*.5);c.hp=Math.min(c.maxHp,c.hp+h);showDmg(`→ ${c.name}のHPが${h}回復。`);}break;}
-case"heal":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[lowestAlly()].filter(Boolean);tg.forEach(t=>{const h=Math.floor(c.stats.matk*(s.pw||100)/100*(1+(c.flags.healPow||0)/100)*(1+(t.flags.healRecv||0)/100));t.hp=Math.min(t.maxHp,t.hp+h);log(fill(pick(TEXT.heal),{a:c.name,t:t.name}));showDmg(`→ ${t.name}のHPが${h}回復。`);});break;}
-case"revive":{const d=battle.party.find(m=>m.hp<=0);if(d){d.hp=Math.floor(d.maxHp*(s.pw||30)/100);log(`${c.name}の祈りが${d.name}の意識を呼び戻す。`);}break;}
-case"buff":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[c];tg.forEach(t=>t.stats[s.stat]=Math.floor(t.stats[s.stat]*(1+s.pct/100)));log(fill(pick(TEXT.buff),{a:c.name}));break;}
-case"debuff":{const t=pickE();if(t){t.stats[s.stat]=Math.floor(t.stats[s.stat]*(1-s.pct/100));log(fill(pick(TEXT.debuff),{a:c.name,e:t.name}));}break;}
-case"status":{const t=pickE();if(t){t.states[s.st]={turns:2};log(fill(pick(TEXT.status),{e:t.name}));}break;}
+case"heal":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[lowestAlly()].filter(Boolean);tg.forEach(t=>{const h=Math.floor(c.stats.matk*(s.pw||100)/100*(1+(c.flags.healPow||0)/100)*(1+(t.flags.healRecv||0)/100));t.hp=Math.min(t.maxHp,t.hp+h);if(s.st==="regen")t.states.regen={turns:3};log(fill(pick(TEXT.heal),{a:c.name,t:t.name}));showDmg(`→ ${t.name}のHPが${h}回復。`);});break;}
+case"revive":{const d=battle.party.find(m=>m.hp<=0);if(d){d.hp=Math.floor(d.maxHp*(s.pw||30)/100);log(`${c.name}の祈りが${d.name}の意識を呼び戻す。`);}else log("蘇生の対象がいない。");break;}
+case"buff":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[c];const pw=Math.floor(s.pct*(1+(c.flags.buffPow||0)/100));tg.forEach(t=>applyMod(t,s.stat,pw,s.tn));log(fill(pick(TEXT.buff),{a:c.name}));break;}
+case"debuff":{const list=s.tg==="all"?aliveE():[pickE()].filter(Boolean);list.forEach(t=>{if(Math.random()*100<85+(c.flags.debHit||0)){applyMod(t,s.stat,-s.pct,s.tn||3);log(fill(pick(TEXT.debuff),{a:c.name,e:t.name}));}else log(`${t.name}は妨害に耐えきった。`);});break;}
+case"status":{const t=pickE();if(t){if(Math.random()*100<85+(c.flags.debHit||0)){t.states[s.st]={turns:3};log(fill(pick(TEXT.status),{e:t.name}))+`（${ST_NM[s.st]}）`;}else log(`${t.name}は状態異常に耐えきった。`);}break;}
 case"guard":c.guard=2;log(fill(pick(TEXT.guard),{a:c.name}));break;
 case"shield":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[lowestAlly()].filter(Boolean);tg.forEach(t=>{t.shield=2;t.shieldPct=s.pct;});log(fill(pick(TEXT.guard),{a:c.name}));break;}
-case"summon":if(c.summons.length<(1+(c.flags.summonMax||0)))c.summons.push({pw:s.pw,turns:s.tn});log(fill(pick(TEXT.summon),{a:c.name}));break;
-case"chant":{const t=s.tg==="ally"?lowestAlly():c;if(t)t.chant=(t.chant||0)+s.pct;log(`${c.name}が力を込める。`);break;}
-case"cleanse":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[lowestAlly()].filter(Boolean);tg.forEach(t=>t.states={});log(`${c.name}が清らかな光で仲間を包む。`);break;}
+case"summon":{const cap=1+(c.flags.summonMax||0);if(c.summons.length<cap){c.summons.push({pw:s.pw,turns:s.tn||3});log(fill(pick(TEXT.summon),{a:c.name}));}else log(`${c.name}の従者は上限に達している。`);break;}
+case"chant":{const t=s.tg==="ally"?lowestAlly():c;if(t)t.chant=(t.chant||0)+s.pct;log(`${c.name}が力を込める。次の威力+${s.pct}%。`);break;}
+case"cleanse":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[lowestAlly()].filter(Boolean);tg.forEach(t=>{Object.keys(t.states).forEach(k=>{if(ST_BAD.includes(k))delete t.states[k];});});log(`${c.name}が清らかな光で仲間を包む。`);break;}
 case"mp":{const tg=s.tg==="party"?battle.party.filter(m=>m.hp>0):[lowestAlly()].filter(Boolean);tg.forEach(t=>t.mp=Math.min(t.maxMp,t.mp+s.pw));log(`${c.name}が魔力を供給する。`);break;}}}
 function basicAttack(c){const t=pickE();if(!t)return;if(c.flags.double)attack(c,t,{power:60,hits:2,brk:5});else attack(c,t,{power:100,brk:5});}
 function chooseAction(c){const L=(c.refSkills||[]).filter(s=>s.ty==="A");const can=s=>c.mp>=mpCost(s,c);let s;
@@ -406,27 +432,38 @@ const low=lowestAlly();if(low&&low.hp<low.maxHp*.75){s=L.find(x=>x.k==="heal");i
 s=L.find(x=>x.k==="summon");if(s&&can(s)&&c.summons.length<(1+(c.flags.summonMax||0))&&Math.random()<.5)return s;
 s=L.find(x=>x.k==="buff");if(s&&can(s)&&battle.turn%3===1)return s;
 s=L.find(x=>x.k==="debuff"||x.k==="status");if(s&&can(s)&&Math.random()<.4)return s;
-s=L.find(x=>x.k==="chant");if(s&&can(s)&&Math.random()<.4)return s;
+s=L.find(x=>x.k==="chant");if(s&&can(s)&&c.chant<=0&&Math.random()<.4)return s;
 const d=L.filter(x=>x.k==="dmg"||x.k==="drain");if(d.length&&Math.random()<.7){s=d.reduce((a,b)=>(b.pw||0)>(a.pw||0)?b:a);if(can(s))return s;}return null;}
 function bossAI(e,targets){const t=targets[rnd(targets.length)];
-if(e.charge){e.charge=false;const dmg=Math.max(1,Math.floor(e.stats.atk*2-t.stats.def*.5));const d=dealDamage(t,dmg);log(`<span class="brk">${e.name}の溜め攻撃が${t.name}を打ち砕く！</span>`);showDmg(`→ ${t.name}に${d}ダメージ。`);return;}
+if(e.charge){e.charge=false;const dmg=Math.max(1,Math.floor(e.stats.atk*2-t.stats.def*.5));const d=dealDamage(t,dmg);log(`<span class="ska">◆ ${e.name}の【原初の劫火】が${t.name}を打ち砕く！</span>`);showDmg(`→ ${t.name}に${d}ダメージ。`);return;}
 switch(e.id){
-case"primordial_dragon":if(battle.turn%3===0){e.charge=true;log(`<span class="brk">${e.name}が炎を溜め始めた…！</span>`);return;}break;
-case"cursed_king":if(e.hp<e.stats.hp*.5&&!e.healed){e.healed=true;const h=Math.floor(e.stats.hp*.2);e.hp=Math.min(e.stats.hp,e.hp+h);log(`${e.name}は闇を纏い、傷を再生した。`);return;}
-if(Math.random()<.4){battle.party.filter(m=>m.hp>0).forEach(m=>m.states.curse={turns:3});log(`${e.name}の呪いがパーティを縛る。`);return;}break;
-case"lake_dragon":if(Math.random()<.4){battle.party.filter(m=>m.hp>0).forEach(m=>{const d=dealDamage(m,Math.max(1,Math.floor(e.stats.matk*.8-m.stats.mdef*.4)));m.states.slow={turns:2};showDmg(`→ ${m.name}に${d}水属性ダメージ。`);});log(`${e.name}は濁流を巻き起こした！`);return;}break;
-case"chaos_beast":if(e.hp<e.stats.hp*.5&&!e.enraged){e.enraged=true;e.stats.atk=Math.floor(e.stats.atk*1.3);log(`<span class="brk">${e.name}が憤怒した！</span>`);return;}break;
-case"king_slime":if(Math.random()<.3){const d=dealDamage(t,Math.max(1,Math.floor(e.stats.atk*.6)));log(`${e.name}は分裂しながら${t.name}に飛びかかる！`);showDmg(`→ ${t.name}に${d}ダメージ。`);return;}break;}
+case"primordial_dragon":if(battle.turn%3===0){e.charge=true;log(`<span class="ska">◆ ${e.name}の【劫火の溜息】</span>…炎を溜め始めた！`);return;}break;
+case"cursed_king":if(e.hp<e.stats.hp*.5&&!e.healed){e.healed=true;const h=Math.floor(e.stats.hp*.2);e.hp=Math.min(e.stats.hp,e.hp+h);log(`<span class="skh">◆ ${e.name}の【闇の再生】</span> 傷が癒えていく。`);return;}
+if(Math.random()<.4){battle.party.filter(m=>m.hp>0).forEach(m=>m.states.curse={turns:3});log(`<span class="skd">◆ ${e.name}の【呪縛の嘆き】がパーティを縛る。</span>`);return;}break;
+case"lake_dragon":if(Math.random()<.4){battle.party.filter(m=>m.hp>0).forEach(m=>{const d=dealDamage(m,Math.max(1,Math.floor(e.stats.matk*.8-m.stats.mdef*.4)));m.states.slow={turns:2};showDmg(`→ ${m.name}に${d}水属性ダメージ。`);});log(`<span class="ska">◆ ${e.name}の【濁流大渦】がパーティを呑み込む！</span>`);return;}break;
+case"chaos_beast":if(e.hp<e.stats.hp*.5&&!e.enraged){e.enraged=true;e.stats.atk=Math.floor(e.stats.atk*1.3);log(`<span class="ska">◆ ${e.name}の【憤怒】</span> 攻撃力が上昇した！`);return;}break;
+case"king_slime":if(Math.random()<.3){const d=dealDamage(t,Math.max(1,Math.floor(e.stats.atk*.6)));log(`<span class="ska">◆ ${e.name}の【分裂突撃】が${t.name}を襲う！</span>`);showDmg(`→ ${t.name}に${d}ダメージ。`);return;}break;}
 enemyNormal(e,t);}
-function enemyNormal(e,t){if(Math.random()*100>=hitCh(e,t)){log(fill(pick(TEXT.miss),{a:e.name,e:t.name}));showDmg(`→ ${t.name}はかわした。`);return;}
+function enemyNormal(e,t){const blind=e.states.blind?-25:0;
+if(Math.random()*100>=hitCh(e,t,blind)){log(fill(pick(TEXT.miss),{a:e.name,e:t.name}));showDmg(`→ ${t.name}はかわした。`);return;}
 let dmg=Math.max(1,Math.floor(e.stats.atk-t.stats.def*.5+Math.random()*5));const d=dealDamage(t,dmg);
 log(fill(pick(TEXT.enemy),{a:e.name,t:t.name}));showDmg(`→ ${t.name}に${d}ダメージ。`);}
-function enemyAct(e){if(e.states.broken){log(`${e.name}は崩れた体勢を立て直せない。`);return;}
+function enemyAct(e){if(!e||e.hp<=0)return;
+if(e.states.stun){log(`${e.name}はしびれて動けない。`);return;}
+if(e.states.confuse&&Math.random()<.4){log(`${e.name}は混乱し、さまよっている。`);return;}
+if(e.states.broken){log(`${e.name}は崩れた体勢を立て直せない。`);return;}
 const tg=battle.party.filter(m=>m.hp>0);if(!tg.length)return;
 if(e.rar==="boss"||e.rar==="rare")bossAI(e,tg);else enemyNormal(e,tg[rnd(tg.length)]);}
-function tickStates(m){const s=m.states;if(!s)return;["poison","burn","bleed"].forEach(k=>{if(s[k]&&m.hp>0){const d=Math.max(1,Math.floor(m.maxHp*.05));m.hp=Math.max(0,m.hp-d);showDmg(`→ ${m.name}は${k}で${d}ダメージ。`);}});
-if(s.regen&&m.hp>0){const h=Math.floor(m.maxHp*.06);m.hp=Math.min(m.maxHp,m.hp+h);}Object.keys(s).forEach(k=>{s[k].turns--;if(s[k].turns<=0)delete s[k];});}
-function autoItems(){if(!game.settings.autoItem)return;battle.party.forEach(m=>{if(m.hp>0&&m.hp<m.maxHp*.4&&(game.items.potion||0)>0){game.items.potion--;const h=Math.floor(m.maxHp*.4);m.hp=Math.min(m.maxHp,m.hp+h);log(`${m.name}はポーションを飲み干した。`);showDmg(`→ HP${h}回復。`);}});}
+function tickStates(m){const s=m.states;if(!s)return;const mx=m.maxHp||(m.stats?m.stats.hp:m.hp)||1;
+["poison","burn","bleed"].forEach(k=>{if(s[k]&&m.hp>0){const d=Math.max(1,Math.floor(mx*.05));m.hp=Math.max(0,m.hp-d);showDmg(`→ ${m.name}は${ST_NM[k]}で${d}ダメージ。`);}});
+if(s.regen&&m.hp>0){const h=Math.floor(mx*.06);m.hp=Math.min(mx,m.hp+h);}
+Object.keys(s).forEach(k=>{s[k].turns--;if(s[k].turns<=0)delete s[k];});
+if(m.timers&&m.timers.length){m.timers.forEach(tm=>{tm.turns--;if(tm.turns<=0&&m.stats){m.stats[tm.stat]=Math.max(1,Math.floor(m.stats[tm.stat]/tm.mult));log(`${m.name}の${STAT_NM[tm.stat]}変化が解けた。`);}});m.timers=m.timers.filter(tm=>tm.turns>0);}}
+function autoItems(){if(!game.settings.autoItem)return;
+battle.party.forEach(m=>{if(m.hp<=0)return;
+if(m.hp<m.maxHp*.4&&(game.items.potion||0)>0){game.items.potion--;const h=Math.floor(m.maxHp*.4);m.hp=Math.min(m.maxHp,m.hp+h);log(`${m.name}はポーションを飲み干した。`);showDmg(`→ HP${h}回復。`);}
+else if(m.hp<m.maxHp*.25&&(game.items.elixir||0)>0){game.items.elixir--;m.hp=m.maxHp;m.mp=m.maxMp;log(`${m.name}はエリクサーを使用した。完全回復！`);}});
+battle.party.forEach(m=>{if(m.hp>0&&m.mp<m.maxMp*.3&&(game.items.ether||0)>0&&m.maxMp>=35){game.items.ether--;const r=Math.floor(m.maxMp*.4);m.mp=Math.min(m.maxMp,m.mp+r);log(`${m.name}はエーテルを飲んだ。`);showDmg(`→ MP${r}回復。`);}});}
 function checkEnd(){if(!battle||!battle.active)return true;
 if(aliveE().length===0){battle.active=false;stopAuto();victory();return true;}
 if(battle.party.every(m=>m.hp<=0)){battle.active=false;stopAuto();log("パーティは力尽きた……かろうじて離脱する。");sync();return true;}return false;}
@@ -438,21 +475,24 @@ game.gold+=gold;log(`→ 経験値${exp} / <span class="gold">${gold}G</span> �
 battle.party.forEach(m=>{const c=game.characters.find(x=>x.id===m.ref);if(c){gainExp(c,exp);c.currentHp=Math.max(1,m.hp);c.currentMp=Math.max(0,m.mp);}});
 if(battle.tower){game.tower++;log(`→ タワー ${game.tower} 階へ進んだ。`);}
 const area=AREAS.find(a=>a[0]===$("areaSelect").value);
-for(let i=0;i<cnt;i++){if(Math.random()*100<25+battle.party[0].stats.luk/2){const it=genEquip(area?area[7]:maxLv,pick(game.characters).jobId);game.inv.push(it);log(`→ ${it.name} を入手！`);}}
-game.party.combo=battle.combo;saveGame();renderParty();renderStatus();}
+const dropLv=(battle.tower||battle.raid)?maxLv:(area?area[7]:maxLv);
+for(let i=0;i<cnt;i++){if(Math.random()*100<25+battle.party[0].stats.luk/2){const it=genEquip(dropLv,pick(game.characters).jobId);game.inv.push(it);log(`→ ${it.name}（${RARITY[it.rar].nm}）を入手！`);}}
+game.party.combo=battle.combo;saveGame();renderParty();renderAreas();renderStatus();}
 function sync(){battle.party.forEach(m=>{const c=game.characters.find(x=>x.id===m.ref);if(c){c.currentHp=Math.max(1,m.hp);c.currentMp=Math.max(0,m.mp);}});saveGame();renderParty();renderStatus();}
 function playTurn(){if(!battle||!battle.active)return;if(checkEnd())return;battle.turn++;log(`--- ターン${battle.turn} ---`);autoItems();
-const actors=[...battle.party.filter(m=>m.hp>0),...aliveE()].map(a=>({a,v:a.stats.agi+rnd(6)})).sort((x,y)=>y.v-x.v).map(x=>x.a);
+const actors=[...battle.party.filter(m=>m.hp>0),...aliveE()].map(a=>({a,v:Math.floor(a.stats.agi*(a.states.slow?0.6:1))+rnd(6)})).sort((x,y)=>y.v-x.v).map(x=>x.a);
 for(const act of actors){if(!battle.active)break;if(act.hp<=0)continue;
 if(act.type==="char"){if(aliveE().length===0)break;
-if(act.states.stun){log(`${act.name}はしびれて動けない。`);}else{const c=game.characters.find(x=>x.id===act.ref);act.refSkills=(c.skills||[]).map(id=>SKILL_INDEX[id]).filter(Boolean);
-const s=chooseAction(act);if(s)useSkill(act,s);else basicAttack(act);
-act.summons.forEach(sm=>{const t=pickE();if(t){const d=Math.max(1,Math.floor(act.stats.matk*sm.pw/100*(1+(act.flags.summonPow||0)/100)-t.stats.mdef*.3));t.hp=Math.max(0,t.hp-d);log(`召喚獣が${t.name}を攻撃。`);showDmg(`→ ${d}ダメージ。`);}});
+if(act.states.stun){log(`${act.name}はしびれて動けない。`);}
+else if(act.states.confuse&&Math.random()<.4){log(`${act.name}は混乱して攻撃の機会を逃した。`);}
+else{const s=chooseAction(act);if(s)useSkill(act,s);else basicAttack(act);
+act.summons.forEach(sm=>{const t=pickE();if(t){const d=Math.max(1,Math.floor(act.stats.matk*sm.pw/100*(1+(act.flags.summonPow||0)/100)-t.stats.mdef*.3));t.hp=Math.max(0,t.hp-d);log(`召喚獣が${t.name}を攻撃。`);showDmg(`→ ${d}ダメージ。`);if(t.hp<=0)log(`<span class="gold">${t.name}を倒した！</span>`);}});
+act.summons.forEach(sm=>sm.turns--);act.summons=act.summons.filter(sm=>sm.turns>0);
 battle.combo=Math.min(game.party.comboMax,battle.combo+6);
-if(battle.combo>=game.party.comboMax&&aliveE().length>0){battle.combo=0;log("=== パーティ連携 ===");aliveE().forEach(e=>{const dmg=battle.party.filter(m=>m.hp>0).reduce((s,m)=>s+Math.max(1,Math.floor(m.stats.atk*.5)),0);e.hp=Math.max(0,e.hp-dmg);showDmg(`→ ${e.name}に${dmg}連携ダメージ。`);});log("全員の息が重なり、敵陣を打ち抜く。");}}}
+if(battle.combo>=game.party.comboMax&&aliveE().length>0){battle.combo=0;log(`<span class="skm">=== パーティ連携【共鳴の一撃】 ===</span>`);aliveE().forEach(e=>{const dmg=battle.party.filter(m=>m.hp>0).reduce((s,m)=>s+Math.max(1,Math.floor(m.stats.atk*.5)),0);e.hp=Math.max(0,e.hp-dmg);showDmg(`→ ${e.name}に${dmg}連携ダメージ。`);});log("全員の息が重なり、敵陣を打ち抜く。");}}}
 else enemyAct(act);
 tickStates(act);renderStatus();if(checkEnd())break;}
-battle.party.forEach(m=>{if(m.guard>0)m.guard--;if(m.shield>0)m.shield--;});renderStatus();}
+if(battle&&battle.active){battle.party.forEach(m=>{if(m.guard>0)m.guard--;if(m.shield>0)m.shield--;});renderStatus();}}
 function stopAuto(){if(autoTimer){clearInterval(autoTimer);autoTimer=null;}$("autoBtn").textContent="オート開始";}
 function toggleAuto(){if(!battle||!battle.active)explore();if(!battle||!battle.active)return;if(autoTimer){stopAuto();return;}
 autoTimer=setInterval(()=>{if(battle&&battle.active)playTurn();else stopAuto();},1000/speed);$("autoBtn").textContent="オート停止";}
@@ -460,23 +500,26 @@ autoTimer=setInterval(()=>{if(battle&&battle.active)playTurn();else stopAuto();}
 function init(){
 $("createBoxes").innerHTML=[1,2,3,4].map(i=>`<div class="card"><div class="two"><div><label>キャラ${i}名前</label><input id="name${i}" maxlength="12" value="${["アキラ","ヒスイ","レン","ユキ"][i-1]}"></div><div><label>職業</label><select id="job${i}"></select></div></div></div>`).join("");
 Object.entries(JOBS).forEach(([id,j])=>{if(Object.values(ADV_MAP).includes(id))return;for(let i=1;i<=4;i++){const o=document.createElement("option");o.value=id;o.textContent=j.nm;$("job"+i).appendChild(o);}});
-$("job2").value="healer";AREAS.forEach(a=>{const o=document.createElement("option");o.value=a[0];o.textContent=`${a[1]} Lv${a[2]}-${a[3]}`;$("areaSelect").appendChild(o);});
-if(!loadGame())game=newGame();$("showDamage").checked=!!game.settings.showDamage;$("autoItem").checked=!!game.settings.autoItem;
+$("job2").value="healer";
+if(!loadGame())game=newGame();
+renderAreas();
+$("showDamage").checked=!!game.settings.showDamage;$("autoItem").checked=!!game.settings.autoItem;
 document.querySelectorAll(".tabbtn").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
 $("createBtn").onclick=createParty;
 $("restBtn").onclick=()=>{game.characters.forEach(c=>{const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;});saveGame();renderParty();alert("全回復した。");};
-$("towerViewBtn").onclick=()=>alert("タワー："+game.tower+" / 撃破："+game.kills+" / ボス："+game.bossKills);
-$("respecBtn").onclick=()=>{if(game.gold>=500||(game.items.respec||0)>0){if(game.items.respec>0)game.items.respec--;else game.gold-=500;game.characters.forEach(c=>{const jobIds=(SKILLS[c.jobId]||[]).map(s=>s.id);c.skills=(c.skills||[]).filter(id=>!jobIds.includes(id));c.sp=c.level-1;});saveGame();renderSkills();renderParty();alert("職スキルをリセットした。");}else alert("Gまたは券が不足");};
+$("towerViewBtn").onclick=()=>alert("タワー："+game.tower+" 階 / 撃破："+game.kills+" / ボス撃破："+game.bossKills);
+$("respecBtn").onclick=()=>{if(game.gold>=500||(game.items.respec||0)>0){if((game.items.respec||0)>0)game.items.respec--;else game.gold-=500;
+game.characters.forEach(c=>{c.skills=[];c.sp=(c.level-1)+(c.adv?10:0)+(c.reinc||0)*20;});saveGame();renderSkills();renderParty();alert("スキルを全てリセットし、SPを返還した。");}else alert("Gまたは券が不足");};
 $("lmYes").onclick=confirmLearn;$("lmNo").onclick=()=>{pendingLearn=null;$("learnModal").style.display="none";};
-$("speedSel").onchange=e=>{speed=+e.target.value;renderStatus();if(autoTimer){stopAuto();toggleAuto();}};
+$("speedSel").onchange=e=>{speed=+e.target.value;if(autoTimer){stopAuto();autoTimer=setInterval(()=>{if(battle&&battle.active)playTurn();else stopAuto();},1000/speed);$("autoBtn").textContent="オート停止";}if(battle)renderStatus();};
 $("exploreBtn").onclick=explore;$("bossBtn").onclick=boss;$("towerBtn").onclick=tower;$("raidBtn").onclick=raid;$("turnBtn").onclick=playTurn;$("autoBtn").onclick=toggleAuto;$("stopBtn").onclick=stopAuto;
 $("showDamage").onchange=e=>{game.settings.showDamage=e.target.checked;saveGame();};
 $("autoItem").onchange=e=>{game.settings.autoItem=e.target.checked;saveGame();};
 $("saveBtn").onclick=()=>{$("saveMsg").textContent=saveGame()?"セーブした":"失敗";renderSave();};
-$("loadBtn").onclick=()=>{if(loadGame()){$("saveMsg").textContent="ロードした";renderParty();renderSkills();renderSave();}else $("saveMsg").textContent="セーブなし";};
-$("deleteBtn").onclick=()=>{storage.del(SAVE_KEY);game=newGame();renderParty();renderSave();};
+$("loadBtn").onclick=()=>{if(loadGame()){$("saveMsg").textContent="ロードした";renderAreas();renderParty();renderSkills();renderSave();}else $("saveMsg").textContent="セーブなし";};
+$("deleteBtn").onclick=()=>{if(!confirm("セーブデータを削除しますか？"))return;storage.del(SAVE_KEY);game=newGame();renderAreas();renderParty();renderSave();};
 $("exportBtn").onclick=()=>{$("saveText").value=exportSave();};
-$("importBtn").onclick=()=>{if(importSave($("saveText").value)){$("saveMsg").textContent="インポート成功";renderParty();renderSkills();renderSave();}else $("saveMsg").textContent="失敗";};
+$("importBtn").onclick=()=>{if(importSave($("saveText").value)){$("saveMsg").textContent="インポート成功";renderAreas();renderParty();renderSkills();renderSave();}else $("saveMsg").textContent="インポート失敗（文字列を確認）";};
 renderParty();renderSave();}
 document.addEventListener("DOMContentLoaded",init);
 </script>
