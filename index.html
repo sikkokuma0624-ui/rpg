@@ -25,6 +25,8 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 .bar{height:7px;background:#22303c;border-radius:4px;overflow:hidden;margin:2px 0;min-width:60px}
 .bar i{display:block;height:100%;background:#4caf7d}.bar.mp i{background:#42a5f5}.bar.en i{background:#ef5350}
 .bw{display:flex;align-items:center;gap:6px}
+.selrow{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px}
+.selbtn{padding:8px 2px;font-size:11px}.selbtn.active{background:#35506b}
 </style>
 </head>
 <body>
@@ -52,7 +54,6 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 
 <section id="tab-skill" class="tab"><h2>スキル</h2>
 <div class="two"><button id="respecBtn">スキルリセット（500G）</button></div>
-<div id="learnModal" class="card" style="display:none"><h3 id="lmName"></h3><div class="mini" id="lmFl"></div><div class="mini" id="lmDesc"></div><div class="two"><button id="lmYes">習得する</button><button id="lmNo">やめる</button></div></div>
 <div id="skillList"></div></section>
 
 <section id="tab-battle" class="tab"><h2>戦闘</h2>
@@ -292,6 +293,8 @@ const JOB_TEXT={sword_shield:["{a}は剣と盾の連動で{e}を押し込む。"
 const WEAPON_TEXT={one_hand_sword:["{a}の片手剣が鋭く{e}を突く。","{a}は剣先で{e}のガードを崩す。"],great_sword:["{a}の大剣が唸り、{e}を両断せんと振るわれる。","重い一撃。{a}の大剣が{e}を打ち砕く。"],light_two_hand:["{a}の両手剣が流れるように{e}を斬る。","{a}は剣速で{e}を翻弄する。"],twin_daggers:["{a}の双剣が連続して{e}を刻む。","{a}は刃の雨を{e}へ浴びせる。"],dagger:["{a}の短刀が{e}の隙を突く。","{a}は素早い刺突で{e}を穿つ。"],staff:["{a}の杖先から魔力が{e}へ奔る。","{a}は杖で術式を導き{e}を打つ。"],orb:["{a}の宝玉が輝き、{e}を焼く。","{a}の宝珠が{e}へ魔力を放つ。"],grimoire:["{a}の魔導書が頁をめくり、{e}を呪う。","{a}は書から術を解放し{e}を打つ。"],instrument:["{a}の音色が刃となり{e}を裂く。","{a}の旋律が{e}を切り刻む。"],gun:["{a}の銃口が火を噴き、{e}が跳ねる。","{a}の連射が{e}を穿つ。"],axe:["{a}の戦斧が{e}を叩き割る。","{a}は斧を振り回し{e}を薙ぐ。"],whip:["{a}の鞭が唸り、{e}を打ち据える。","{a}の鞭が{e}の体勢を崩す。"],astrolabe:["{a}の星盤が回転し、{e}へ星力を放つ。","{a}は星を導き{e}を撃つ。"]};
 
 let game=null,battle=null,autoTimer=null,uidSeq=1,speed=1;
+let skillSel=0,openSkill=null;
+const smithUI={mine:"",ore:"",metal:"",type:"",gem:""};
 
 function jobStats(j,lv){const b=JOBS[j].base,g=JOBS[j].g,o={};STAT_KEYS.forEach(k=>o[k]=Math.floor(b[k]+g[k]*(lv-1)));return o;}
 function titleBonus(){const b={atk:0,def:0,hp:0};const k=game.kills||0,bk=game.bossKills||0,tw=game.tower||1;
@@ -384,6 +387,7 @@ const it={uid:"eq"+(uidSeq++)+"_"+(Date.now()%1e5),name:M[1]+"鍛の"+type[2],se
 game.inv.push(it);gainSmithExp(15*M[4]);
 smithLog(`${it.name}（${RARITY[rar].nm}）を鍛造！${great?" 大成功+1！":""}`);
 saveGame();renderSmith();renderParty();}
+function restoreSel(id){const el=$(id);const v=smithUI[id];if(v&&[...el.options].some(o=>o.value===v&&!o.disabled))el.value=v;}
 function renderSmith(){const s=game.smith;const F=smithFlags();
 $("smithStatus").innerHTML=`<div class="mini"><b>${s.name}</b> 鍛冶師 Lv${s.level} / SP${s.sp||0}</div>
 <div class="mini bw">EXP ${s.exp}/${nextExp(s.level)} ${bar(s.exp,nextExp(s.level))}</div>
@@ -398,6 +402,7 @@ $("refineSelect").innerHTML=ORES.map(o=>`<option value="${o[0]}">${o[1]}（${s.o
 $("craftMetal").innerHTML=METALS.map(m=>`<option value="${m[0]}" ${s.level<m[2]?"disabled":""}>${m[1]}インゴット（${s.ingot[m[0]]||0}）Lv${m[2]}〜</option>`).join("");
 if(!$("craftType").options.length)$("craftType").innerHTML=EQ_TYPES.map(t=>`<option value="${t[0]}">${t[2]}（${t[1]==="weapon"?"武器":t[1]==="armor"?"防具":t[1]==="sub"?"サブ":"装飾"}）</option>`).join("");
 $("craftGem").innerHTML=`<option value="">なし</option>`+GEMS.map(g=>`<option value="${g[0]}" ${(s.gem[g[0]]||0)>0?"":"disabled"}>${g[1]}（${s.gem[g[0]]||0}）</option>`).join("");
+restoreSel("mineSelect");restoreSel("refineSelect");restoreSel("craftMetal");restoreSel("craftType");restoreSel("craftGem");
 updateCraftInfo();
 $("smithLog").innerHTML=(game.smithLog||[]).map(t=>`<div>${t}</div>`).join("")||"<div>まだ記録なし</div>";}
 
@@ -460,22 +465,30 @@ const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();
 function reincarnate(c){if(c.level<100||!c.adv||(c.reinc||0)>=5)return;c.reinc=(c.reinc||0)+1;c.level=1;c.exp=0;c.sp=(c.sp||0)+20;
 const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();alert(c.name+"は転生した！（"+c.reinc+"回目）");}
 
-let pendingLearn=null;
-function skillRow(c,i,s){const learned=(c.skills||[]).includes(s.id);const can=!learned&&c.level>=s.lv&&(c.sp||0)>=s.sp;
-return `<div class="mini">${s.nm} [${s.ty==="P"?"P":"A"}] SP${s.sp} Lv${s.lv} ${learned?'<b style="color:#9fe8a8">習得済</b>':`<button data-c="${i}" data-s="${s.id}" class="learnBtn" ${can?"":"disabled"}>習得</button>`}</div>`;}
+function skillRow(c,key,s){const learned=(c.skills||[]).includes(s.id);const can=!learned&&c.level>=s.lv&&(c.sp||0)>=s.sp;
+let row=`<div class="mini">${s.nm} [${s.ty==="P"?"P":"A"}] SP${s.sp} Lv${s.lv} ${learned?'<b style="color:#9fe8a8">習得済</b>':`<button data-c="${key}" data-s="${s.id}" class="learnBtn" ${can?"":"disabled"}>詳細/習得</button>`}</div>`;
+if(openSkill&&openSkill.c===key&&openSkill.id===s.id){row+=`<div class="card" style="margin:4px 0 8px;border-color:#35506b"><div class="mini" style="color:#ffd76a">${FLAVOR[s.id]||""}</div><div class="mini">${skillDesc(s)}</div><div class="two"><button data-c="${key}" data-s="${s.id}" class="learnYesBtn" ${can?"":"disabled"}>習得する</button><button class="learnNoBtn">やめる</button></div></div>`;}
+return row;}
 function renderSkills(){const el=$("skillList");if(!game.characters.length){el.innerHTML='<div class="card">未作成</div>';return;}
-el.innerHTML=game.characters.map((c,i)=>{let h=`<div class="card"><h3>${c.name}（SP ${c.sp||0}）${c.adv?' <span class="adv">上級</span>':""}${c.reinc?` <span class="rc">転生${c.reinc}</span>`:""}</h3><div class="mini">― 職業 ―</div>`+(SKILLS[c.jobId]||[]).map(s=>skillRow(c,i,s)).join("");
+if(skillSel!=="smith"&&skillSel>=game.characters.length)skillSel=0;
+const selBtns=game.characters.map((c,i)=>`<button class="selbtn ${skillSel===i?"active":""}" data-sel="${i}">${c.name}</button>`).join("")+`<button class="selbtn ${skillSel==="smith"?"active":""}" data-sel="smith">${game.smith.name}(鍛冶)</button>`;
+let h=`<div class="card"><div class="mini"><b>キャラを選ぶ</b></div><div class="selrow" style="grid-template-columns:repeat(${game.characters.length+1},1fr)">${selBtns}</div></div>`;
+if(skillSel==="smith"){h+=`<div class="card"><h3>${game.smith.name}（鍛冶師 SP ${game.smith.sp||0}）</h3><div class="mini"><b>鍛冶スキル</b></div>`+(SKILLS.smith||[]).map(s=>skillRow(game.smith,"smith",s)).join("")+"</div>";}
+else{const c=game.characters[skillSel];const i=skillSel;
+h+=`<div class="card"><h3>${c.name}（SP ${c.sp||0}）${c.adv?' <span class="adv">上級</span>':""}${c.reinc?` <span class="rc">転生${c.reinc}</span>`:""}</h3><div class="mini">― 職業 ―</div>`+(SKILLS[c.jobId]||[]).map(s=>skillRow(c,i,s)).join("");
 [["spec_offense","攻撃"],["spec_defense","防御"],["spec_support","支援"],["spec_speed","速度"]].forEach(([k,nm])=>{h+=`<div class="mini"><b>${nm}系統</b></div>`+(SKILLS[k]||[]).map(s=>skillRow(c,i,s)).join("");});
 h+=`<div class="mini"><b>才能</b></div>`+(SKILLS.talent||[]).map(s=>skillRow(c,i,s)).join("");
 if(c.adv){const pool=COMBAT_JOBS.has(c.jobId)?"adv_attack":"adv_support";h+=`<hr><div class="mini adv"><b>上級スキル</b></div>`+(SKILLS[pool]||[]).map(s=>skillRow(c,i,s)).join("");
 h+=`<div class="mini adv"><b>奥義</b></div>`+(SKILLS["ult_"+c.jobId]||[]).map(s=>skillRow(c,i,s)).join("");}
 if(c.reinc)h+=`<hr><div class="mini rc"><b>転生スキル</b></div>`+(SKILLS.reinc_pool||[]).map(s=>skillRow(c,i,s)).join("");
-return h+"</div>";}).join("");
-el.innerHTML+=`<div class="card"><h3>${game.smith.name}（鍛冶師 SP ${game.smith.sp||0}）</h3><div class="mini"><b>鍛冶スキル</b></div>`+(SKILLS.smith||[]).map(s=>skillRow(game.smith,"smith",s)).join("")+"</div>";
-document.querySelectorAll(".learnBtn").forEach(b=>b.addEventListener("click",e=>{const dc=e.currentTarget.dataset.c;const c=dc==="smith"?game.smith:game.characters[+dc];const s=SKILL_INDEX[e.currentTarget.dataset.s];
-pendingLearn={c,s};$("lmName").textContent=s.nm;$("lmFl").textContent=FLAVOR[s.id]||"";$("lmDesc").textContent=skillDesc(s);$("learnModal").style.display="block";}));}
-function confirmLearn(){if(!pendingLearn)return;const{c,s}=pendingLearn;if(c.level>=s.lv&&(c.sp||0)>=s.sp){c.sp-=s.sp;c.skills=c.skills||[];c.skills.push(s.id);saveGame();renderSkills();renderParty();renderSmith();}
-pendingLearn=null;$("learnModal").style.display="none";}
+h+="</div>";}
+el.innerHTML=h;
+el.querySelectorAll("[data-sel]").forEach(b=>b.onclick=e=>{const v=e.currentTarget.dataset.sel;skillSel=v==="smith"?"smith":+v;openSkill=null;renderSkills();});
+el.querySelectorAll(".learnBtn").forEach(b=>b.onclick=e=>{openSkill={c:e.currentTarget.dataset.c,id:e.currentTarget.dataset.s};renderSkills();});
+el.querySelectorAll(".learnNoBtn").forEach(b=>b.onclick=()=>{openSkill=null;renderSkills();});
+el.querySelectorAll(".learnYesBtn").forEach(b=>b.onclick=e=>{const key=e.currentTarget.dataset.c;const sid=e.currentTarget.dataset.s;const ch=key==="smith"?game.smith:game.characters[+key];const s=SKILL_INDEX[sid];
+if(ch&&s&&ch.level>=s.lv&&(ch.sp||0)>=s.sp){ch.sp-=s.sp;ch.skills=ch.skills||[];ch.skills.push(s.id);saveGame();}
+openSkill=null;renderSkills();renderParty();renderSmith();});}
 
 function renderShop(){renderGold();const items=[["potion","ポーション（HP40%回復）",50],["ether","エーテル（MP40%回復）",60],["elixir","エリクサー（全回復）",300],["respec","スキルリセット券",800],["box","装備箱",200]];
 $("shopList").innerHTML=items.map(([id,nm,pr])=>`<div class="card"><div class="mini">${nm} 所持:${game.items[id]||0}</div><button data-i="${id}" data-p="${pr}" class="buyBtn" ${game.gold>=pr?"":"disabled"}>購入 ${pr}G</button></div>`).join("");
@@ -491,7 +504,7 @@ function createParty(){const names=[],jobs=[];for(let i=1;i<=4;i++){names.push($
 const sn=$("name5").value.trim()||"ドゥカン";
 if(names.some(n=>!n))return alert("全キャラ名前を入力");const allN=[...names,sn];if(new Set(allN).size!==5)return alert("同じ名前は不可");
 if(game&&(game.characters.length||(game.kills||0)>0)&&!confirm("既存データを上書きして新規パーティを作成しますか？"))return;
-game=newGame();game.settings.showDamage=$("showDamage").checked;game.characters=names.map((n,idx)=>makeChar("c"+(idx+1),idx+1,n,jobs[idx]));game.smith=newSmith(sn);saveGame();renderAreas();switchTab("party");}
+game=newGame();game.settings.showDamage=$("showDamage").checked;game.characters=names.map((n,idx)=>makeChar("c"+(idx+1),idx+1,n,jobs[idx]));game.smith=newSmith(sn);skillSel=0;openSkill=null;saveGame();renderAreas();switchTab("party");}
 
 function weaponTypeOf(c){const uid=(c.equip||[]).find(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot==="weapon";});const it=game.inv.find(x=>x.uid===uid);return it?it.type:null;}
 function startBattle(enemyArr){stopAuto();if(!game||game.characters.length<2){alert("先にキャラ作成");return;}
@@ -658,13 +671,12 @@ $("towerViewBtn").onclick=()=>alert("タワー："+game.tower+" 階 / 撃破："
 $("respecBtn").onclick=()=>{if(game.gold>=500||(game.items.respec||0)>0){if((game.items.respec||0)>0)game.items.respec--;else game.gold-=500;
 game.characters.forEach(c=>{c.skills=[];c.sp=(c.level-1)+(c.adv?10:0)+(c.reinc||0)*20;});
 game.smith.skills=[];game.smith.sp=game.smith.level-1;
-saveGame();renderSkills();renderParty();renderSmith();alert("スキルを全てリセットし、SPを返還した。");}else alert("Gまたは券が不足");};
-$("lmYes").onclick=confirmLearn;$("lmNo").onclick=()=>{pendingLearn=null;$("learnModal").style.display="none";};
+openSkill=null;saveGame();renderSkills();renderParty();renderSmith();alert("スキルを全てリセットし、SPを返還した。");}else alert("Gまたは券が不足");};
 $("speedSel").onchange=e=>{speed=+e.target.value;if(autoTimer){stopAuto();autoTimer=setInterval(()=>{if(battle&&battle.active)playTurn();else stopAuto();},1000/speed);$("autoBtn").textContent="オート停止";}if(battle)renderStatus();};
 $("exploreBtn").onclick=explore;$("bossBtn").onclick=boss;$("towerBtn").onclick=tower;$("raidBtn").onclick=raid;$("turnBtn").onclick=playTurn;$("autoBtn").onclick=toggleAuto;$("stopBtn").onclick=stopAuto;
 $("mineBtn").onclick=()=>doMine(1);$("mine5Btn").onclick=()=>doMine(5);
 $("refineBtn").onclick=refine;$("craftBtn").onclick=craft;
-$("craftMetal").onchange=updateCraftInfo;$("craftType").onchange=updateCraftInfo;
+["mineSelect","refineSelect","craftMetal","craftType","craftGem"].forEach(id=>{$(id).addEventListener("change",e=>{smithUI[id]=e.target.value;if(id==="craftMetal"||id==="craftType")updateCraftInfo();});});
 $("showDamage").onchange=e=>{game.settings.showDamage=e.target.checked;saveGame();};
 $("autoItem").onchange=e=>{game.settings.autoItem=e.target.checked;saveGame();};
 $("saveBtn").onclick=()=>{$("saveMsg").textContent=saveGame()?"セーブした":"失敗";renderSave();};
