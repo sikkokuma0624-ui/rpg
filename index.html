@@ -95,6 +95,7 @@ details.card summary{cursor:pointer}
 
 <section id="tab-save" class="tab"><h2>セーブ</h2>
 <div class="card"><div class="row"><div class="three"><button id="saveBtn">セーブ</button><button id="loadBtn">ロード</button><button id="deleteBtn">削除</button></div>
+<button id="loadOldBtn" style="display:none">旧バックアップ（v8）から復元する</button>
 <div id="saveMsg" class="msg"></div><div class="mini" id="storageType"></div></div></div>
 <div class="card"><div class="row"><label>セーブ文字列</label><textarea id="saveText" rows="3"></textarea>
 <div class="two"><button id="exportBtn">エクスポート</button><button id="importBtn">インポート</button></div></div></div>
@@ -104,6 +105,7 @@ details.card summary{cursor:pointer}
 "use strict";
 const storage=(()=>{try{localStorage.setItem("__t","1");localStorage.removeItem("__t");return{type:"local",get:k=>localStorage.getItem(k),set:(k,v)=>localStorage.setItem(k,v),del:k=>localStorage.removeItem(k)};}catch(e){const m={};return{type:"memory",get:k=>m[k]??null,set:(k,v)=>{m[k]=v},del:k=>{delete m[k]}};}})();
 const SAVE_KEY="text_rpg_v9";
+const OLD_KEYS=["text_rpg_v8"];
 const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const pick=a=>a[Math.floor(Math.random()*a.length)];const rnd=n=>Math.floor(Math.random()*n);
 const fill=(t,p={})=>t.replace(/\{(\w+)\}/g,(_,k)=>p[k]??"");
@@ -117,16 +119,13 @@ const DUAL_TYPES=new Set(["one_hand_sword","dagger","twin_daggers"]);
 const ORES=[["copper","銅鉱石",3],["iron","鉄鉱石",5],["silver","銀鉱石",8],["gold","金鉱石",12],["mithril","ミスリル鉱石",18],["dragon","竜骨鉱石",26]];
 const ORE_NM={},ORE_EXP={};ORES.forEach(o=>{ORE_NM[o[0]]=o[1];ORE_EXP[o[0]]=o[2];});
 const ING_NM={copper:"銅インゴット",iron:"鉄インゴット",silver:"銀インゴット",gold:"金インゴット",mithril:"ミスリルインゴット",dragon:"竜骨インゴット"};
-/* [id,名前,必要鍛冶Lv,ステ倍率,費用係数] */
 const METALS=[["copper","銅",1,1,1],["iron","鉄",5,1.4,2],["silver","銀",15,1.8,3],["gold","金",30,2.5,4],["mithril","ミスリル",50,3.5,5],["dragon","竜骨",75,5,6]];
 const METALS_BY={};METALS.forEach(m=>METALS_BY[m[0]]=m);
 const GEMS=[["ruby","ルビー",60],["sapphire","サファイア",80],["emerald","エメラルド",100],["diamond","ダイヤ",150]];
 const GEM_NM={};GEMS.forEach(g=>GEM_NM[g[0]]=g[1]);
-/* 宝石の固定ボーナス（金属Lvでスケール：1+Lv/30 倍） */
 const GEM_STATS={ruby:{atk:3},sapphire:{matk:3},emerald:{hp:10},diamond:{agi:2,luk:2}};
 const MINES=[["mine1","古い鉱山",1,["copper","iron"]],["mine2","銀脈鉱山",10,["iron","silver"]],["mine3","金脈鉱山",25,["silver","gold"]],["mine4","ミスリル鉱山",50,["gold","mithril"]],["mine5","竜骨鉱山",75,["mithril","dragon"]]];
 
-/* ===== 12段階レア度 ===== */
 const RARITY={
 common:{nm:"一般級",en:"Common",mult:1.00,rate:40},
 uncommon:{nm:"上質級",en:"Uncommon",mult:1.07,rate:25},
@@ -142,7 +141,6 @@ divine:{nm:"神聖級",en:"Divine",mult:2.35,rate:0.08},
 genesis:{nm:"創世級",en:"Genesis",mult:2.60,rate:0.02}};
 const RAR_ORDER=Object.keys(RARITY);
 const rarTag=r=>`<span class="rtag r${RAR_ORDER.indexOf(r)}">${RARITY[r].nm}</span>`;
-/* boost: ボス/タワー/レイドの運補正（上位レアの重みを増やす） */
 function rollRarity(boost=0){const es=RAR_ORDER.map((k,i)=>({k,w:RARITY[k].rate*(i>=3?1+boost*(i-2)/100:1)}));
 const tot=es.reduce((s,e)=>s+e.w,0);let r=Math.random()*tot;
 for(const e of es){if(r<e.w)return e.k;r-=e.w;}return"common";}
@@ -313,8 +311,7 @@ const AREAS=[["area01","始まりの草原",1,6,["slime","horn_rabbit","giant_be
 const EQ_TYPES=[["one_hand_sword","weapon","剣",{atk:8,hit:2},["sword_shield","guardian","blade_master","shadow_user","holy_knight","bastion","sword_saint","assassin","twin_dagger","shadow_master"]],["shield","sub","盾",{def:6,hp:10},["sword_shield","guardian","healer","holy_knight","bastion","saint"]],["great_sword","weapon","大剣",{atk:14,hit:-2,agi:-1},["great_sword","berserker","war_god","war_demon"]],["light_two_hand","weapon","両手剣",{atk:10,agi:3,hit:2},["blade_master","great_sword","berserker","sword_saint","war_god","war_demon"]],["twin_daggers","weapon","双剣",{atk:6,agi:3,luk:2},["twin_dagger","blade_master","shadow_user","assassin","shadow_master"]],["dagger","weapon","短剣",{atk:6,agi:2,luk:2},["shadow_user","twin_dagger","assassin","shadow_master"]],["great_shield","sub","大盾",{def:12,hp:20,agi:-2},["guardian","bastion"]],["staff","weapon","杖",{matk:10,mp:10},["healer","sage","attack_mage","necromancer","onmyoji","saint","arch_sage","archmage","death_lord","grand_onmyoji","maestro","arch_summoner"]],["grimoire","sub","魔導書",{matk:6,mp:10},["buffer_debuffer","summoner","sage","attack_mage","necromancer","onmyoji","maestro","arch_summoner","arch_sage","archmage","death_lord","grand_onmyoji","saint"]],["orb","weapon","宝玉",{matk:9,mp:12},["summoner","sage","attack_mage","necromancer","onmyoji","arch_summoner","arch_sage","archmage","death_lord","grand_onmyoji"]],["instrument","weapon","楽器",{matk:8,luk:2},["buffer_debuffer","maestro"]],["whip","weapon","鞭",{atk:6,luk:3},["tamer","beast_lord"]],["horn","sub","角笛",{matk:4,hp:6},["tamer","beast_lord"]],["astrolabe","weapon","星盤",{matk:10,hit:2},["sage","arch_sage"]],["gun","weapon","銃",{atk:12,hit:4},["gunner","gunslinger"]],["axe","weapon","戦斧",{atk:13,luk:-1},["berserker","war_demon"]],["heavy_armor","armor","重鎧",{def:10,hp:15,agi:-1},["sword_shield","great_sword","guardian","berserker","holy_knight","war_god","bastion","war_demon"]],["medium_armor","armor","中鎧",{def:7,hp:8,agi:1},["blade_master","twin_dagger","tamer","sword_shield","gunner","sword_saint","assassin","gunslinger","beast_lord"]],["light_armor","armor","軽鎧",{def:4,agi:3,eva:3},["blade_master","twin_dagger","tamer","healer","buffer_debuffer","shadow_user","gunner","berserker","assassin","shadow_master","gunslinger","beast_lord","sword_saint"]],["cloth_armor","armor","法衣",{mdef:6,mp:12},["healer","buffer_debuffer","summoner","sage","attack_mage","necromancer","onmyoji","saint","maestro","arch_summoner","beast_lord","arch_sage","archmage","death_lord","grand_onmyoji"]],["accessory","accessory","装飾品",{hp:5,mp:5,agi:1,luk:1},"all"]];
 const TYPE_BY={};EQ_TYPES.forEach(t=>TYPE_BY[t[0]]=t);
 
-/* ===== 装備：決定論的スタック方式 =====
- key = 金属|装備種|レア度|宝石|強化値 → 同じkeyは必ず同じステータス */
+/* ===== 装備：決定論的スタック方式 ===== */
 const itemKey=o=>[o.metal,o.type,o.rar,o.gem||"",o.enh||0].join("|");
 function parseKey(k){const[metal,type,rar,gem,enh]=k.split("|");return{metal,type,rar,gem:gem||null,enh:+enh||0};}
 function buildItem(p){const M=METALS_BY[p.metal],T=TYPE_BY[p.type],R=RARITY[p.rar];
@@ -326,12 +323,11 @@ if(ri>0){const bonus=Math.max(1,Math.round(M[2]/12))*Math.min(ri,8);
 baseKeys.forEach(k=>stats[k]+=Math.ceil(bonus/2));
 const ex=STAT_KEYS[(EQ_TYPES.indexOf(T)+ri)%STAT_KEYS.length];
 stats[ex]=(stats[ex]||0)+bonus;}
-if(p.gem&&GEM_STATS[p.gem]){const sc=(1+M[2]/30)+(game&&game.smith?((smithFlags().gemPow||0)/10):0);
-Object.entries(GEM_STATS[p.gem]).forEach(([k,v])=>stats[k]=(stats[k]||0)+Math.max(1,Math.round(v*sc)));}
+if(p.gem&&GEM_STATS[p.gem]){const gp=game&&game.smith?(smithFlags().gemPow||0):0;const sc=(1+M[2]/30);
+Object.entries(GEM_STATS[p.gem]).forEach(([k,v])=>stats[k]=(stats[k]||0)+Math.max(1,Math.round(v*sc))+gp);}
 return{key:itemKey(p),metal:p.metal,type:p.type,rar:p.rar,gem:p.gem,enh:p.enh||0,ri,
 name:`${M[1]}の${T[2]}${p.gem?"・"+GEM_NM[p.gem]:""}`,slot:T[1],lv:M[2],stats,jobs:T[4],typeLabel:T[2]};}
-const itemCache={};
-function itemOf(k){if(!itemCache[k])itemCache[k]=buildItem(parseKey(k));return itemCache[k];}
+const itemOf=k=>buildItem(parseKey(k));
 function addItem(k,n=1){game.inv[k]=(game.inv[k]||0)+n;}
 function removeItem(k,n=1){game.inv[k]=(game.inv[k]||0)-n;if(game.inv[k]<=0)delete game.inv[k];}
 function equippedCount(k){let n=0;game.characters.forEach(c=>{Object.values(c.equip||{}).forEach(x=>{if(x===k)n++;});});return n;}
@@ -393,7 +389,6 @@ return{id,name:m.nm,race:m.type,type:"enemy",rar:m.rar,level:lv,stats:s};}
 
 function newSmith(nm){return{name:nm,level:1,exp:0,sp:0,skills:[],ore:{},ingot:{},gem:{}};}
 function newGame(){return{v:9,settings:{showDamage:true,autoItem:true},party:{combo:0,comboMax:100},characters:[],smith:newSmith("ドゥカン"),smithLog:[],inv:{},gold:100,items:{potion:2,ether:1},tower:1,kills:0,bossKills:0,flags:{}};}
-/* 旧形式（uid配列）→ 新形式（keyスタック）へ移行 */
 function migrateLegacy(g){const old=g.inv;const map={};const uidToKey={};
 old.forEach(it=>{const M=metalForLv(it.lv||1);
 const rarMap={common:"common",uncommon:"uncommon",rare:"rare",epic:"epic",legend:"legendary"};
@@ -408,13 +403,26 @@ list.forEach(u=>{const k=uidToKey[u];if(!k)return;const p=parseKey(k);const T=TY
 if(T[1]==="sub")eq.sub=k;else eq[T[1]]=k;});
 if(c.subW&&uidToKey[c.subW])eq.sub=uidToKey[c.subW];
 c.equip=eq;delete c.subW;});}
-function normalizeGame(g){g.items=g.items||{};g.gold=g.gold??100;g.tower=g.tower||1;g.kills=g.kills||0;g.bossKills=g.bossKills||0;g.party=g.party||{combo:0,comboMax:100};g.settings=Object.assign({showDamage:true,autoItem:true},g.settings||{});g.characters=g.characters||[];g.smith=g.smith||newSmith("ドゥカン");g.smith.ore=g.smith.ore||{};g.smith.ingot=g.smith.ingot||{};g.smith.gem=g.smith.gem||{};g.smithLog=g.smithLog||[];
-if(Array.isArray(g.inv))migrateLegacy(g);
-g.inv=g.inv||{};
-g.characters.forEach(c=>{if(!c.equip||Array.isArray(c.equip))c.equip={weapon:null,sub:null,armor:null,accessory:null};});
+const BLANK_EQUIP=()=>({weapon:null,sub:null,armor:null,accessory:null});
+function normalizeGame(g){
+g.items=g.items||{};g.gold=g.gold??100;g.tower=g.tower||1;g.kills=g.kills||0;g.bossKills=g.bossKills||0;
+g.party=g.party||{combo:0,comboMax:100};
+g.settings=Object.assign({showDamage:true,autoItem:true},g.settings||{});
+g.characters=g.characters||[];
+g.smith=g.smith||newSmith("ドゥカン");
+g.smith.name=g.smith.name||"ドゥカン";g.smith.level=clamp(g.smith.level||1,1,100);g.smith.exp=g.smith.exp||0;g.smith.sp=g.smith.sp||0;
+g.smith.skills=g.smith.skills||[];g.smith.ore=g.smith.ore||{};g.smith.ingot=g.smith.ingot||{};g.smith.gem=g.smith.gem||{};
+g.smithLog=g.smithLog||[];
+if(Array.isArray(g.inv)){try{migrateLegacy(g);}catch(e){g.inv={};g.characters.forEach(c=>{c.equip=BLANK_EQUIP();});}}
+if(typeof g.inv!=="object"||g.inv===null||Array.isArray(g.inv))g.inv={};
+g.characters.forEach(c=>{if(!c.equip||Array.isArray(c.equip))c.equip=BLANK_EQUIP();
+c.level=clamp(c.level||1,1,100);c.exp=c.exp||0;c.sp=c.sp||0;c.skills=c.skills||[];
+c.currentHp=c.currentHp||0;c.currentMp=c.currentMp||0;});
 return g;}
 function saveGame(){try{game.updatedAt=new Date().toISOString();storage.set(SAVE_KEY,JSON.stringify(game));return true;}catch(e){return false;}}
-function loadGame(){try{const r=storage.get(SAVE_KEY)||storage.get("text_rpg_v8");if(!r)return false;game=normalizeGame(JSON.parse(r));return true;}catch(e){return false;}}
+function loadGame(specificKey){const keys=specificKey?[specificKey]:[SAVE_KEY,...OLD_KEYS];
+for(const k of keys){try{const r=storage.get(k);if(!r)continue;game=normalizeGame(JSON.parse(r));return true;}catch(e){}}
+return false;}
 const exportSave=()=>btoa(unescape(encodeURIComponent(JSON.stringify(game))));
 function importSave(s){try{game=normalizeGame(JSON.parse(decodeURIComponent(escape(atob(s.trim())))));saveGame();return true;}catch(e){return false;}}
 
@@ -446,8 +454,8 @@ function craftNeed(){const type=EQ_TYPES.find(t=>t[0]===$("craftType").value);if
 function updateCraftInfo(){const M=METALS.find(m=>m[0]===$("craftMetal").value)||METALS[0];const F=smithFlags();
 const cost=Math.floor(30*M[4]*(1-(F.craftSave||0)/100));
 const gem=$("craftGem").value;let gemTxt="なし（宝石なしの固定ステータス）";
-if(gem&&GEM_STATS[gem]){const sc=(1+M[2]/30)+((F.gemPow||0)/10);
-gemTxt=Object.entries(GEM_STATS[gem]).map(([k,v])=>`${STAT_NM[k]}+${Math.max(1,Math.round(v*sc))}`).join(" ")+"（必ず付与）";}
+if(gem&&GEM_STATS[gem]){
+gemTxt=Object.entries(GEM_STATS[gem]).map(([k,v])=>`${STAT_NM[k]}+${Math.max(1,Math.round(v*(1+M[2]/30)))+(F.gemPow||0)}`).join(" ")+"（必ず付与）";}
 $("craftInfo").textContent=`必要：${ING_NM[M[0]]}×${craftNeed()}＋${cost}G / レア運補正+${(F.smithLuck||0)+(F.smithLuck2||0)}% / 大成功${F.smithCrit||0}%（強化+1完成） / 宝石：${gemTxt} / ※同素材・同レア度は常に同じ性能`;}
 function craft(){const s=game.smith;const F=smithFlags();const M=METALS.find(m=>m[0]===$("craftMetal").value);const type=EQ_TYPES.find(t=>t[0]===$("craftType").value);const gem=$("craftGem").value;
 if(!M||!type)return;
@@ -559,9 +567,10 @@ function reincarnate(c){if(c.level<100||!c.adv||(c.reinc||0)>=5)return;c.reinc=(
 const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();alert(c.name+"は転生した！（"+c.reinc+"回目）");}
 
 const SRC_TAG={job:'<span class="eff">[職業]</span>',spec:'<span class="res">[系統]</span>',talent:'<span class="res">[才能]</span>',adv:'<span class="adv">[上級]</span>',ult:'<span class="gold">[奥義]</span>',rc:'<span class="rc">[転生]</span>'};
+const SRC_RANK={job:0,spec:1,talent:2,adv:3,ult:4,rc:5};
 function skillRow(c,key,s,src){const k=String(key);const learned=(c.skills||[]).includes(s.id);const can=!learned&&c.level>=s.lv&&(c.sp||0)>=s.sp;
 const isOpen=openSkill&&openSkill.c===k&&openSkill.id===s.id;
-let row=`<div class="mini">${SRC_TAG[src]||""}${s.nm} [${s.ty==="P"?"P":"A"}] SP${s.sp} Lv${s.lv}${learned?' <b style="color:#9fe8a8">習得済</b>':""} <button data-c="${k}" data-s="${s.id}" class="learnBtn">${isOpen?"閉じる":"詳細"}</button></div>`;
+let row=`<div class="mini">${SRC_TAG[src]||""}${s.nm} [${s.ty==="P"?"P":"A"}] SP${s.sp}${learned?' <b style="color:#9fe8a8">習得済</b>':""} <button data-c="${k}" data-s="${s.id}" class="learnBtn">${isOpen?"閉じる":"詳細"}</button></div>`;
 if(isOpen){row+=`<div class="card" style="margin:4px 0 8px;border-color:#35506b"><div class="mini" style="color:#ffd76a">${FLAVOR[s.id]||""}</div><div class="mini">${skillDesc(s)}</div>`;
 row+=learned?`<div><button class="learnNoBtn">閉じる</button></div>`:`<div class="two"><button data-c="${k}" data-s="${s.id}" class="learnYesBtn" ${can?"":"disabled"}>習得する</button><button class="learnNoBtn">やめる</button></div>`;
 row+="</div>";}
@@ -570,7 +579,12 @@ function renderSkills(){const el=$("skillList");if(!game.characters.length){el.i
 if(skillSel!=="smith"&&skillSel>=game.characters.length)skillSel=0;
 const selBtns=game.characters.map((c,i)=>`<button class="selbtn ${skillSel===i?"active":""}" data-sel="${i}">${c.name}</button>`).join("")+`<button class="selbtn ${skillSel==="smith"?"active":""}" data-sel="smith">${game.smith.name}(鍛冶)</button>`;
 let h=`<div class="card"><div class="mini"><b>キャラを選ぶ</b></div><div class="selrow" style="grid-template-columns:repeat(${game.characters.length+1},1fr)">${selBtns}</div></div>`;
-if(skillSel==="smith"){h+=`<div class="card"><h3>${game.smith.name}（鍛冶師 SP ${game.smith.sp||0}）</h3><div class="mini"><b>鍛冶スキル</b></div>`+(SKILLS.smith||[]).map(s=>skillRow(game.smith,"smith",s)).join("")+"</div>";}
+if(skillSel==="smith"){
+const byLv={};(SKILLS.smith||[]).forEach(s=>{(byLv[s.lv]=byLv[s.lv]||[]).push(s);});
+h+=`<div class="card"><h3>${game.smith.name}（鍛冶師 Lv${game.smith.level} / SP ${game.smith.sp||0}）</h3><div class="mini"><b>鍛冶スキル（習得レベル順）</b></div>`;
+Object.keys(byLv).map(Number).sort((a,b)=>a-b).forEach(lv=>{
+h+=`<hr><div class="mini" style="color:#ffd76a"><b>Lv${lv}</b> <span class="res">― ${byLv[lv].length}スキル</span></div>`+byLv[lv].map(s=>skillRow(game.smith,"smith",s)).join("");});
+h+="</div>";}
 else{const c=game.characters[skillSel];const i=skillSel;const phys=COMBAT_JOBS.has(c.jobId);
 const pool=[];
 (SKILLS[c.jobId]||[]).forEach(s=>pool.push({s,src:"job"}));
@@ -579,12 +593,12 @@ const pool=[];
 if(c.adv){const ap=phys?"adv_attack":"adv_support";(SKILLS[ap]||[]).forEach(s=>pool.push({s,src:"adv"}));
 (SKILLS["ult_"+c.jobId]||[]).forEach(s=>pool.push({s,src:"ult"}));}
 if(c.reinc)(SKILLS.reinc_pool||[]).forEach(s=>pool.push({s,src:"rc"}));
-const bands={};pool.forEach(({s,src})=>{const b=Math.floor((s.lv-1)/10)*10+1;(bands[b]=bands[b]||[]).push({s,src});});
-h+=`<div class="card"><h3>${c.name}（SP ${c.sp||0} / ${phys?"物理系":"魔法系"}）${c.adv?' <span class="adv">上級</span>':""}${c.reinc?` <span class="rc">転生${c.reinc}</span>`:""}</h3>
-<div class="mini">習得レベル帯ごとに全スキルを表示。タグは元カテゴリ。</div>`;
-Object.keys(bands).map(Number).sort((a,b)=>a-b).forEach(b=>{
-bands[b].sort((x,y)=>x.s.lv-y.s.lv||x.s.sp-y.s.sp);
-h+=`<hr><div class="mini" style="color:#ffd76a"><b>習得Lv${b}〜${Math.min(b+9,100)}</b></div>`+bands[b].map(x=>skillRow(c,i,x.s,x.src)).join("");});
+const byLv={};pool.forEach(({s,src})=>{(byLv[s.lv]=byLv[s.lv]||[]).push({s,src});});
+h+=`<div class="card"><h3>${c.name}（Lv${c.level} / SP ${c.sp||0} / ${phys?"物理系":"魔法系"}）${c.adv?' <span class="adv">上級</span>':""}${c.reinc?` <span class="rc">転生${c.reinc}</span>`:""}</h3>
+<div class="mini">習得レベルごとに昇順で表示（同レベル内：職業→系統→才能→上級→奥義→転生）。</div>`;
+Object.keys(byLv).map(Number).sort((a,b)=>a-b).forEach(lv=>{
+byLv[lv].sort((x,y)=>(SRC_RANK[x.src]??9)-(SRC_RANK[y.src]??9)||x.s.sp-y.s.sp);
+h+=`<hr><div class="mini" style="color:#ffd76a"><b>Lv${lv}</b> <span class="res">― ${byLv[lv].length}スキル</span></div>`+byLv[lv].map(x=>skillRow(c,i,x.s,x.src)).join("");});
 h+="</div>";}
 el.innerHTML=h;
 el.querySelectorAll("[data-sel]").forEach(b=>b.onclick=e=>{const v=e.currentTarget.dataset.sel;skillSel=v==="smith"?"smith":+v;openSkill=null;renderSkills();});
@@ -598,13 +612,17 @@ openSkill=null;renderSkills();renderParty();renderSmith();});}
 function renderShop(){renderGold();const items=[["potion","ポーション（HP40%回復）",50],["ether","エーテル（MP40%回復）",60],["elixir","エリクサー（全回復）",300],["respec","スキルリセット券",800],["box","装備箱（運補正+15）",200]];
 $("shopList").innerHTML=items.map(([id,nm,pr])=>`<div class="card"><div class="mini">${nm} 所持:${game.items[id]||0}</div><button data-i="${id}" data-p="${pr}" class="buyBtn" ${game.gold>=pr?"":"disabled"}>購入 ${pr}G</button></div>`).join("");
 document.querySelectorAll(".buyBtn").forEach(b=>b.onclick=e=>{const id=e.currentTarget.dataset.i,pr=+e.currentTarget.dataset.p;if(game.gold>=pr){game.gold-=pr;game.items[id]=(game.items[id]||0)+1;saveGame();renderShop();}});}
-function renderSave(){$("storageType").textContent="保存方式："+storage.type;$("savePreview").textContent=JSON.stringify(game,null,1).slice(0,2500);}
+function renderSave(){
+const hasOld=OLD_KEYS.some(k=>storage.get(k));
+$("loadOldBtn").style.display=hasOld?"block":"none";
+$("storageType").textContent="保存方式："+storage.type+" / 最終更新："+(game.updatedAt?new Date(game.updatedAt).toLocaleString():"未保存")+(hasOld?" / 旧バックアップ(v8)あり":"");
+$("savePreview").textContent=JSON.stringify(game,null,1).slice(0,2500);}
 function statesText(m){const ks=Object.keys(m.states||{});if(!ks.length)return"";return " ["+ks.map(k=>ST_NM[k]||k).join(",")+"]";}
 function renderStatus(){const el=$("battleStatus");if(!battle){el.innerHTML="戦闘未開始 / タワー階層："+game.tower+" / 撃破："+(game.kills||0)+" / ボス撃破："+(game.bossKills||0);return;}
 el.innerHTML=battle.enemies.map(e=>`<div class="mini"><b>${e.name}</b> Lv${e.level} ${e.hp}/${e.stats.hp} <span class="bw" style="flex:1">${bar(e.hp,e.stats.hp,"en")}</span> <span class="brk">Brk${e.break||0}</span>${e.charge?' <span class="brk">溜め!</span>':""}${statesText(e)}</div>`).join("")+
 `<div class="mini">連携${battle.combo}/${game.party.comboMax} / 速度${speed}x / ターン${battle.turn}</div><hr>`+battle.party.map(m=>`<div class="mini bw">${m.name}${m.guard>0?"🛡":""} HP${m.hp}/${m.maxHp} ${bar(m.hp,m.maxHp)} MP${m.mp}/${m.maxMp} ${bar(m.mp,m.maxMp,"mp")}${statesText(m)}</div>`).join("");}
 
-function makeChar(id,slot,name,job){const t=jobStats(job,1);return{id,slot,name,jobId:job,level:1,exp:0,sp:0,skills:[],equip:{weapon:null,sub:null,armor:null,accessory:null},currentHp:t.hp,currentMp:t.mp,adv:false,reinc:0};}
+function makeChar(id,slot,name,job){const t=jobStats(job,1);return{id,slot,name,jobId:job,level:1,exp:0,sp:0,skills:[],equip:BLANK_EQUIP(),currentHp:t.hp,currentMp:t.mp,adv:false,reinc:0};}
 function createParty(){const names=[],jobs=[];for(let i=1;i<=4;i++){names.push($("name"+i).value.trim());jobs.push($("job"+i).value);}
 const sn=$("name5").value.trim()||"ドゥカン";
 if(names.some(n=>!n))return alert("全キャラ名前を入力");const allN=[...names,sn];if(new Set(allN).size!==5)return alert("同じ名前は不可");
@@ -771,6 +789,7 @@ $("createBoxes").innerHTML=[1,2,3,4].map(i=>`<div class="card"><div class="two">
 Object.entries(JOBS).forEach(([id,j])=>{if(Object.values(ADV_MAP).includes(id))return;for(let i=1;i<=4;i++){const o=document.createElement("option");o.value=id;o.textContent=j.nm;$("job"+i).appendChild(o);}});
 $("job2").value="healer";
 if(!loadGame())game=newGame();
+saveGame();
 renderAreas();
 $("showDamage").checked=!!game.settings.showDamage;$("autoItem").checked=!!game.settings.autoItem;
 document.querySelectorAll(".tabbtn").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
@@ -789,8 +808,10 @@ $("refineBtn").onclick=refine;$("craftBtn").onclick=craft;
 $("showDamage").onchange=e=>{game.settings.showDamage=e.target.checked;saveGame();};
 $("autoItem").onchange=e=>{game.settings.autoItem=e.target.checked;saveGame();};
 $("saveBtn").onclick=()=>{$("saveMsg").textContent=saveGame()?"セーブした":"失敗";renderSave();};
-$("loadBtn").onclick=()=>{if(loadGame()){$("saveMsg").textContent="ロードした";renderAreas();renderParty();renderSkills();renderSave();renderSmith();}else $("saveMsg").textContent="セーブなし";};
-$("deleteBtn").onclick=()=>{if(!confirm("セーブデータを削除しますか？"))return;storage.del(SAVE_KEY);storage.del("text_rpg_v8");game=newGame();renderAreas();renderParty();renderSave();renderSmith();};
+$("loadBtn").onclick=()=>{if(loadGame()){saveGame();$("saveMsg").textContent="ロードした";renderAreas();renderParty();renderSkills();renderSave();renderSmith();}else $("saveMsg").textContent="セーブなし";};
+$("loadOldBtn").onclick=()=>{if(!confirm("旧バックアップ（v8）を読み込み、現在のデータに上書きします。よろしいですか？"))return;
+if(loadGame("text_rpg_v8")){saveGame();$("saveMsg").textContent="v8バックアップから復元した";renderAreas();renderParty();renderSkills();renderSave();renderSmith();}else $("saveMsg").textContent="バックアップの読み込みに失敗";};
+$("deleteBtn").onclick=()=>{if(!confirm("セーブデータを削除しますか？（旧バックアップも消えます）"))return;storage.del(SAVE_KEY);OLD_KEYS.forEach(k=>storage.del(k));game=newGame();renderAreas();renderParty();renderSave();renderSmith();};
 $("exportBtn").onclick=()=>{$("saveText").value=exportSave();};
 $("importBtn").onclick=()=>{if(importSave($("saveText").value)){$("saveMsg").textContent="インポート成功";renderAreas();renderParty();renderSkills();renderSave();renderSmith();}else $("saveMsg").textContent="インポート失敗（文字列を確認）";};
 renderParty();renderSave();}
