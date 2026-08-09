@@ -20,6 +20,7 @@ label{display:block;font-size:11px;color:#b8c4d0;margin-bottom:4px}
 .check{display:flex;align-items:center;gap:7px;font-size:12px;margin:6px 0}.check input{width:auto}
 .pre{background:#0a0e12;border:1px solid #2c3b4a;border-radius:12px;padding:8px;font-size:10px;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
 .msg{margin:6px 0;font-size:12px;color:#9fe8a8}.gold{color:#ffd76a;font-weight:bold}.eff{color:#7fd7ff}.res{color:#93a1af}.brk{color:#ff9f6a}.aw{color:#e6b3ff}.adv{color:#ffd76a}.rc{color:#7fffd4}
+.up{color:#9fe8a8}.dn{color:#ff8a80}
 .ska{color:#ff9f6a;font-weight:bold}.skh{color:#9fe8a8;font-weight:bold}.skb{color:#7fd7ff;font-weight:bold}.skd{color:#e6b3ff;font-weight:bold}.sks{color:#7fffd4;font-weight:bold}.skm{color:#ffd76a;font-weight:bold}
 hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 .bar{height:7px;background:#22303c;border-radius:4px;overflow:hidden;margin:2px 0;min-width:60px}
@@ -27,6 +28,7 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 .bw{display:flex;align-items:center;gap:6px}
 .selrow{display:grid;gap:4px;margin-bottom:8px}
 .selbtn{padding:8px 2px;font-size:11px}.selbtn.active{background:#35506b}
+details.card summary{cursor:pointer}
 </style>
 </head>
 <body>
@@ -194,11 +196,11 @@ necromancer:[{id:"nc01",nm:"死体収集",ty:"P",sp:2,lv:1,k:"flag",fl:"corpse",
 gunner:[{id:"gn01",nm:"銃器熟練",ty:"P",sp:2,lv:1,k:"flag",fl:"hit",val:5},{id:"gn02",nm:"スナップショット",ty:"A",sp:2,lv:5,mp:5,k:"dmg",pw:110},{id:"gn03",nm:"貫通弾",ty:"A",sp:3,lv:10,mp:7,k:"dmg",pw:120,pen:15,brk:15},{id:"gn04",nm:"連射",ty:"A",sp:3,lv:20,mp:9,k:"dmg",pw:70,hits:2},{id:"gn05",nm:"弱点狙い",ty:"P",sp:4,lv:30,k:"flag",fl:"critRate",val:8},{id:"gn06",nm:"炸裂弾",ty:"A",sp:4,lv:40,mp:14,k:"dmg",pw:90,tg:"all",brk:20},{id:"gn07",nm:"特殊弾薬",ty:"P",sp:5,lv:60,k:"flag",fl:"critDmg",val:20},{id:"gn08",nm:"フィニッシュバレット",ty:"A",sp:8,lv:90,mp:25,k:"dmg",pw:280,hm:100}],
 berserker:[{id:"bk01",nm:"剛力",ty:"P",sp:2,lv:1,k:"stat",stat:"atk",pct:6},{id:"bk02",nm:"血の代償",ty:"P",sp:3,lv:5,k:"flag",fl:"hpCostPow",val:15},{id:"bk03",nm:"捨身斬り",ty:"A",sp:3,lv:10,mp:0,k:"dmg",pw:150,hpCost:5,brk:20},{id:"bk04",nm:"激怒",ty:"A",sp:3,lv:20,mp:6,k:"buff",stat:"atk",pct:20,tn:2,tg:"self"},{id:"bk05",nm:"怒りの血",ty:"P",sp:4,lv:30,k:"stat",stat:"atk",pct:15,cond:"hp50"},{id:"bk06",nm:"破壊の突進",ty:"A",sp:4,lv:40,mp:0,k:"dmg",pw:190,hm:-10,hpCost:8,brk:30},{id:"bk07",nm:"絶叫",ty:"P",sp:5,lv:60,k:"flag",fl:"critDmg",val:20},{id:"bk08",nm:"血滅斬",ty:"A",sp:8,lv:90,mp:0,k:"dmg",pw:280,hpCost:10,crit:20,brk:40}],
 onmyoji:[{id:"on01",nm:"呪力増幅",ty:"P",sp:2,lv:1,k:"stat",stat:"matk",pct:5},{id:"on02",nm:"火炎の術",ty:"A",sp:2,lv:5,mp:8,k:"dmg",mg:1,pw:125,st:"burn",el:"fire"},{id:"on03",nm:"氷縛の術",ty:"A",sp:3,lv:10,mp:10,k:"dmg",mg:1,pw:120,st:"slow",el:"water"},{id:"on04",nm:"式神召喚",ty:"A",sp:3,lv:15,mp:12,k:"summon",pw:70,tn:3},{id:"on05",nm:"属性精通",ty:"P",sp:4,lv:25,k:"flag",fl:"elemPow",val:15},{id:"on06",nm:"呪殺の印",ty:"A",sp:4,lv:35,mp:12,k:"debuff",stat:"mdef",pct:15,tn:3,el:"dark"},{id:"on07",nm:"方結界",ty:"A",sp:5,lv:50,mp:16,k:"shield",pct:25,tn:2,tg:"party"},{id:"on08",nm:"泰山府君祭",ty:"A",sp:8,lv:90,mp:35,k:"dmg",mg:1,pw:160,tg:"all",el:"light"}],
-spec_offense:[{id:"of01",nm:"攻撃の才能",ty:"P",sp:3,lv:10,k:"stat",stat:"atk",pct:6},{id:"of02",nm:"会心の才能",ty:"P",sp:3,lv:15,k:"flag",fl:"critRate",val:6},{id:"of03",nm:"猛撃",ty:"A",sp:4,lv:20,mp:10,k:"dmg",pw:140,hm:-5,brk:15},{id:"of04",nm:"貫通の才能",ty:"P",sp:4,lv:30,k:"flag",fl:"defPen",val:8},{id:"of05",nm:"会心威力の才能",ty:"P",sp:5,lv:40,k:"flag",fl:"critDmg",val:15},{id:"of06",nm:"全力強打",ty:"A",sp:5,lv:50,mp:14,k:"dmg",pw:200,hm:-10,brk:25},{id:"of07",nm:"連撃の才能",ty:"A",sp:6,lv:60,mp:16,k:"dmg",pw:110,hits:2},{id:"of08",nm:"破壊の才能",ty:"P",sp:7,lv:75,k:"stat",stat:"atk",pct:10}],
-spec_defense:[{id:"df01",nm:"防御の才能",ty:"P",sp:3,lv:10,k:"stat",stat:"def",pct:6},{id:"df02",nm:"体力の才能",ty:"P",sp:3,lv:15,k:"stat",stat:"hp",pct:8},{id:"df03",nm:"魔防の才能",ty:"P",sp:3,lv:20,k:"stat",stat:"mdef",pct:6},{id:"df04",nm:"鉄の意志",ty:"A",sp:4,lv:30,mp:10,k:"guard"},{id:"df05",nm:"庇護の才能",ty:"A",sp:5,lv:40,mp:14,k:"shield",pct:20,tn:2,tg:"party"},{id:"df06",nm:"被回復の才能",ty:"P",sp:4,lv:50,k:"flag",fl:"healRecv",val:10},{id:"df07",nm:"ダメージ軽減",ty:"P",sp:6,lv:60,k:"flag",fl:"dmgReduce",val:5},{id:"df08",nm:"不屈の才能",ty:"P",sp:7,lv:75,k:"stat",stat:"def",pct:10}],
-spec_support:[{id:"sp01",nm:"回復の才能",ty:"P",sp:3,lv:10,k:"flag",fl:"healPow",val:8},{id:"sp02",nm:"魔力の才能",ty:"P",sp:3,lv:15,k:"stat",stat:"mp",pct:10},{id:"sp03",nm:"小回復",ty:"A",sp:3,lv:20,mp:8,k:"heal",pw:70,tg:"party"},{id:"sp04",nm:"全体浄化",ty:"A",sp:4,lv:30,mp:12,k:"cleanse",tg:"party"},{id:"sp05",nm:"強化の才能",ty:"P",sp:4,lv:40,k:"flag",fl:"buffPow",val:8},{id:"sp06",nm:"魔力供給",ty:"A",sp:4,lv:50,mp:0,k:"mp",pw:12,tg:"party"},{id:"sp07",nm:"MP節約の才能",ty:"P",sp:5,lv:60,k:"flag",fl:"mpReduce",val:1},{id:"sp08",nm:"蘇生の才能",ty:"A",sp:7,lv:75,mp:25,k:"revive",pw:40}],
-spec_speed:[{id:"sd01",nm:"敏捷の才能",ty:"P",sp:3,lv:10,k:"stat",stat:"agi",pct:6},{id:"sd02",nm:"回避の才能",ty:"P",sp:3,lv:15,k:"flag",fl:"eva",val:6},{id:"sd03",nm:"連撃行動の才能",ty:"P",sp:4,lv:20,k:"flag",fl:"extraAct",val:6},{id:"sd04",nm:"命中の才能",ty:"P",sp:3,lv:30,k:"flag",fl:"hit",val:6},{id:"sd05",nm:"神速",ty:"A",sp:4,lv:40,mp:10,k:"buff",stat:"agi",pct:20,tn:2,tg:"self"},{id:"sd06",nm:"鈍足撃",ty:"A",sp:4,lv:50,mp:10,k:"dmg",pw:100,st:"slow"},{id:"sd07",nm:"先制の才能",ty:"P",sp:5,lv:60,k:"flag",fl:"firstStrike",val:10},{id:"sd08",nm:"双撃の才能",ty:"A",sp:6,lv:75,mp:14,k:"dmg",pw:90,hits:2}],
-talent:[{id:"tl01",nm:"才能:HP+5%",ty:"P",sp:2,lv:1,k:"stat",stat:"hp",pct:5},{id:"tl02",nm:"才能:物攻+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"atk",pct:4},{id:"tl03",nm:"才能:魔攻+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"matk",pct:4},{id:"tl04",nm:"才能:物防+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"def",pct:4},{id:"tl05",nm:"才能:素早さ+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"agi",pct:4},{id:"tl06",nm:"才能:運+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"luk",pct:4},{id:"tl07",nm:"才能:命中+5",ty:"P",sp:2,lv:1,k:"flag",fl:"hit",val:5},{id:"tl08",nm:"才能:回避+5",ty:"P",sp:2,lv:1,k:"flag",fl:"eva",val:5},{id:"tl09",nm:"才能:会心+4",ty:"P",sp:2,lv:1,k:"flag",fl:"critRate",val:4},{id:"tl10",nm:"才能:MP+8%",ty:"P",sp:2,lv:1,k:"stat",stat:"mp",pct:8}],
+spec_offense:[{id:"of01",nm:"猛攻",nm2:["猛攻","魔力増強"],ty:"P",sp:3,lv:10,k:"stat",stat:"atk",pct:6},{id:"of02",nm:"会心の眼",nm2:["会心の眼","集中の眼"],ty:"P",sp:3,lv:15,k:"flag",fl:"critRate",val:6},{id:"of03",nm:"猛撃",ty:"A",sp:4,lv:20,mp:10,k:"dmg",pw:140,hm:-5,brk:15},{id:"of04",nm:"破鎧撃",nm2:["破鎧撃","魔法貫通"],ty:"P",sp:4,lv:30,k:"flag",fl:"defPen",val:8},{id:"of05",nm:"仕上げの一撃",nm2:["仕上げの一撃","クリティカルマジック"],ty:"P",sp:5,lv:40,k:"flag",fl:"critDmg",val:15},{id:"of06",nm:"全力強打",ty:"A",sp:5,lv:50,mp:14,k:"dmg",pw:200,hm:-10,brk:25},{id:"of07",nm:"連ねる刃",nm2:["連ねる刃","連詠"],ty:"A",sp:6,lv:60,mp:16,k:"dmg",pw:110,hits:2},{id:"of08",nm:"破壊の意志",nm2:["破壊の意志","圧倒の意志"],ty:"P",sp:7,lv:75,k:"stat",stat:"atk",pct:10}],
+spec_defense:[{id:"df01",nm:"鉄壁の構え",nm2:["鉄壁の構え","障壁の構え"],ty:"P",sp:3,lv:10,k:"stat",stat:"def",pct:6},{id:"df02",nm:"生命力強化",nm2:["生命力強化","生命の祝福"],ty:"P",sp:3,lv:15,k:"stat",stat:"hp",pct:8},{id:"df03",nm:"魔障の肌",nm2:["魔障の肌","魔法障壁"],ty:"P",sp:3,lv:20,k:"stat",stat:"mdef",pct:6},{id:"df04",nm:"鉄の意志",ty:"A",sp:4,lv:30,mp:10,k:"guard"},{id:"df05",nm:"守護の誓い",nm2:["守護の誓い","聖域の祈り"],ty:"A",sp:5,lv:40,mp:14,k:"shield",pct:20,tn:2,tg:"party"},{id:"df06",nm:"癒やしの体",nm2:["癒やしの体","癒やしの祝福"],ty:"P",sp:4,lv:50,k:"flag",fl:"healRecv",val:10},{id:"df07",nm:"受け流し",nm2:["受け流し","魔法 ward"],ty:"P",sp:6,lv:60,k:"flag",fl:"dmgReduce",val:5},{id:"df08",nm:"不屈の心",nm2:["不屈の心","不屈の精神"],ty:"P",sp:7,lv:75,k:"stat",stat:"def",pct:10}],
+spec_support:[{id:"sp01",nm:"癒やしの腕",nm2:["癒やしの腕","癒やしの光"],ty:"P",sp:3,lv:10,k:"flag",fl:"healPow",val:8},{id:"sp02",nm:"魔力循環",ty:"P",sp:3,lv:15,k:"stat",stat:"mp",pct:10},{id:"sp03",nm:"小回復",ty:"A",sp:3,lv:20,mp:8,k:"heal",pw:70,tg:"party"},{id:"sp04",nm:"全体浄化",ty:"A",sp:4,lv:30,mp:12,k:"cleanse",tg:"party"},{id:"sp05",nm:"増幅の詠唱",ty:"P",sp:4,lv:40,k:"flag",fl:"buffPow",val:8},{id:"sp06",nm:"魔力供給",ty:"A",sp:4,lv:50,mp:0,k:"mp",pw:12,tg:"party"},{id:"sp07",nm:"魔力節約",ty:"P",sp:5,lv:60,k:"flag",fl:"mpReduce",val:1},{id:"sp08",nm:"蘇生の叫び",nm2:["蘇生の叫び","蘇生の詠唱"],ty:"A",sp:7,lv:75,mp:25,k:"revive",pw:40}],
+spec_speed:[{id:"sd01",nm:"俊足",nm2:["俊足","風歩き"],ty:"P",sp:3,lv:10,k:"stat",stat:"agi",pct:6},{id:"sd02",nm:"柳の回避",nm2:["柳の回避","蜃気楼"],ty:"P",sp:3,lv:15,k:"flag",fl:"eva",val:6},{id:"sd03",nm:"残像歩法",nm2:["残像歩法","加速術"],ty:"P",sp:4,lv:20,k:"flag",fl:"extraAct",val:6},{id:"sd04",nm:"鷹の眼",nm2:["鷹の眼","真視"],ty:"P",sp:3,lv:30,k:"flag",fl:"hit",val:6},{id:"sd05",nm:"神速",ty:"A",sp:4,lv:40,mp:10,k:"buff",stat:"agi",pct:20,tn:2,tg:"self"},{id:"sd06",nm:"鈍足撃",ty:"A",sp:4,lv:50,mp:10,k:"dmg",pw:100,st:"slow"},{id:"sd07",nm:"先駆け",nm2:["先駆け","先詠"],ty:"P",sp:5,lv:60,k:"flag",fl:"firstStrike",val:10},{id:"sd08",nm:"双撃",nm2:["双撃","二重詠唱"],ty:"A",sp:6,lv:75,mp:14,k:"dmg",pw:90,hits:2}],
+talent:[{id:"tl01",nm:"活力",ty:"P",sp:2,lv:1,k:"stat",stat:"hp",pct:5},{id:"tl02",nm:"剛力",ty:"P",sp:2,lv:1,k:"stat",stat:"atk",pct:4},{id:"tl03",nm:"叡智",ty:"P",sp:2,lv:1,k:"stat",stat:"matk",pct:4},{id:"tl04",nm:"硬気",ty:"P",sp:2,lv:1,k:"stat",stat:"def",pct:4},{id:"tl05",nm:"敏捷",ty:"P",sp:2,lv:1,k:"stat",stat:"agi",pct:4},{id:"tl06",nm:"強運",ty:"P",sp:2,lv:1,k:"stat",stat:"luk",pct:4},{id:"tl07",nm:"精密",ty:"P",sp:2,lv:1,k:"flag",fl:"hit",val:5},{id:"tl08",nm:"回避",ty:"P",sp:2,lv:1,k:"flag",fl:"eva",val:5},{id:"tl09",nm:"鋭気",ty:"P",sp:2,lv:1,k:"flag",fl:"critRate",val:4},{id:"tl10",nm:"瞑想",ty:"P",sp:2,lv:1,k:"stat",stat:"mp",pct:8}],
 adv_attack:[{id:"va01",nm:"上級:攻撃+12%",ty:"P",sp:6,lv:50,k:"stat",stat:"atk",pct:12},{id:"va02",nm:"上級:会心+12",ty:"P",sp:6,lv:50,k:"flag",fl:"critRate",val:12},{id:"va03",nm:"上級撃",ty:"A",sp:7,lv:55,mp:20,k:"dmg",pw:240,brk:35},{id:"va04",nm:"上級:貫通+15",ty:"P",sp:7,lv:60,k:"flag",fl:"defPen",val:15},{id:"va05",nm:"上級連斬",ty:"A",sp:8,lv:65,mp:24,k:"dmg",pw:110,hits:3},{id:"va06",nm:"上級:HP+12%",ty:"P",sp:7,lv:70,k:"stat",stat:"hp",pct:12},{id:"va07",nm:"上級:溜め+70",ty:"A",sp:8,lv:75,mp:18,k:"chant",pct:70},{id:"va08",nm:"上級:会心威力+30",ty:"P",sp:9,lv:80,k:"flag",fl:"critDmg",val:30}],
 adv_support:[{id:"vs01",nm:"上級:魔攻+12%",ty:"P",sp:6,lv:50,k:"stat",stat:"matk",pct:12},{id:"vs02",nm:"上級:回復+20",ty:"P",sp:6,lv:50,k:"flag",fl:"healPow",val:20},{id:"vs03",nm:"上級治癒",ty:"A",sp:7,lv:55,mp:24,k:"heal",pw:140,tg:"party"},{id:"vs04",nm:"上級:MP+20%",ty:"P",sp:7,lv:60,k:"stat",stat:"mp",pct:20},{id:"vs05",nm:"上級結界",ty:"A",sp:8,lv:65,mp:28,k:"shield",pct:35,tn:2,tg:"party"},{id:"vs06",nm:"上級:強化+15",ty:"P",sp:7,lv:70,k:"flag",fl:"buffPow",val:15},{id:"vs07",nm:"上級蘇生",ty:"A",sp:9,lv:75,mp:32,k:"revive",pw:60},{id:"vs08",nm:"上級:軽減+10",ty:"P",sp:9,lv:80,k:"flag",fl:"dmgReduce",val:10}],
 ult_holy_knight:[{id:"u01",nm:"聖域不動陣",ty:"A",sp:10,lv:70,mp:40,k:"shield",pct:50,tn:3,tg:"party"}],ult_war_god:[{id:"u02",nm:"軍神の断罪",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:350,crit:25,brk:50}],ult_sword_saint:[{id:"u03",nm:"無想連斬",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:120,hits:4,crit:20}],ult_assassin:[{id:"u04",nm:"影殺・絶",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:300,crit:40}],ult_bastion:[{id:"u05",nm:"絶対城塞",ty:"A",sp:10,lv:70,mp:40,k:"guard"}],ult_saint:[{id:"u06",nm:"聖母の祝福",ty:"A",sp:10,lv:70,mp:40,k:"heal",pw:200,tg:"party"}],ult_maestro:[{id:"u07",nm:"天地交響曲",ty:"A",sp:10,lv:70,mp:40,k:"buff",stat:"atk",pct:25,tn:3,tg:"party"}],ult_arch_summoner:[{id:"u08",nm:"神霊降臨",ty:"A",sp:10,lv:70,mp:40,k:"summon",pw:250,tn:3}],ult_beast_lord:[{id:"u09",nm:"百獣の咆哮",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:200,tg:"all",brk:40}],ult_arch_sage:[{id:"u10",nm:"大星脈陣",ty:"A",sp:10,lv:70,mp:40,k:"mp",pw:30,tg:"party"}],ult_archmage:[{id:"u11",nm:"禁呪・隕石",ty:"A",sp:10,lv:70,mp:40,k:"dmg",mg:1,pw:220,tg:"all",el:"fire"}],ult_shadow_master:[{id:"u12",nm:"影域支配",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:280,st:"stun",el:"dark"}],ult_death_lord:[{id:"u13",nm:"冥界の軍勢",ty:"A",sp:10,lv:70,mp:40,k:"summon",pw:150,tn:3}],ult_gunslinger:[{id:"u14",nm:"乱れ撃ち・極",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:90,hits:5,crit:20}],ult_war_demon:[{id:"u15",nm:"戦鬼の血祭",ty:"A",sp:10,lv:70,mp:0,k:"dmg",pw:350,hpCost:12,brk:50}],ult_grand_onmyoji:[{id:"u16",nm:"陰陽転生陣",ty:"A",sp:10,lv:70,mp:40,k:"dmg",mg:1,pw:200,tg:"all",el:"light"}],
@@ -206,6 +208,7 @@ reinc_pool:[{id:"rc01",nm:"転生:全ステ+8%",ty:"P",sp:8,lv:1,k:"stat",stat:"
 smith:[{id:"w01",nm:"採掘知識",ty:"P",sp:2,lv:1,k:"flag",fl:"mineYield",val:1},{id:"w02",nm:"宝石の勘",ty:"P",sp:2,lv:5,k:"flag",fl:"gemFind",val:8},{id:"w03",nm:"精錬知識",ty:"P",sp:3,lv:10,k:"flag",fl:"refineSave",val:20},{id:"w04",nm:"名匠の眼",ty:"P",sp:3,lv:15,k:"flag",fl:"smithLuck",val:10},{id:"w05",nm:"効率鍛造",ty:"P",sp:3,lv:20,k:"flag",fl:"craftSave",val:20},{id:"w06",nm:"宝石研磨",ty:"P",sp:4,lv:30,k:"flag",fl:"gemPow",val:2},{id:"w07",nm:"会心の一打",ty:"P",sp:5,lv:40,k:"flag",fl:"smithCrit",val:15},{id:"w08",nm:"伝承鍛冶",ty:"P",sp:6,lv:60,k:"flag",fl:"smithLuck2",val:15}]
 };
 const SKILL_INDEX={};Object.values(SKILLS).forEach(a=>a.forEach(s=>SKILL_INDEX[s.id]=s));
+function skillNm(s,job){if(s.nm2&&job)return COMBAT_JOBS.has(job)?s.nm2[0]:s.nm2[1];return s.nm;}
 
 function flagDesc(fl,v){switch(fl){
 case"critRate":return`感覚を研ぎ澄まし、会心率を${v}上げる。`;
@@ -419,23 +422,20 @@ if(sl==="sub"){eq=eq.filter(u=>{const it=inv(u);return it&&it.slot!=="sub";});su
 if(uid){const it=inv(uid);if(it&&it.slot==="weapon")subW=uid;else eq.push(uid);}}
 else{eq=eq.filter(u=>{const it=inv(u);return it&&it.slot!==sl;});if(subW===uid)subW=undefined;if(uid)eq.push(uid);}
 return{eq,subW};}
-function diffText(c,sl,uid){const cur=calcTotal(c);const te=tempEquip(c,sl,uid);const tmp=Object.assign({},c,{equip:te.eq,subW:te.subW});const nt=calcTotal(tmp);
-const p=[];STAT_KEYS.forEach(k=>{const d=nt[k]-cur[k];if(d)p.push(`${STAT_NM[k]}${d>0?"+":""}${d}`);});return p.length?p.join(" "):"変化なし";}
+function diffHTML(c,sl,uid){const cur=calcTotal(c);const te=tempEquip(c,sl,uid);const tmp=Object.assign({},c,{equip:te.eq,subW:te.subW});const nt=calcTotal(tmp);
+const p=[];STAT_KEYS.forEach(k=>{const d=nt[k]-cur[k];if(d)p.push(`<span class="${d>0?"up":"dn"}">${STAT_NM[k]}${d>0?"+":""}${d}</span>`);});
+return p.length?p.join(" "):'<span class="res">変化なし</span>';}
 function renderParty(){renderGold();const el=$("partyList");if(!game.characters.length){el.innerHTML='<div class="card">未作成</div>';$("invList").innerHTML="";renderItems();return;}
 el.innerHTML=game.characters.map((c,i)=>{const t=calcTotal(c);const si=setInfo(c);
 const others=new Set();game.characters.forEach((oc,oi)=>{if(oi!==i)equippedUids(oc).forEach(u=>others.add(u));});
 const slots=["weapon","sub","armor","accessory"].map(sl=>{
 const all=(game.inv||[]).filter(it=>it.slot===sl||(sl==="sub"&&canDual(c)&&it.slot==="weapon"&&DUAL_TYPES.has(it.type)));
+const vis=all.filter(it=>(it.jobs==="all"||it.jobs.includes(c.jobId))&&!others.has(it.uid));
 const curUid=sl==="sub"?((c.equip||[]).find(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot==="sub";})||c.subW):(c.equip||[]).find(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot===sl;})||"";
-const usable=it=>c.level>=it.lv&&(it.jobs==="all"||it.jobs.includes(c.jobId));
-const ok=all.filter(it=>!others.has(it.uid)&&usable(it));
-const ng=all.filter(it=>!(ok.includes(it)));
-const okOpts=ok.map(o=>`<option value="${o.uid}" ${o.uid===curUid?"selected":""}>${o.name}+${o.enh||0}〔${diffText(c,sl,o.uid)}〕</option>`).join("");
-const ngOpts=ng.map(o=>{const r=[];if(others.has(o.uid)){const ow=game.characters.find((oc,oi)=>oi!==i&&equippedUids(oc).includes(o.uid));r.push((ow?ow.name:"他")+"が装備中");}
-if(c.level<o.lv)r.push("Lv"+o.lv+"必要");if(!(o.jobs==="all"||o.jobs.includes(c.jobId)))r.push("職業違い");
-if(sl==="sub"&&o.slot==="weapon"&&!canDual(c))r.push("二刀流が必要");return `<option disabled>${o.name}+${o.enh||0}（${r.join("/")}）</option>`;}).join("");
-const note=sl==="sub"&&canDual(c)?' <span class="mini" style="color:#7fd7ff">二刀流:軽量武器OK</span>':"";
-return `<label>${sl}${note}<select data-c="${i}" data-s="${sl}" class="eqsel"><option value="">なし${curUid?"〔"+diffText(c,sl,"")+"〕":""}</option>${okOpts}${ngOpts}</select></label>`;}).join("");
+const curIt=curUid?game.inv.find(x=>x.uid===curUid):null;
+const rows=vis.map(it=>{const cur=it.uid===curUid;const lvOk=c.level>=it.lv;
+return `<div class="mini" style="margin:3px 0">・${it.name}+${it.enh||0} ${diffHTML(c,sl,it.uid)} ${cur?'<b style="color:#7fd7ff">装備中</b>':`<button data-c="${i}" data-sl="${sl}" data-u="${it.uid}" class="eqBtn" ${lvOk?"":"disabled"}>${lvOk?"装備":"Lv"+it.lv+"必要"}</button>`}</div>`;}).join("")||'<div class="mini">装備可能なものなし</div>';
+return `<details class="card" style="padding:6px;margin:4px 0"><summary class="mini"><b>${sl}</b>：${curIt?curIt.name+"+"+(curIt.enh||0):"なし"}${sl==="sub"&&canDual(c)?' <span style="color:#7fd7ff">二刀流OK</span>':""}</summary>${rows}${curUid?`<div style="margin-top:4px"><button data-c="${i}" data-sl="${sl}" class="uneqBtn">外す</button></div>`:""}</details>`;}).join("");
 let btns="";
 if(c.level>=50&&!c.adv&&ADV_MAP[c.jobId])btns+=`<button data-c="${i}" class="promoBtn"><span class="adv">上級職転職：${JOBS[ADV_MAP[c.jobId]].nm}</span></button>`;
 if(c.level>=100&&c.adv&&(c.reinc||0)<5)btns+=`<button data-c="${i}" class="reincBtn"><span class="rc">転生（${(c.reinc||0)+1}回目）</span></button>`;
@@ -444,8 +444,8 @@ return `<div class="card"><h3>${c.name}</h3><div class="mini">${JOBS[c.jobId].nm
 <div class="mini bw">MP ${c.currentMp??t.mp}/${t.mp} ${bar(c.currentMp??t.mp,t.mp,"mp")}</div>
 <div class="mini">物攻${t.atk} 物防${t.def} 魔攻${t.matk} 魔防${t.mdef} 素早${t.agi} 運${t.luk} 命中${t.hit} 回避${t.eva}</div>
 <div class="two">${slots}</div>${btns}</div>`;}).join("");
-document.querySelectorAll(".eqsel").forEach(sel=>sel.addEventListener("change",e=>{const c=game.characters[+e.target.dataset.c];const sl=e.target.dataset.s;const v=e.target.value;
-const te=tempEquip(c,sl,v||undefined);c.equip=te.eq;c.subW=te.subW;saveGame();renderParty();}));
+el.querySelectorAll(".eqBtn").forEach(b=>b.onclick=e=>{const c=game.characters[+e.currentTarget.dataset.c];const te=tempEquip(c,e.currentTarget.dataset.sl,e.currentTarget.dataset.u);c.equip=te.eq;c.subW=te.subW;saveGame();renderParty();});
+el.querySelectorAll(".uneqBtn").forEach(b=>b.onclick=e=>{const c=game.characters[+e.currentTarget.dataset.c];const te=tempEquip(c,e.currentTarget.dataset.sl,undefined);c.equip=te.eq;c.subW=te.subW;saveGame();renderParty();});
 document.querySelectorAll(".promoBtn").forEach(b=>b.onclick=e=>{promote(game.characters[+e.currentTarget.dataset.c]);});
 document.querySelectorAll(".reincBtn").forEach(b=>b.onclick=e=>{reincarnate(game.characters[+e.currentTarget.dataset.c]);});
 $("invList").innerHTML=(game.inv||[]).map(it=>`<div class="mini">${it.name}+${it.enh||0} [${RARITY[it.rar].nm}] Lv${it.lv} <button data-e="${it.uid}" class="enhBtn" ${game.gold>=enhCost(it)&&(it.enh||0)<10?"":"disabled"}>強化${enhCost(it)}G(${enhChance(it)}%)</button> <button data-e="${it.uid}" class="sellBtn">売${sellVal(it)}G</button></div>`).join("")||'<div class="mini">なし</div>';
@@ -465,8 +465,8 @@ const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();
 function reincarnate(c){if(c.level<100||!c.adv||(c.reinc||0)>=5)return;c.reinc=(c.reinc||0)+1;c.level=1;c.exp=0;c.sp=(c.sp||0)+20;
 const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();alert(c.name+"は転生した！（"+c.reinc+"回目）");}
 
-function skillRow(c,key,s){const k=String(key);const learned=(c.skills||[]).includes(s.id);const can=!learned&&c.level>=s.lv&&(c.sp||0)>=s.sp;
-let row=`<div class="mini">${s.nm} [${s.ty==="P"?"P":"A"}] SP${s.sp} Lv${s.lv} ${learned?'<b style="color:#9fe8a8">習得済</b>':`<button data-c="${k}" data-s="${s.id}" class="learnBtn" ${can?"":"disabled"}>詳細/習得</button>`}</div>`;
+function skillRow(c,key,s){const k=String(key);const nm=skillNm(s,c.jobId);const learned=(c.skills||[]).includes(s.id);const can=!learned&&c.level>=s.lv&&(c.sp||0)>=s.sp;
+let row=`<div class="mini">${nm} [${s.ty==="P"?"P":"A"}] SP${s.sp} Lv${s.lv} ${learned?'<b style="color:#9fe8a8">習得済</b>':`<button data-c="${k}" data-s="${s.id}" class="learnBtn" ${can?"":"disabled"}>詳細/習得</button>`}</div>`;
 if(openSkill&&openSkill.c===k&&openSkill.id===s.id){row+=`<div class="card" style="margin:4px 0 8px;border-color:#35506b"><div class="mini" style="color:#ffd76a">${FLAVOR[s.id]||""}</div><div class="mini">${skillDesc(s)}</div><div class="two"><button data-c="${k}" data-s="${s.id}" class="learnYesBtn" ${can?"":"disabled"}>習得する</button><button class="learnNoBtn">やめる</button></div></div>`;}
 return row;}
 function renderSkills(){const el=$("skillList");if(!game.characters.length){el.innerHTML='<div class="card">未作成</div>';return;}
@@ -484,7 +484,8 @@ if(c.reinc)h+=`<hr><div class="mini rc"><b>転生スキル</b></div>`+(SKILLS.re
 h+="</div>";}
 el.innerHTML=h;
 el.querySelectorAll("[data-sel]").forEach(b=>b.onclick=e=>{const v=e.currentTarget.dataset.sel;skillSel=v==="smith"?"smith":+v;openSkill=null;renderSkills();});
-el.querySelectorAll(".learnBtn").forEach(b=>b.onclick=e=>{openSkill={c:e.currentTarget.dataset.c,id:e.currentTarget.dataset.s};renderSkills();});
+el.querySelectorAll(".learnBtn").forEach(b=>b.onclick=e=>{const key=e.currentTarget.dataset.c;const ch=key==="smith"?game.smith:game.characters[+key];const s=SKILL_INDEX[e.currentTarget.dataset.s];
+openSkill={c:key,id:s.id};$("lmName").textContent=skillNm(s,ch.jobId);renderSkills();});
 el.querySelectorAll(".learnNoBtn").forEach(b=>b.onclick=()=>{openSkill=null;renderSkills();});
 el.querySelectorAll(".learnYesBtn").forEach(b=>b.onclick=e=>{const key=e.currentTarget.dataset.c;const sid=e.currentTarget.dataset.s;const ch=key==="smith"?game.smith:game.characters[+key];const s=SKILL_INDEX[sid];
 if(ch&&s&&ch.level>=s.lv&&(ch.sp||0)>=s.sp){ch.sp-=s.sp;ch.skills=ch.skills||[];ch.skills.push(s.id);saveGame();}
@@ -565,7 +566,7 @@ if(opt.st&&t.hp>0&&Math.random()*100<80+(c.flags.debHit||0)){t.states[opt.st]={t
 if(t.hp<=0&&t.type==="enemy")log(`<span class="gold">${t.name}を倒した！</span>`);}}
 function applyMod(t,stat,pctV,turns){if(!t||!t.stats)return;const mult=1+pctV/100;t.stats[stat]=Math.max(1,Math.floor(t.stats[stat]*mult));(t.timers=t.timers||[]).push({stat,mult,turns:turns||3});}
 function useSkill(c,s){const cost=mpCost(s,c);c.mp-=cost;
-log(`<span class="${SK_CLS[s.k]||"skb"}">◆ ${c.name}の【${s.nm}】</span>${cost>0?` <span class="res">MP${cost}</span>`:""}`);
+log(`<span class="${SK_CLS[s.k]||"skb"}">◆ ${c.name}の【${skillNm(s,c.jobId)}】</span>${cost>0?` <span class="res">MP${cost}</span>`:""}`);
 if(s.hpCost){const cost2=Math.floor(c.maxHp*s.hpCost/100);c.hp=Math.max(1,c.hp-cost2);log(`${c.name}は自らの血を代償に力を解放する。`);}
 switch(s.k){
 case"dmg":case"drain":{let pw=s.pw||100;if(s.hpCost&&c.flags.hpCostPow)pw=Math.floor(pw*(1+c.flags.hpCostPow/100));
