@@ -176,7 +176,6 @@ grand_onmyoji:{nm:"グラン陰陽師",base:{hp:62,mp:55,atk:6,def:9,matk:20,mde
 };
 const ADV_MAP={sword_shield:"holy_knight",great_sword:"war_god",blade_master:"sword_saint",twin_dagger:"assassin",guardian:"bastion",healer:"saint",buffer_debuffer:"maestro",summoner:"arch_summoner",tamer:"beast_lord",sage:"arch_sage",attack_mage:"archmage",shadow_user:"shadow_master",necromancer:"death_lord",gunner:"gunslinger",berserker:"war_demon",onmyoji:"grand_onmyoji"};
 const BASE_OF={};Object.entries(ADV_MAP).forEach(([b,a])=>BASE_OF[a]=b);
-/* 物理職判定（特技系統の振り分け・上級スキル選択に使用）※攻撃魔法使いは魔法職なので除外 */
 const COMBAT_JOBS=new Set(["sword_shield","great_sword","blade_master","twin_dagger","guardian","shadow_user","gunner","berserker","tamer","holy_knight","war_god","sword_saint","assassin","bastion","beast_lord","shadow_master","gunslinger","war_demon"]);
 const TANK_JOBS=new Set(["guardian","sword_shield","bastion","holy_knight"]);
 const HEAL_JOBS=new Set(["healer","saint","sage","arch_sage","onmyoji","grand_onmyoji"]);
@@ -468,9 +467,10 @@ const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();
 function reincarnate(c){if(c.level<100||!c.adv||(c.reinc||0)>=5)return;c.reinc=(c.reinc||0)+1;c.level=1;c.exp=0;c.sp=(c.sp||0)+20;
 const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();alert(c.name+"は転生した！（"+c.reinc+"回目）");}
 
-function skillRow(c,key,s){const k=String(key);const learned=(c.skills||[]).includes(s.id);const can=!learned&&c.level>=s.lv&&(c.sp||0)>=s.sp;
+const SRC_TAG={job:'<span class="eff">[職業]</span>',spec:'<span class="res">[系統]</span>',talent:'<span class="res">[才能]</span>',adv:'<span class="adv">[上級]</span>',ult:'<span class="gold">[奥義]</span>',rc:'<span class="rc">[転生]</span>'};
+function skillRow(c,key,s,src){const k=String(key);const learned=(c.skills||[]).includes(s.id);const can=!learned&&c.level>=s.lv&&(c.sp||0)>=s.sp;
 const isOpen=openSkill&&openSkill.c===k&&openSkill.id===s.id;
-let row=`<div class="mini">${s.nm} [${s.ty==="P"?"P":"A"}] SP${s.sp} Lv${s.lv}${learned?' <b style="color:#9fe8a8">習得済</b>':""} <button data-c="${k}" data-s="${s.id}" class="learnBtn">${isOpen?"閉じる":"詳細"}</button></div>`;
+let row=`<div class="mini">${SRC_TAG[src]||""}${s.nm} [${s.ty==="P"?"P":"A"}] SP${s.sp} Lv${s.lv}${learned?' <b style="color:#9fe8a8">習得済</b>':""} <button data-c="${k}" data-s="${s.id}" class="learnBtn">${isOpen?"閉じる":"詳細"}</button></div>`;
 if(isOpen){row+=`<div class="card" style="margin:4px 0 8px;border-color:#35506b"><div class="mini" style="color:#ffd76a">${FLAVOR[s.id]||""}</div><div class="mini">${skillDesc(s)}</div>`;
 row+=learned?`<div><button class="learnNoBtn">閉じる</button></div>`:`<div class="two"><button data-c="${k}" data-s="${s.id}" class="learnYesBtn" ${can?"":"disabled"}>習得する</button><button class="learnNoBtn">やめる</button></div>`;
 row+="</div>";}
@@ -481,14 +481,19 @@ const selBtns=game.characters.map((c,i)=>`<button class="selbtn ${skillSel===i?"
 let h=`<div class="card"><div class="mini"><b>キャラを選ぶ</b></div><div class="selrow" style="grid-template-columns:repeat(${game.characters.length+1},1fr)">${selBtns}</div></div>`;
 if(skillSel==="smith"){h+=`<div class="card"><h3>${game.smith.name}（鍛冶師 SP ${game.smith.sp||0}）</h3><div class="mini"><b>鍛冶スキル</b></div>`+(SKILLS.smith||[]).map(s=>skillRow(game.smith,"smith",s)).join("")+"</div>";}
 else{const c=game.characters[skillSel];const i=skillSel;const phys=COMBAT_JOBS.has(c.jobId);
-h+=`<div class="card"><h3>${c.name}（SP ${c.sp||0}）${c.adv?' <span class="adv">上級</span>':""}${c.reinc?` <span class="rc">転生${c.reinc}</span>`:""}</h3><div class="mini">― 職業 ―</div>`+(SKILLS[c.jobId]||[]).map(s=>skillRow(c,i,s)).join("");
-[["spec_offense","攻撃"],["spec_defense","防御"],["spec_support","支援"],["spec_speed","速度"]].forEach(([k,nm])=>{
-const list=(SKILLS[k]||[]).filter(s=>!s.for||s.for===(phys?"phys":"mag"));
-h+=`<div class="mini"><b>${nm}系統${phys?"（物理）":"（魔法）"}</b></div>`+list.map(s=>skillRow(c,i,s)).join("");});
-h+=`<div class="mini"><b>才能</b></div>`+(SKILLS.talent||[]).map(s=>skillRow(c,i,s)).join("");
-if(c.adv){const pool=phys?"adv_attack":"adv_support";h+=`<hr><div class="mini adv"><b>上級スキル</b></div>`+(SKILLS[pool]||[]).map(s=>skillRow(c,i,s)).join("");
-h+=`<div class="mini adv"><b>奥義</b></div>`+(SKILLS["ult_"+c.jobId]||[]).map(s=>skillRow(c,i,s)).join("");}
-if(c.reinc)h+=`<hr><div class="mini rc"><b>転生スキル</b></div>`+(SKILLS.reinc_pool||[]).map(s=>skillRow(c,i,s)).join("");
+const pool=[];
+(SKILLS[c.jobId]||[]).forEach(s=>pool.push({s,src:"job"}));
+["spec_offense","spec_defense","spec_support","spec_speed"].forEach(k=>{(SKILLS[k]||[]).forEach(s=>{if(!s.for||s.for===(phys?"phys":"mag"))pool.push({s,src:"spec"});});});
+(SKILLS.talent||[]).forEach(s=>pool.push({s,src:"talent"}));
+if(c.adv){const ap=phys?"adv_attack":"adv_support";(SKILLS[ap]||[]).forEach(s=>pool.push({s,src:"adv"}));
+(SKILLS["ult_"+c.jobId]||[]).forEach(s=>pool.push({s,src:"ult"}));}
+if(c.reinc)(SKILLS.reinc_pool||[]).forEach(s=>pool.push({s,src:"rc"}));
+const bands={};pool.forEach(({s,src})=>{const b=Math.floor((s.lv-1)/10)*10+1;(bands[b]=bands[b]||[]).push({s,src});});
+h+=`<div class="card"><h3>${c.name}（SP ${c.sp||0} / ${phys?"物理系":"魔法系"}）${c.adv?' <span class="adv">上級</span>':""}${c.reinc?` <span class="rc">転生${c.reinc}</span>`:""}</h3>
+<div class="mini">習得レベル帯ごとに全スキルを表示。タグは元カテゴリ。</div>`;
+Object.keys(bands).map(Number).sort((a,b)=>a-b).forEach(b=>{
+bands[b].sort((x,y)=>x.s.lv-y.s.lv||x.s.sp-y.s.sp);
+h+=`<hr><div class="mini" style="color:#ffd76a"><b>習得Lv${b}〜${Math.min(b+9,100)}</b></div>`+bands[b].map(x=>skillRow(c,i,x.s,x.src)).join("");});
 h+="</div>";}
 el.innerHTML=h;
 el.querySelectorAll("[data-sel]").forEach(b=>b.onclick=e=>{const v=e.currentTarget.dataset.sel;skillSel=v==="smith"?"smith":+v;openSkill=null;renderSkills();});
