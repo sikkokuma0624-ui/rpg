@@ -25,7 +25,7 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 .bar{height:7px;background:#22303c;border-radius:4px;overflow:hidden;margin:2px 0;min-width:60px}
 .bar i{display:block;height:100%;background:#4caf7d}.bar.mp i{background:#42a5f5}.bar.en i{background:#ef5350}
 .bw{display:flex;align-items:center;gap:6px}
-.selrow{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px}
+.selrow{display:grid;gap:4px;margin-bottom:8px}
 .selbtn{padding:8px 2px;font-size:11px}.selbtn.active{background:#35506b}
 </style>
 </head>
@@ -465,9 +465,9 @@ const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();
 function reincarnate(c){if(c.level<100||!c.adv||(c.reinc||0)>=5)return;c.reinc=(c.reinc||0)+1;c.level=1;c.exp=0;c.sp=(c.sp||0)+20;
 const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();alert(c.name+"は転生した！（"+c.reinc+"回目）");}
 
-function skillRow(c,key,s){const learned=(c.skills||[]).includes(s.id);const can=!learned&&c.level>=s.lv&&(c.sp||0)>=s.sp;
-let row=`<div class="mini">${s.nm} [${s.ty==="P"?"P":"A"}] SP${s.sp} Lv${s.lv} ${learned?'<b style="color:#9fe8a8">習得済</b>':`<button data-c="${key}" data-s="${s.id}" class="learnBtn" ${can?"":"disabled"}>詳細/習得</button>`}</div>`;
-if(openSkill&&openSkill.c===key&&openSkill.id===s.id){row+=`<div class="card" style="margin:4px 0 8px;border-color:#35506b"><div class="mini" style="color:#ffd76a">${FLAVOR[s.id]||""}</div><div class="mini">${skillDesc(s)}</div><div class="two"><button data-c="${key}" data-s="${s.id}" class="learnYesBtn" ${can?"":"disabled"}>習得する</button><button class="learnNoBtn">やめる</button></div></div>`;}
+function skillRow(c,key,s){const k=String(key);const learned=(c.skills||[]).includes(s.id);const can=!learned&&c.level>=s.lv&&(c.sp||0)>=s.sp;
+let row=`<div class="mini">${s.nm} [${s.ty==="P"?"P":"A"}] SP${s.sp} Lv${s.lv} ${learned?'<b style="color:#9fe8a8">習得済</b>':`<button data-c="${k}" data-s="${s.id}" class="learnBtn" ${can?"":"disabled"}>詳細/習得</button>`}</div>`;
+if(openSkill&&openSkill.c===k&&openSkill.id===s.id){row+=`<div class="card" style="margin:4px 0 8px;border-color:#35506b"><div class="mini" style="color:#ffd76a">${FLAVOR[s.id]||""}</div><div class="mini">${skillDesc(s)}</div><div class="two"><button data-c="${k}" data-s="${s.id}" class="learnYesBtn" ${can?"":"disabled"}>習得する</button><button class="learnNoBtn">やめる</button></div></div>`;}
 return row;}
 function renderSkills(){const el=$("skillList");if(!game.characters.length){el.innerHTML='<div class="card">未作成</div>';return;}
 if(skillSel!=="smith"&&skillSel>=game.characters.length)skillSel=0;
