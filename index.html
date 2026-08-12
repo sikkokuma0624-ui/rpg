@@ -9,8 +9,8 @@
 h1{font-size:19px;margin:6px 0 12px}h2{font-size:16px;margin:6px 0}h3{font-size:14px;margin:6px 0}
 button,select,input,textarea{font-size:13px;padding:8px;border-radius:9px;border:1px solid #44505c;background:#1b232c;color:#eef3f8;width:100%}
 button{cursor:pointer;background:#24313d;font-weight:bold}button:disabled{opacity:.4;cursor:not-allowed}
-.tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:10px}
-.tabbtn{padding:8px 2px;font-size:11px}.tabbtn.active{background:#35506b}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.tabbtn{flex:1 1 64px;padding:8px 2px;font-size:11px}.tabbtn.active{background:#35506b}
 .tab{display:none}.tab.active{display:block}
 .card{background:#161d26;border:1px solid #2c3b4a;border-radius:12px;padding:10px;margin-bottom:10px}
 .row{display:grid;gap:7px;margin-bottom:8px}.two{display:grid;grid-template-columns:1fr 1fr;gap:7px}.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
@@ -24,7 +24,7 @@ label{display:block;font-size:11px;color:#b8c4d0;margin-bottom:4px}
 .ska{color:#ff9f6a;font-weight:bold}.skh{color:#9fe8a8;font-weight:bold}.skb{color:#7fd7ff;font-weight:bold}.skd{color:#e6b3ff;font-weight:bold}.sks{color:#7fffd4;font-weight:bold}.skm{color:#ffd76a;font-weight:bold}
 hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 .bar{height:7px;background:#22303c;border-radius:4px;overflow:hidden;margin:2px 0;min-width:60px}
-.bar i{display:block;height:100%;background:#4caf7d}.bar.mp i{background:#42a5f5}.bar.en i{background:#ef5350}
+.bar i{display:block;height:100%;background:#4caf7d}.bar.mp i{background:#42a5f5}.bar.en i{background:#ef5350}.bar.sta i{background:#ffd76a}
 .bw{display:flex;align-items:center;gap:6px}
 .selrow{display:grid;gap:4px;margin-bottom:8px}
 .selbtn{padding:8px 2px;font-size:11px}.selbtn.active{background:#35506b}
@@ -35,6 +35,7 @@ details.card summary{cursor:pointer}
 .r11{background:linear-gradient(90deg,#ff6a6a,#ffd76a,#7ee787,#7fd7ff,#d2a8ff,#ff9ecf,#ff6a6a);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;border-color:#ffd76a;animation:rban 4s linear infinite}
 @keyframes rban{to{background-position:300% 0}}
 .gemtag{color:#7fd7ff;font-weight:bold}
+.modalbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:50;align-items:center;justify-content:center}
 </style>
 </head>
 <body>
@@ -46,15 +47,18 @@ details.card summary{cursor:pointer}
 <button class="tabbtn" data-tab="battle">戦闘</button>
 <button class="tabbtn" data-tab="smith">鍛冶</button>
 <button class="tabbtn" data-tab="shop">ショップ</button>
+<button class="tabbtn" data-tab="guide">ガイド</button>
 <button class="tabbtn" data-tab="save">セーブ</button>
+<button class="tabbtn" data-tab="record">記録</button>
 </div>
 
 <section id="tab-create" class="tab"><h2>キャラ作成（4人/Lv1＋鍛冶師）</h2><div id="createBoxes"></div>
-<div class="card"><div class="two"><div><label>鍛冶師（職人）名前</label><input id="name5" maxlength="12" value="ドゥカン"></div><div class="mini" style="align-self:end">戦闘には不参加。採掘/精錬/鍛冶でパーティを支援する5人目。</div></div></div>
+<div class="card"><div class="two"><div><label>鍛冶師（職人）名前</label><input id="name5" maxlength="12" value="ドゥカン"></div><div class="mini" style="align-self:end">戦闘には不参加。採掘/精錬/鍛冶でパーティを支援する5人目。名前は自由に変更できます。</div></div></div>
+<div class="mini">職業の詳しい特徴は「ガイド」タブ参照。おすすめ：タンク1＋回復1＋攻撃2。</div>
 <button id="createBtn">パーティ＋鍛冶師を作成してセーブ</button></section>
 
 <section id="tab-party" class="tab"><h2>パーティ/装備</h2>
-<div class="mini">ゴールド：<span class="gold" id="goldView">0</span> G</div>
+<div class="mini">ゴールド：<span class="gold" id="goldView">0</span> G / 転生の欠片：<span class="rc" id="shardView">0</span></div>
 <div id="partyList"></div>
 <div class="two"><button id="restBtn">休憩して全回復</button><button id="towerViewBtn">実績/タワー</button></div>
 <h3>アイテム</h3><div id="itemList"></div>
@@ -66,11 +70,21 @@ details.card summary{cursor:pointer}
 <div id="skillList"></div></section>
 
 <section id="tab-battle" class="tab"><h2>戦闘</h2>
+<div class="card">
+<div class="mini bw"><b style="color:#ffd76a">スタミナ</b> <span id="staNum">-</span><div class="bar sta" style="flex:1"><i id="staBar" style="width:100%"></i></div></div>
+<div class="three" style="margin-top:5px"><button id="adRecoverBtn">広告を見て回復</button><button id="premiumBtn">プレミアム（買い切り）</button><div class="mini" id="staInfo" style="align-self:center"></div></div>
+<div class="mini" style="margin-top:4px">消費：探索10 / タワー15 / ボス20 / レイド30 / 採掘5（2分で+1自然回復）</div>
+</div>
+<div class="two">
+<div class="card" id="goalsCard"></div>
+<div class="card" id="dailyCard"></div>
+</div>
 <div class="card"><div class="row">
 <div><label>エリア</label><select id="areaSelect"></select></div>
-<div class="two"><label>速度<select id="speedSel"><option value="1">1x</option><option value="2">2x</option><option value="4">4x</option></select></label>
+<div class="two"><label>速度<select id="speedSel"><option value="1">1x</option><option value="2">2x</option><option value="4">4x</option><option value="8">8x</option></select></label>
 <div class="check"><input type="checkbox" id="showDamage" checked><span>ダメージ表示</span></div></div>
-<div class="check"><input type="checkbox" id="autoItem" checked><span>アイテム自動使用</span></div>
+<div class="two"><div class="check"><input type="checkbox" id="autoItem" checked><span>アイテム自動使用</span></div>
+<div class="check"><input type="checkbox" id="autoLoop" checked><span>スタミナが続くまで自動周回</span></div></div>
 <div class="three"><button id="exploreBtn">探索</button><button id="bossBtn">ボス</button><button id="towerBtn">タワー</button></div>
 <div class="two"><button id="raidBtn">レイド</button><button id="autoBtn">オート開始</button></div>
 <div class="two"><button id="turnBtn">1ターン</button><button id="stopBtn">停止</button></div>
@@ -80,8 +94,11 @@ details.card summary{cursor:pointer}
 
 <section id="tab-smith" class="tab"><h2>鍛冶師工房</h2>
 <div class="card" id="smithStatus"></div>
-<div class="card"><h3>採掘（鉱山に入る）</h3><div class="row"><div><label>鉱山</label><select id="mineSelect"></select></div>
+<div class="card"><h3>採掘（鉱山に入る）</h3>
+<div class="mini">採掘は<b class="gold">スタミナ5/回</b>を消費します。</div>
+<div class="row"><div><label>鉱山</label><select id="mineSelect"></select></div>
 <div class="two"><button id="mineBtn">採掘する</button><button id="mine5Btn">5回採掘</button></div></div>
+<div id="smithMsg" class="msg"></div>
 <div id="smithLog" class="log" style="min-height:90px;max-height:150px"></div></div>
 <div class="card"><h3>所持素材</h3><div id="holdList"></div></div>
 <div class="card"><h3>精錬（鉱石3→インゴット1）</h3><div class="two"><div><label>鉱石</label><select id="refineSelect"></select></div><button id="refineBtn">精錬する</button></div></div>
@@ -93,6 +110,67 @@ details.card summary{cursor:pointer}
 
 <section id="tab-shop" class="tab"><h2>ショップ</h2><div class="mini">G：<span class="gold" id="goldView2">0</span></div><div id="shopList"></div></section>
 
+<section id="tab-guide" class="tab"><h2>ガイド</h2>
+<div class="card"><div class="two"><button id="tutOpenBtn">チュートリアルを見る</button><div id="guideLink" class="mini" style="align-self:center"></div></div></div>
+<div class="card"><h3>ストーリー</h3>
+<div class="mini" style="line-height:2">
+はるか昔、世界は一つの<b class="gold">「原初の歌」</b>によって紡がれた。歌は<b class="eff">鋼の木</b>を生み、その鋼は<b>言霊</b>を宿して栄えたという。<br>
+だが或る日、原初の歌は途切れ、鋼の木は枯れ果てた。鋼に宿っていた言霊は砕け散り、荒野の魔物たちの核となってさまよっている。<br><br>
+あなたに託されたのは、4人の冒険者と、頑固な<b>鍛冶師</b>。<br>
+魔物から言霊を回収し、鍛冶の槌音で鋼の歌を繰り返すこと。そして歌の残滓が眠るとされる<b class="brk">「原初の門」</b>へ辿り着くこと。<br><br>
+<span class="res">――一戦は一編の言霊。一鍛は一曲の鋼の歌。旅の記録を、ここに刻め。</span>
+</div></div>
+<div class="card"><h3>探索・バトルの目的</h3>
+<div class="mini" style="line-height:1.9">
+<b class="eff">探索</b>：エリアの魔物と戦い、<b>経験値・ゴールド・装備</b>を得る基本行動。一定の撃破数で次のエリアが解放され、エリアボスに挑戦できます。<br>
+<b class="eff">ボス</b>：各エリアの強敵。倒すと実績にカウントされ、運補正付きの良いドロップが狙えます。物語上は「言霊の大核」の回収に当たります。<br>
+<b class="eff">タワー</b>：無限に強くなる階層。上るほどドロップのレア運が上昇。最終目標は創世級装備の追求。<br>
+<b class="eff">レイド</b>：強敵が複数同時に出現する高難易度戦闘。高レア狙い向け。<br>
+<b class="gold">最終目標</b>：エリア10「原初の門」を解放し、<b>原初の竜</b>を討伐すること。その後はタワー踏破と、転生を重ねての創世級装備追求が遊びのゴールです。
+</div></div>
+<div class="card"><h3>進め方（8ステップ）</h3>
+<div class="mini" style="line-height:1.9">
+1. <b>作成</b>：4人＋鍛冶師を作る（タンク1＋ヒーラー1＋攻撃2が安定）<br>
+2. <b>探索</b>：始まりの草原でLv5程度まで上げる（装備ドロップも狙う）<br>
+3. <b>パーティ</b>：拾った装備を各自に装備（ステータス差分が表示されます）<br>
+4. <b>スキル</b>：Lvアップで貰えるSPで習得（習得レベル順に並んでいます）<br>
+5. <b>鍛冶</b>：採掘（スタミナ5/回）→精錬→鍛冶で装備を自作（ドロップより強力。宝石を嵌めると更に強化）<br>
+6. <b>ボス</b>：撃破数が溜まったらエリアボス→次エリアへ<br>
+7. <b>Lv50で上級職</b>に転職（SP+10、新スキル・奥義解禁）<br>
+8. <b>Lv100で転生</b>：転生の欠片5個を消費（ステ+10%、<b>回数上限なし</b>）。欠片はデイリーミッションで毎日最大5個入手
+</div></div>
+<div class="card"><h3>職業の特徴</h3>
+<div class="mini" style="line-height:1.9">
+<b class="skb">ソード＆シールド</b>（タンク/攻撃）：片手剣と盾の前衛。かばうと全体防御バフで仲間を守る。<br>
+<b class="skb">グレートソード</b>（攻撃）：高威力の全体攻撃と鎧破壊。一撃のロマン型。<br>
+<b class="skb">ブレードマスター</b>（攻撃/回避）：見切り・カウンター・再行動。避けて斬る技巧派。<br>
+<b class="skb">ツインダガー</b>（攻撃/速攻）：二刀流で多段攻撃。毒・出血で削る。<br>
+<b class="skb">ガーディアン</b>（タンク）：挑発と大盾で敵を引き受けるパーティの壁。<br>
+<b class="skh">ヒーラー</b>（回復）：回復・状態異常解除・蘇生。編成にいると魔防ボーナス。<br>
+<b class="skd">バフデバッファー</b>（支援）：歌で味方を強化し、敵を弱体化させる。<br>
+<b class="sks">サモナー</b>（魔法/召喚）：召喚獣が毎ターン追撃。長期戦に強い。<br>
+<b class="sks">テイマー</b>（攻撃/獣）：スタンさせつつ獣と戦う。獣系スキルで味方も強化。<br>
+<b class="skh">セージ</b>（支援/結界）：属性付与・MP供給・バリア。魔法パーティの要。<br>
+<b class="ska">攻撃魔法使い</b>（魔法攻撃）：火・氷・雷の属性魔法と全体攻撃。<br>
+<b class="ska">影使い</b>（攻撃/会心）：影分身と高会心。身代わりの影で生存も。<br>
+<b class="skd">ネクロマンサー</b>（魔法/消耗）：吸収と呪いで削り、死者を使役する。<br>
+<b class="ska">ガンナー</b>（物理攻撃）：高命中・貫通・連射。安定した火力。<br>
+<b class="ska">バーサーカー</b>（攻撃/高リスク）：HPを削って大火力。窮地で更に強い。<br>
+<b class="skd">陰陽師</b>（魔法/呪い）：式神と呪術。全体結界でパーティを守る。<br>
+<span class="res">※上級職（Lv50）でそれぞれ強化方向に進化します。</span>
+</div></div>
+<div class="card"><h3>システム早見</h3>
+<div class="mini" style="line-height:1.9">
+<b>スタミナ</b>：行動ごとに消費（探索10/タワー15/ボス20/レイド30/採掘5）。2分で+1自然回復、広告視聴で+50（1日5回）。<br>
+<b>プレミアム</b>：<b class="adv">買い切り500円</b>で広告が永久に不要＋スタミナ即時全回復。<br>
+<b>レア度</b>：12段階（一般級〜創世級）。同じ素材・同じレア度なら性能は常に同じ（スタック管理）。<br>
+<b>宝石</b>：鍛冶時に嵌めると固定ボーナスが必ず付く（ルビー=物攻/サファイア=魔攻/エメラルド=HP/ダイヤ=素早+運）。<br>
+<b>セット効果</b>：同じ素材シリーズを複数装備で防御/攻撃/HPボーナス。<br>
+<b>編成ボーナス</b>：タンク職入りで物防+10%、回復職入りで魔防+10%。<br>
+<b>デイリーミッション</b>：3勝=欠片2 / 鍛冶1回=欠片2 / 採掘5回=欠片1（全部達成で毎日ちょうど5個）。<br>
+<b>転生</b>：Lv100＋転生の欠片5個で1回。全ステ+10%で<b>回数上限なし</b>。
+</div></div></section>
+
 <section id="tab-save" class="tab"><h2>セーブ</h2>
 <div class="card"><div class="row"><div class="three"><button id="saveBtn">セーブ</button><button id="loadBtn">ロード</button><button id="deleteBtn">削除</button></div>
 <button id="loadOldBtn" style="display:none">旧バックアップ（v8）から復元する</button>
@@ -101,14 +179,59 @@ details.card summary{cursor:pointer}
 <div class="two"><button id="exportBtn">エクスポート</button><button id="importBtn">インポート</button></div></div></div>
 <div class="card"><pre id="savePreview" class="pre"></pre></div></section>
 
+<section id="tab-record" class="tab"><h2>プレイ記録</h2>
+<div class="card"><div class="row"><label>プレイヤー名（ログイン記録に使用）</label>
+<div class="two"><input id="playerName" maxlength="12" placeholder="名もなき冒険者"><button id="playerNameBtn">名前を保存</button></div>
+<div id="playerMsg" class="msg"></div></div></div>
+<div class="card" id="statsSummary"></div>
+<div class="card"><h3>毎日の履歴（直近14日）</h3><div id="statsDays"></div></div>
+<div class="mini">※この記録はブラウザごとに保存されます。</div></section>
+
+<div id="tutModal" class="modalbg">
+<div class="card" style="max-width:520px;width:94%">
+<h3 id="tutTitle"></h3>
+<div id="tutBody" class="mini" style="min-height:170px;line-height:2"></div>
+<div class="three" style="margin-top:8px"><button id="tutPrev">前へ</button><button id="tutSkip">後で見る</button><button id="tutNext">次へ</button></div>
+</div></div>
+
+<div id="adModal" class="modalbg">
+<div class="card" style="max-width:440px;width:92%;text-align:center">
+<h3>報酬広告</h3>
+<div id="adBox" style="height:190px;background:#0a0e12;border:1px dashed #44505c;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#c9d5e1">広告動画の再生を待機中… <span id="adCount" class="gold"></span></div>
+<div class="mini" style="margin-top:6px">※配信時はここにリワード広告（動画）が挿入されます</div>
+<button id="adCloseBtn" disabled style="margin-top:8px">視聴して報酬を受け取る（スタミナ+50）</button>
+</div></div>
+
+<div id="prModal" class="modalbg">
+<div class="card" style="max-width:440px;width:92%">
+<h3>プレミアム（買い切り）</h3>
+<div class="mini">・<b class="adv">買い切り500円</b>で広告動画が<b class="adv">永久に不要</b>になります</div>
+<div class="mini">・スタミナを<b class="adv">ボタン一つで即時全回復</b>できます</div>
+<div class="mini">・今後の有料コンテンツも追加料金なし</div>
+<div class="mini" style="margin-top:6px">料金：<b class="gold">500円（1回のみ）</b></div>
+<div class="row" style="margin-top:8px">
+<button id="prPayBtn">決済ページへ（準備中）</button>
+<button id="prTestBtn">テスト有効化（検証用）</button>
+<button id="prCloseBtn">閉じる</button></div>
+<div class="mini" id="prState" style="margin-top:6px"></div>
+</div></div>
+
 <script>
 "use strict";
 const storage=(()=>{try{localStorage.setItem("__t","1");localStorage.removeItem("__t");return{type:"local",get:k=>localStorage.getItem(k),set:(k,v)=>localStorage.setItem(k,v),del:k=>localStorage.removeItem(k)};}catch(e){const m={};return{type:"memory",get:k=>m[k]??null,set:(k,v)=>{m[k]=v},del:k=>{delete m[k]}};}})();
 const SAVE_KEY="text_rpg_v9";
 const OLD_KEYS=["text_rpg_v8"];
+const STATS_KEY="hagane_play_stats_v1";
+const GA_ID="";
+const GUIDE_URL="";
+if(GA_ID){try{const gs=document.createElement("script");gs.async=true;gs.src="https://www.googletagmanager.com/gtag/js?id="+GA_ID;document.head.appendChild(gs);
+window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};
+gtag("js",new Date());gtag("config",GA_ID);}catch(e){}}
+function track(ev,p){try{if(GA_ID&&window.gtag)gtag("event",ev,p||{});}catch(e){}}
 const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const pick=a=>a[Math.floor(Math.random()*a.length)];const rnd=n=>Math.floor(Math.random()*n);
 const fill=(t,p={})=>t.replace(/\{(\w+)\}/g,(_,k)=>p[k]??"");
+const todayStr=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
 const STAT_KEYS=["hp","mp","atk","def","matk","mdef","agi","luk","hit","eva"];
 const STAT_NM={hp:"HP",mp:"MP",atk:"物攻",def:"物防",matk:"魔攻",mdef:"魔防",agi:"素早",luk:"運",hit:"命中",eva:"回避"};
 const ST_NM={poison:"毒",burn:"燃焼",bleed:"出血",confuse:"混乱",blind:"暗闇",stun:"スタン",curse:"呪い",slow:"鈍足",vulnerable:"脆弱",defdown:"防御低下",regen:"再生",broken:"崩壊"};
@@ -116,6 +239,7 @@ const ST_BAD=["poison","burn","bleed","confuse","blind","stun","curse","slow","v
 const EL_NM={fire:"火",water:"水",wind:"風",earth:"地",light:"光",dark:"闇",none:"無"};
 const SK_CLS={dmg:"ska",drain:"ska",heal:"skh",revive:"skh",cleanse:"skh",buff:"skb",shield:"skb",guard:"skb",debuff:"skd",status:"skd",summon:"sks",chant:"skm",mp:"skm"};
 const DUAL_TYPES=new Set(["one_hand_sword","dagger","twin_daggers"]);
+const RACE_ICON={slime:"🫧",beast:"🐺",humanoid:"👺",undead:"💀",golem:"🗿",magic:"🔮",dragon:"🐉",bird:"🦅",ghost:"👻",insect:"🐝"};
 const ORES=[["copper","銅鉱石",3],["iron","鉄鉱石",5],["silver","銀鉱石",8],["gold","金鉱石",12],["mithril","ミスリル鉱石",18],["dragon","竜骨鉱石",26]];
 const ORE_NM={},ORE_EXP={};ORES.forEach(o=>{ORE_NM[o[0]]=o[1];ORE_EXP[o[0]]=o[2];});
 const ING_NM={copper:"銅インゴット",iron:"鉄インゴット",silver:"銀インゴット",gold:"金インゴット",mithril:"ミスリルインゴット",dragon:"竜骨インゴット"};
@@ -125,6 +249,14 @@ const GEMS=[["ruby","ルビー",60],["sapphire","サファイア",80],["emerald"
 const GEM_NM={};GEMS.forEach(g=>GEM_NM[g[0]]=g[1]);
 const GEM_STATS={ruby:{atk:3},sapphire:{matk:3},emerald:{hp:10},diamond:{agi:2,luk:2}};
 const MINES=[["mine1","古い鉱山",1,["copper","iron"]],["mine2","銀脈鉱山",10,["iron","silver"]],["mine3","金脈鉱山",25,["silver","gold"]],["mine4","ミスリル鉱山",50,["gold","mithril"]],["mine5","竜骨鉱山",75,["mithril","dragon"]]];
+
+const STA_COST={explore:10,boss:20,tower:15,raid:30,mine:5};
+const STA_REGEN_MS=2*60*1000;
+const AD_RECOVER=50;
+const AD_LIMIT=5;
+const AD_SECONDS=5;
+const SHARD_PER_REINC=5;
+const PREMIUM_CODES=["PREMIUM_TEST"];
 
 const RARITY={
 common:{nm:"一般級",en:"Common",mult:1.00,rate:40},
@@ -146,7 +278,6 @@ const tot=es.reduce((s,e)=>s+e.w,0);let r=Math.random()*tot;
 for(const e of es){if(r<e.w)return e.k;r-=e.w;}return"common";}
 function metalForLv(lv){let m=METALS[0];METALS.forEach(x=>{if(lv>=x[2])m=x;});return m;}
 
-/* ===== 装備命名（決定論的） ===== */
 const MAT_WORD={copper:"青銅",iron:"鉄刃",silver:"白銀",gold:"黄金",mithril:"精銀",dragon:"竜魂"};
 const GEM_WORD={ruby:"朱炎",sapphire:"蒼淵",emerald:"翠霊",diamond:"金剛"};
 const TYPE_WORD={one_hand_sword:["剣","太刀"],shield:["円盾","小盾"],great_sword:["斬馬刀","巨剣"],light_two_hand:["両手剣","長剣"],twin_daggers:["双刃","双鋸"],dagger:["短刀","懐剣"],great_shield:["大盾","巨壁"],staff:["宝杖","聖杖"],grimoire:["魔導書","秘典"],orb:["魔玉","霊珠"],instrument:["魔笛","楽器"],whip:["鞭","蛇腹剣"],astrolabe:["星儀","天球儀"],gun:["銃","拳銃"],axe:["戦斧","大斧"],heavy_armor:["重鎧","重甲"],medium_armor:["鎖帷子","中鎧"],light_armor:["軽鎧","皮鎧"],cloth_armor:["法衣","霊袍"],accessory:["宝飾","護符"]};
@@ -215,6 +346,7 @@ gunslinger:{nm:"ガンスリンガー",base:{hp:70,mp:23,atk:18,def:10,matk:6,md
 war_demon:{nm:"ウォーデーモン",base:{hp:94,mp:16,atk:22,def:12,matk:4,mdef:9,agi:13,luk:10,hit:13,eva:8},g:{hp:15,mp:2.3,atk:3.8,def:2.1,matk:.6,mdef:1.2,agi:1.6,luk:1.2,hit:1.6,eva:.9}},
 grand_onmyoji:{nm:"グラン陰陽師",base:{hp:62,mp:55,atk:6,def:9,matk:20,mdef:17,agi:12,luk:13,hit:14,eva:9},g:{hp:9,mp:6.8,atk:.9,def:1.3,matk:3.1,mdef:2.5,agi:1.3,luk:1.4,hit:1.6,eva:1}}
 };
+const JOB_ROLE={sword_shield:"タンク/攻撃",great_sword:"攻撃",blade_master:"攻撃/回避",twin_dagger:"攻撃/速攻",guardian:"タンク",healer:"回復",buffer_debuffer:"支援",summoner:"魔法/召喚",tamer:"攻撃/獣",sage:"支援/結界",attack_mage:"魔法攻撃",shadow_user:"攻撃/会心",necromancer:"魔法/消耗",gunner:"物理攻撃",berserker:"攻撃/高リスク",onmyoji:"魔法/呪い"};
 const ADV_MAP={sword_shield:"holy_knight",great_sword:"war_god",blade_master:"sword_saint",twin_dagger:"assassin",guardian:"bastion",healer:"saint",buffer_debuffer:"maestro",summoner:"arch_summoner",tamer:"beast_lord",sage:"arch_sage",attack_mage:"archmage",shadow_user:"shadow_master",necromancer:"death_lord",gunner:"gunslinger",berserker:"war_demon",onmyoji:"grand_onmyoji"};
 const BASE_OF={};Object.entries(ADV_MAP).forEach(([b,a])=>BASE_OF[a]=b);
 const COMBAT_JOBS=new Set(["sword_shield","great_sword","blade_master","twin_dagger","guardian","shadow_user","gunner","berserker","tamer","holy_knight","war_god","sword_saint","assassin","bastion","beast_lord","shadow_master","gunslinger","war_demon"]);
@@ -321,7 +453,6 @@ const AREAS=[["area01","始まりの草原",1,6,["slime","horn_rabbit","giant_be
 const EQ_TYPES=[["one_hand_sword","weapon","剣",{atk:8,hit:2},["sword_shield","guardian","blade_master","shadow_user","holy_knight","bastion","sword_saint","assassin","twin_dagger","shadow_master"]],["shield","sub","盾",{def:6,hp:10},["sword_shield","guardian","healer","holy_knight","bastion","saint"]],["great_sword","weapon","大剣",{atk:14,hit:-2,agi:-1},["great_sword","berserker","war_god","war_demon"]],["light_two_hand","weapon","両手剣",{atk:10,agi:3,hit:2},["blade_master","great_sword","berserker","sword_saint","war_god","war_demon"]],["twin_daggers","weapon","双剣",{atk:6,agi:3,luk:2},["twin_dagger","blade_master","shadow_user","assassin","shadow_master"]],["dagger","weapon","短剣",{atk:6,agi:2,luk:2},["shadow_user","twin_dagger","assassin","shadow_master"]],["great_shield","sub","大盾",{def:12,hp:20,agi:-2},["guardian","bastion"]],["staff","weapon","杖",{matk:10,mp:10},["healer","sage","attack_mage","necromancer","onmyoji","saint","arch_sage","archmage","death_lord","grand_onmyoji","maestro","arch_summoner"]],["grimoire","sub","魔導書",{matk:6,mp:10},["buffer_debuffer","summoner","sage","attack_mage","necromancer","onmyoji","maestro","arch_summoner","arch_sage","archmage","death_lord","grand_onmyoji","saint"]],["orb","weapon","宝玉",{matk:9,mp:12},["summoner","sage","attack_mage","necromancer","onmyoji","arch_summoner","arch_sage","archmage","death_lord","grand_onmyoji"]],["instrument","weapon","楽器",{matk:8,luk:2},["buffer_debuffer","maestro"]],["whip","weapon","鞭",{atk:6,luk:3},["tamer","beast_lord"]],["horn","sub","角笛",{matk:4,hp:6},["tamer","beast_lord"]],["astrolabe","weapon","星盤",{matk:10,hit:2},["sage","arch_sage"]],["gun","weapon","銃",{atk:12,hit:4},["gunner","gunslinger"]],["axe","weapon","戦斧",{atk:13,luk:-1},["berserker","war_demon"]],["heavy_armor","armor","重鎧",{def:10,hp:15,agi:-1},["sword_shield","great_sword","guardian","berserker","holy_knight","war_god","bastion","war_demon"]],["medium_armor","armor","中鎧",{def:7,hp:8,agi:1},["blade_master","twin_dagger","tamer","sword_shield","gunner","sword_saint","assassin","gunslinger","beast_lord"]],["light_armor","armor","軽鎧",{def:4,agi:3,eva:3},["blade_master","twin_dagger","tamer","healer","buffer_debuffer","shadow_user","gunner","berserker","assassin","shadow_master","gunslinger","beast_lord","sword_saint"]],["cloth_armor","armor","法衣",{mdef:6,mp:12},["healer","buffer_debuffer","summoner","sage","attack_mage","necromancer","onmyoji","saint","maestro","arch_summoner","beast_lord","arch_sage","archmage","death_lord","grand_onmyoji"]],["accessory","accessory","装飾品",{hp:5,mp:5,agi:1,luk:1},"all"]];
 const TYPE_BY={};EQ_TYPES.forEach(t=>TYPE_BY[t[0]]=t);
 
-/* ===== 装備：決定論的スタック方式 ===== */
 const itemKey=o=>[o.metal,o.type,o.rar,o.gem||"",o.enh||0].join("|");
 function parseKey(k){const[metal,type,rar,gem,enh]=k.split("|");return{metal,type,rar,gem:gem||null,enh:+enh||0};}
 function buildItem(p){const M=METALS_BY[p.metal],T=TYPE_BY[p.type],R=RARITY[p.rar];
@@ -368,6 +499,98 @@ let game=null,battle=null,autoTimer=null,speed=1;
 let skillSel=0,openSkill=null;
 const smithUI={mine:"",ore:"",metal:"",type:"",gem:""};
 
+let stats=null,lastAct=Date.now();
+function loadStats(){try{const r=storage.get(STATS_KEY);stats=r?JSON.parse(r):{days:{},totalSecs:0,first:null,playerName:""};}catch(e){stats={days:{},totalSecs:0,first:null,playerName:""};}
+if(!stats.days)stats.days={};if(!stats.totalSecs)stats.totalSecs=0;}
+function saveStats(){try{storage.set(STATS_KEY,JSON.stringify(stats));}catch(e){}}
+function playerName(){return ((stats&&stats.playerName)||"").trim()||"名もなき冒険者";}
+function recordLogin(){const d=todayStr();stats.days[d]=stats.days[d]||{logins:0,secs:0,players:{}};
+stats.days[d].logins++;stats.days[d].players[playerName()]=1;
+if(!stats.first)stats.first=d;saveStats();}
+function fmtSecs(s){s=Math.floor(s||0);const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h>0?`${h}時間${m}分`:`${m}分${s%60}秒`;}
+function renderStats(){const d=todayStr();const t=stats.days[d]||{logins:0,secs:0,players:{}};
+const days=Object.keys(stats.days);
+const totalLogins=days.reduce((s,k)=>s+(stats.days[k].logins||0),0);
+const tp=Object.keys(t.players||{});
+$("statsSummary").innerHTML=`
+<div class="mini"><b>今日（${d}）</b>：ログイン <span class="gold">${t.logins||0}</span> 回 / プレイ人数 <span class="gold">${tp.length}</span> 人（${tp.join("、")||"-"}） / プレイ時間 <span class="eff" id="statsLive">${fmtSecs(t.secs||0)}</span></div>
+<div class="mini"><b>累計</b>：総ログイン ${totalLogins} 回 / 総プレイ時間 ${fmtSecs(stats.totalSecs)} / プレイ日数 ${days.length} 日${stats.first?` / 初回プレイ ${stats.first}`:""}</div>`;
+const list=days.sort((a,b)=>b.localeCompare(a)).slice(0,14);
+$("statsDays").innerHTML=list.map(k=>{const s=stats.days[k];const ps=Object.keys(s.players||{});
+return `<div class="mini" style="border-bottom:1px dotted #2c3b4a;padding:3px 0"><b>${k}</b>${k===d?' <span class="eff">（今日）</span>':""} — ログイン ${s.logins||0} 回 / ${ps.length} 人（${ps.join("、")||"-"}） / ${fmtSecs(s.secs||0)}</div>`;}).join("")||'<div class="mini">まだ記録がありません</div>';}
+function statsTick(){if(document.visibilityState!=="visible")return;
+if(Date.now()-lastAct>10*60*1000)return;
+const d=todayStr();stats.days[d]=stats.days[d]||{logins:0,secs:0,players:{}};
+stats.days[d].secs=(stats.days[d].secs||0)+1;stats.totalSecs=(stats.totalSecs||0)+1;
+if(stats.totalSecs%10===0)saveStats();
+const el=$("statsLive");if(el)el.textContent=fmtSecs(stats.days[d].secs);}
+
+const isPremium=()=>game&&game.stamina&&(game.stamina.premium||((game.stamina.premiumUntil||0)>Date.now()));
+function updateStamina(){const st=game.stamina;if(!st)return;const now=Date.now();
+if(st.cur>=st.max){st.updated=now;}
+else{const gain=Math.floor((now-st.updated)/STA_REGEN_MS);
+if(gain>0){st.cur=Math.min(st.max,st.cur+gain);st.updated+=gain*STA_REGEN_MS;
+if(st.cur>=st.max)st.updated=now;}}
+if(!st.adViews||st.adViews.date!==todayStr())st.adViews={date:todayStr(),count:0};}
+function renderStamina(){if(!game||!game.stamina)return;updateStamina();const st=game.stamina;
+$("staNum").textContent=`${st.cur}/${st.max}`;
+$("staBar").style.width=(st.cur/st.max*100)+"%";
+const left=AD_LIMIT-st.adViews.count;const adBtn=$("adRecoverBtn");
+if(isPremium()){adBtn.textContent="即時回復（プレミアム）";adBtn.disabled=st.cur>=st.max;}
+else{adBtn.textContent=`広告を見て回復+${AD_RECOVER}（本日あと${left}回）`;adBtn.disabled=left<=0||st.cur>=st.max;}
+$("staInfo").innerHTML=isPremium()?`<span class="adv">プレミアム購入済（永久）</span>`:
+(st.cur>=st.max?"スタミナ満タン":`次の+1まで ${Math.ceil((STA_REGEN_MS-(Date.now()-st.updated))/1000)}秒`);
+$("prState").innerHTML=isPremium()?`<b class="adv">購入済み：広告不要・即時回復 有効</b>`:"未購入";}
+function spendSta(mode){updateStamina();const c=STA_COST[mode];const st=game.stamina;
+if(st.cur<c){renderStamina();smsg(`スタミナ不足です（必要${c} / 現在${st.cur}）。広告視聴で回復するか、自然回復をお待ちください。`);return false;}
+st.cur-=c;saveGame();renderStamina();return true;}
+function grantPremium(){game.stamina.premium=1;game.stamina.premiumUntil=0;saveGame();renderStamina();}
+
+let adRewardCb=null,adTimer=null;
+function playRewardedAd(cb){adRewardCb=cb;$("adModal").style.display="flex";
+let left=AD_SECONDS;$("adCount").textContent=left;$("adCloseBtn").disabled=true;
+adTimer=setInterval(()=>{left--;$("adCount").textContent=left;
+if(left<=0){clearInterval(adTimer);$("adCount").textContent="完了！";$("adCloseBtn").disabled=false;}},1000);}
+function closeAdModal(){$("adModal").style.display="none";if(adTimer)clearInterval(adTimer);}
+
+function bumpDaily(){if(!game.daily||game.daily.date!==todayStr())game.daily={date:todayStr(),wins:0,crafts:0,mines:0,claimed:{}};}
+const DAILY_MS=[["wins","戦闘に3回勝利する",3,2],["crafts","装備を1回鍛冶する",1,2],["mines","採掘を5回行う",5,1]];
+function renderDaily(){if(!game||!game.daily)return;bumpDaily();const d=game.daily;
+$("dailyCard").innerHTML=`<h3>デイリーミッション（毎日0時リセット）</h3>
+<div class="mini">転生の欠片：<b class="rc">${game.shards||0}</b>（5個でLv100転生が1回・上限なし）</div>`+
+DAILY_MS.map(([id,nm,need,g])=>{
+const cur=Math.min(d[id]||0,need);const got=d.claimed[id];
+return `<div class="mini" style="margin:4px 0">${got?'<b class="up">✔</b>':cur>=need?'<b class="gold">★</b>':'<span class="res">□</span>'} ${nm}：${cur}/${need} ${got?'<span class="res">受取済</span>':cur>=need?`<button data-m="${id}" data-g="${g}" class="dailyGet" style="width:auto;padding:2px 8px">欠片+${g} 受取</button>`:`<span class="res">(報酬:欠片${g})</span>`}</div>`;}).join("");
+document.querySelectorAll(".dailyGet").forEach(b=>b.onclick=e=>{const id=e.currentTarget.dataset.m,g=+e.currentTarget.dataset.g;
+if(game.daily.claimed[id])return;game.daily.claimed[id]=1;game.shards=(game.shards||0)+g;saveGame();renderDaily();renderParty();});}
+
+function renderGoals(){if(!game)return;const maxLv=game.characters.length?Math.max(...game.characters.map(c=>c.level)):0;
+const anyEquip=game.characters.length&&game.characters.every(c=>Object.values(c.equip||{}).some(Boolean));
+const G=[[game.characters.length>0,"パーティを作成する（作成タブ）"],
+[!!anyEquip,"全員に装備をつける（パーティタブ）"],
+[(game.kills||0)>0,"最初の戦闘に勝利する"],
+[maxLv>=10,"Lv10 に到達する"],
+[(game.bossKills||0)>0,"エリアボスを倒す"],
+[(game.kills||0)>=10,"撃破10体で次のエリアへ"],
+[(game.tower||1)>=5,"タワー5階に到達する"],
+[maxLv>=50,"Lv50 で上級職に転職する"],
+[maxLv>=100,"Lv100＋欠片5で転生する"]];
+$("goalsCard").innerHTML="<h3>冒険の目標</h3>"+G.map(([dn,t])=>`<div class="mini" style="margin:4px 0">${dn?'<b class="up">✔</b>':'<span class="res">□</span>'} ${t}</div>`).join("");}
+
+const TUT=[["ようこそ、冒険者よ","この世界では、魔物に宿る<b class='gold'>言霊</b>を集め、失われた<b class='eff'>鋼の歌</b>を取り戻す旅に出ます。<br><br>あなたは4人の冒険者と、1人の鍛冶師を率いることになります。<br>まずは次のステップでパーティを作成しましょう。"],
+["ステップ1：パーティ作成","「作成」タブで4人の名前と職業を決めます。<br><br>おすすめ構成：<br>・<b class='eff'>タンク</b>（ガーディアン等）…味方を守る<br>・<b class='eff'>ヒーラー</b>…回復担当<br>・<b class='eff'>攻撃役</b>×2<br><br>タンクかヒーラーが居ると<b class='gold'>編成ボーナス（防御+10%）</b>が付きます。鍛冶師は戦闘に出ませんが、装備作りの要です。"],
+["ステップ2：探索と戦闘","「戦闘」タブでエリアを選び「探索」を押すと戦闘開始。<br><br>勝利すると<b class='eff'>経験値・ゴールド・装備</b>が手に入ります。<br>「オート開始」にすると自動で進行します。<br><br>戦闘と採掘には<b class='gold'>スタミナ</b>を消費します（2分で+1回復、広告視聴で+50・1日5回）。<br><b class='adv'>プレミアム（買い切り500円）</b>を買うと広告が不要になり、即時全回復できます。"],
+["ステップ3：装備と鍛冶","拾った装備は「パーティ」タブで装備します（ステータスの変化が赤/青で表示されます）。<br><br>「鍛冶」タブでは <b class='eff'>採掘→精錬→鍛冶</b> で装備を自作できます。<br>同じ素材・同じレア度なら性能は常に同じ。宝石を嵌めると更に強力になります。"],
+["ステップ4：スキルと成長","レベルアップで貰える<b class='eff'>SP</b>は「スキル」タブで消費します（習得レベル順に表示）。<br><br>Lv50で<b class='adv'>上級職に転職</b>。<br>「デイリーミッション」を達成すると<b class='rc'>転生の欠片</b>が貰えます（毎日最大5個）。"],
+["ステップ5：転生と旅の目的","<b class='rc'>転生</b>：Lv100のキャラを、転生の欠片5個を消費して転生させます。全ステ+10%で<b>回数上限なし</b>。<br><br>エリアの魔物を倒して撃破数を積み、<b class='eff'>次のエリアとボス</b>を解放していきます。<br>最終目標は、エリア10「原初の門」に眠る<b class='brk'>原初の竜</b>の討伐。<br>その後はタワー踏破と、転生を重ねての創世級装備追求が待っています。<br><br>困ったら「ガイド」タブを見てください。良き旅を！"]];
+let tutIdx=0;
+function drawTut(){const t=TUT[tutIdx];$("tutTitle").textContent=`チュートリアル ${tutIdx+1}/${TUT.length}：${t[0]}`;
+$("tutBody").innerHTML=t[1];
+$("tutPrev").disabled=tutIdx===0;
+$("tutNext").textContent=tutIdx===TUT.length-1?"旅に出る！":"次へ";}
+function showTut(){tutIdx=0;drawTut();$("tutModal").style.display="flex";}
+function closeTut(){$("tutModal").style.display="none";if(game){game.flags=game.flags||{};game.flags.tutorialDone=1;saveGame();}}
+
 function jobStats(j,lv){const b=JOBS[j].base,g=JOBS[j].g,o={};STAT_KEYS.forEach(k=>o[k]=Math.floor(b[k]+g[k]*(lv-1)));return o;}
 function titleBonus(){const b={atk:0,def:0,hp:0};const k=game.kills||0,bk=game.bossKills||0,tw=game.tower||1;
 if(k>=50)b.atk+=3;if(k>=200)b.atk+=5;if(bk>=5)b.hp+=5;if(bk>=20)b.hp+=8;if(tw>=10)b.def+=3;if(tw>=30)b.def+=5;return b;}
@@ -400,7 +623,9 @@ const s={hp:Math.round((40+lv*14)*r.hp*scale),mp:20,atk:Math.round((8+lv*2.2)*r.
 return{id,name:m.nm,race:m.type,type:"enemy",rar:m.rar,level:lv,stats:s};}
 
 function newSmith(nm){return{name:nm,level:1,exp:0,sp:0,skills:[],ore:{},ingot:{},gem:{}};}
-function newGame(){return{v:9,settings:{showDamage:true,autoItem:true},party:{combo:0,comboMax:100},characters:[],smith:newSmith("ドゥカン"),smithLog:[],inv:{},gold:100,items:{potion:2,ether:1},tower:1,kills:0,bossKills:0,flags:{}};}
+function newGame(){return{v:9,settings:{showDamage:true,autoItem:true},party:{combo:0,comboMax:100},characters:[],smith:newSmith("ドゥカン"),smithLog:[],inv:{},gold:100,items:{potion:2,ether:1},tower:1,kills:0,bossKills:0,flags:{},shards:0,
+daily:{date:todayStr(),wins:0,crafts:0,mines:0,claimed:{}},
+stamina:{cur:100,max:100,updated:Date.now(),adViews:{date:todayStr(),count:0},premium:0,premiumUntil:0}};}
 function migrateLegacy(g){const old=g.inv;const map={};const uidToKey={};
 old.forEach(it=>{const M=metalForLv(it.lv||1);
 const rarMap={common:"common",uncommon:"uncommon",rare:"rare",epic:"epic",legend:"legendary"};
@@ -421,10 +646,15 @@ g.items=g.items||{};g.gold=g.gold??100;g.tower=g.tower||1;g.kills=g.kills||0;g.b
 g.party=g.party||{combo:0,comboMax:100};
 g.settings=Object.assign({showDamage:true,autoItem:true},g.settings||{});
 g.characters=g.characters||[];
+g.flags=g.flags||{};
+g.shards=g.shards||0;
+g.daily=g.daily||{date:todayStr(),wins:0,crafts:0,mines:0,claimed:{}};
 g.smith=g.smith||newSmith("ドゥカン");
 g.smith.name=g.smith.name||"ドゥカン";g.smith.level=clamp(g.smith.level||1,1,100);g.smith.exp=g.smith.exp||0;g.smith.sp=g.smith.sp||0;
 g.smith.skills=g.smith.skills||[];g.smith.ore=g.smith.ore||{};g.smith.ingot=g.smith.ingot||{};g.smith.gem=g.smith.gem||{};
 g.smithLog=g.smithLog||[];
+g.stamina=g.stamina||{cur:100,max:100,updated:Date.now(),adViews:{date:todayStr(),count:0},premium:0,premiumUntil:0};
+g.stamina.cur=clamp(g.stamina.cur??100,0,g.stamina.max||100);g.stamina.updated=g.stamina.updated||Date.now();g.stamina.premium=g.stamina.premium||0;g.stamina.premiumUntil=g.stamina.premiumUntil||0;
 if(Array.isArray(g.inv)){try{migrateLegacy(g);}catch(e){g.inv={};g.characters.forEach(c=>{c.equip=BLANK_EQUIP();});}}
 if(typeof g.inv!=="object"||g.inv===null||Array.isArray(g.inv))g.inv={};
 g.characters.forEach(c=>{if(!c.equip||Array.isArray(c.equip))c.equip=BLANK_EQUIP();
@@ -444,23 +674,33 @@ const showDmg=t=>{if(game.settings.showDamage)log(t);};
 const pct=(c,m)=>clamp(Math.round(c/m*100),0,100);
 const bar=(c,m,cls)=>`<div class="bar ${cls||""}" style="flex:1"><i style="width:${pct(c,m)}%"></i></div>`;
 
+function smsg(t){const el=$("smithMsg");if(el)el.textContent=t;}
 function smithFlags(){const m={};(game.smith.skills||[]).forEach(id=>{const s=SKILL_INDEX[id];if(s&&s.ty==="P"&&s.k==="flag")m[s.fl]=(m[s.fl]||0)+s.val;});return m;}
 function gainSmithExp(amt){const s=game.smith;s.exp=(s.exp||0)+amt;while(s.level<100&&s.exp>=nextExp(s.level)){s.exp-=nextExp(s.level);s.level++;s.sp=(s.sp||0)+1;}}
 function smithLog(t){game.smithLog=game.smithLog||[];game.smithLog.unshift(t);game.smithLog=game.smithLog.slice(0,30);}
 function doMine(times){const s=game.smith;const mine=MINES.find(x=>x[0]===$("mineSelect").value);if(!mine)return;
-if(s.level<mine[2])return alert("鍛冶師Lv"+mine[2]+"が必要");
+if(s.level<mine[2])return smsg(`鍛冶師Lv${mine[2]}が必要です（現在Lv${s.level}）`);
+const cost=STA_COST.mine*times;
+updateStamina();
+if(game.stamina.cur<cost)return smsg(`スタミナ不足です（採掘${times}回に${cost}必要 / 現在${game.stamina.cur}）`);
+game.stamina.cur-=cost;
 const F=smithFlags();
+let lastOut="";
 for(let i=0;i<times;i++){const out=[];const y=1+(F.mineYield||0)+(Math.random()<.3?1:0);
 for(let j=0;j<y;j++){const o=pick(mine[3]);s.ore[o]=(s.ore[o]||0)+1;out.push(ORE_NM[o]);gainSmithExp(ORE_EXP[o]);}
 if(Math.random()*100<8+(F.gemFind||0)){const g=pick(GEMS);s.gem[g[0]]=(s.gem[g[0]]||0)+1;out.push(g[1]+"！");}
 gainSmithExp(mine[2]===1?4:mine[2]);
-smithLog(`${mine[1]}：${out.join("、")} を採取`);}
-saveGame();renderSmith();}
+lastOut=out.join("、");
+smithLog(`${mine[1]}：${lastOut} を採取`);}
+smsg(`${mine[1]}を${times}回採掘（スタミナ-${cost}）：${lastOut}`);
+bumpDaily();game.daily.mines+=times;
+saveGame();renderSmith();renderStamina();renderDaily();}
 function refine(){const s=game.smith;const F=smithFlags();const o=$("refineSelect").value;
-if((s.ore[o]||0)<3)return alert("鉱石が3個必要");
+if((s.ore[o]||0)<3)return smsg(`${ORE_NM[o]}が3個ありません（現在${s.ore[o]||0}個）`);
 s.ore[o]-=3;let n=1;if(Math.random()*100<(F.refineSave||0))n++;
 s.ingot[o]=(s.ingot[o]||0)+n;gainSmithExp(ORE_EXP[o]*2);
 smithLog(`${ORE_NM[o]}を精錬 → ${ING_NM[o]}×${n}${n>1?"（ボーナス！）":""}`);
+smsg(`${ING_NM[o]}×${n} を精錬しました`);
 saveGame();renderSmith();}
 function craftNeed(){const type=EQ_TYPES.find(t=>t[0]===$("craftType").value);if(!type)return 3;return type[1]==="weapon"||type[1]==="armor"?3:type[1]==="sub"?2:1;}
 function updateCraftInfo(){const M=METALS.find(m=>m[0]===$("craftMetal").value)||METALS[0];const F=smithFlags();
@@ -469,11 +709,12 @@ const gem=$("craftGem").value;let gemTxt="なし（宝石なしの固定ステ�
 if(gem&&GEM_STATS[gem]){
 gemTxt=Object.entries(GEM_STATS[gem]).map(([k,v])=>`${STAT_NM[k]}+${Math.max(1,Math.round(v*(1+M[2]/30)))+(F.gemPow||0)}`).join(" ")+"（必ず付与）";}
 $("craftInfo").textContent=`必要：${ING_NM[M[0]]}×${craftNeed()}＋${cost}G / レア運補正+${(F.smithLuck||0)+(F.smithLuck2||0)}% / 大成功${F.smithCrit||0}%（強化+1完成） / 宝石：${gemTxt} / ※同素材・同レア度は常に同じ性能`;}
-function craft(){const s=game.smith;const F=smithFlags();const M=METALS.find(m=>m[0]===$("craftMetal").value);const type=EQ_TYPES.find(t=>t[0]===$("craftType").value);const gem=$("craftGem").value;
+function craft(){const s=game.smith;const F=smithFlags();const M=METALS.find(m=>m[0]===$("craftMetal").value);const type=EQ_TYPES.find(t=>t[0]===$("craftType").value);let gem=$("craftGem").value;
 if(!M||!type)return;
-if(s.level<M[2])return alert("鍛冶師Lv"+M[2]+"が必要");
-const need=craftNeed();if((s.ingot[M[0]]||0)<need)return alert(ING_NM[M[0]]+"が"+need+"個必要");
-const cost=Math.floor(30*M[4]*(1-(F.craftSave||0)/100));if(game.gold<cost)return alert("ゴールド不足");
+if(s.level<M[2])return smsg(`鍛冶師Lv${M[2]}が必要です（現在Lv${s.level}）`);
+if(gem&&(s.gem[gem]||0)<1){gem="";$("craftGem").value="";}
+const need=craftNeed();if((s.ingot[M[0]]||0)<need)return smsg(`${ING_NM[M[0]]}が${need}個ありません（現在${s.ingot[M[0]]||0}個）`);
+const cost=Math.floor(30*M[4]*(1-(F.craftSave||0)/100));if(game.gold<cost)return smsg(`ゴールド不足です（必要${cost}G / 現在${game.gold}G）`);
 s.ingot[M[0]]-=need;game.gold-=cost;if(gem)s.gem[gem]=(s.gem[gem]||0)-1;
 const rar=rollRarity((F.smithLuck||0)+(F.smithLuck2||0));
 const great=Math.random()*100<(F.smithCrit||0);
@@ -481,7 +722,9 @@ const p={metal:M[0],type:type[0],rar,gem:gem||null,enh:great?1:0};
 const k=itemKey(p);addItem(k);gainSmithExp(15*M[4]);
 const it=itemOf(k);
 smithLog(`${it.name}（${RARITY[rar].nm}）を鍛造！${great?" 大成功：強化+1付き！":""}`);
-saveGame();renderSmith();renderParty();}
+smsg(`${it.name}（${RARITY[rar].nm}）を鍛造しました！`);
+bumpDaily();game.daily.crafts++;track("craft_done",{rar});
+saveGame();renderSmith();renderParty();renderDaily();}
 function restoreSel(id){const el=$(id);const v=smithUI[id];if(v&&[...el.options].some(o=>o.value===v&&!o.disabled))el.value=v;}
 function renderSmith(){const s=game.smith;const F=smithFlags();
 $("smithStatus").innerHTML=`<div class="mini"><b>${s.name}</b> 鍛冶師 Lv${s.level} / SP${s.sp||0}</div>
@@ -492,7 +735,7 @@ let h=`<div class="mini"><b>鉱石</b> ${ORES.map(o=>`${o[1]}:${s.ore[o[0]]||0}`
 <div class="mini"><b>インゴット</b> ${ORES.map(o=>`${ING_NM[o[0]]}:${s.ingot[o[0]]||0}`).join(" / ")}</div>
 <div class="mini"><b>宝石</b> ${GEMS.map(g=>`${g[1]}:${s.gem[g[0]]||0} <button data-g="${g[0]}" class="gemSellBtn" ${(s.gem[g[0]]||0)>0?"":"disabled"} style="width:auto;padding:2px 6px">売${g[2]}G</button>`).join(" ")}</div>`;
 $("holdList").innerHTML=h;
-document.querySelectorAll(".gemSellBtn").forEach(b=>b.onclick=e=>{const g=GEMS.find(x=>x[0]===e.currentTarget.dataset.g);if((s.gem[g[0]]||0)>0){s.gem[g[0]]--;game.gold+=g[2];smithLog(`${g[1]}を${g[2]}Gで売却`);saveGame();renderSmith();renderGold();}});
+document.querySelectorAll(".gemSellBtn").forEach(b=>b.onclick=e=>{const g=GEMS.find(x=>x[0]===e.currentTarget.dataset.g);if((s.gem[g[0]]||0)>0){s.gem[g[0]]--;game.gold+=g[2];smithLog(`${g[1]}を${g[2]}Gで売却`);smsg(`${g[1]}を${g[2]}Gで売却しました`);saveGame();renderSmith();renderGold();}});
 $("refineSelect").innerHTML=ORES.map(o=>`<option value="${o[0]}">${o[1]}（${s.ore[o[0]]||0}）</option>`).join("");
 $("craftMetal").innerHTML=METALS.map(m=>`<option value="${m[0]}" ${s.level<m[2]?"disabled":""}>${m[1]}インゴット（${s.ingot[m[0]]||0}）Lv${m[2]}〜</option>`).join("");
 if(!$("craftType").options.length)$("craftType").innerHTML=EQ_TYPES.map(t=>`<option value="${t[0]}">${t[2]}（${t[1]==="weapon"?"武器":t[1]==="armor"?"防具":t[1]==="sub"?"サブ":"装飾"}）</option>`).join("");
@@ -502,8 +745,8 @@ updateCraftInfo();
 $("smithLog").innerHTML=(game.smithLog||[]).map(t=>`<div>${t}</div>`).join("")||"<div>まだ記録なし</div>";}
 
 function switchTab(n){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".tabbtn").forEach(b=>b.classList.remove("active"));$("tab-"+n).classList.add("active");document.querySelector(`[data-tab="${n}"]`).classList.add("active");
-if(n==="party")renderParty();if(n==="skill")renderSkills();if(n==="battle"){renderAreas();renderStatus();}if(n==="save")renderSave();if(n==="shop")renderShop();if(n==="smith")renderSmith();}
-function renderGold(){$("goldView").textContent=game.gold;$("goldView2").textContent=game.gold;}
+if(n==="party")renderParty();if(n==="skill")renderSkills();if(n==="battle"){renderAreas();renderStatus();renderStamina();renderGoals();renderDaily();}if(n==="save")renderSave();if(n==="shop")renderShop();if(n==="smith")renderSmith();if(n==="record")renderStats();}
+function renderGold(){$("goldView").textContent=game.gold;$("goldView2").textContent=game.gold;$("shardView").textContent=game.shards||0;}
 function renderAreas(){const sel=$("areaSelect");const prev=sel.value;sel.innerHTML="";let firstOk="";
 AREAS.forEach(a=>{const locked=(game.kills||0)<a[7];const o=document.createElement("option");o.value=a[0];
 o.textContent=`${a[1]} Lv${a[2]}-${a[3]}${locked?"（撃破"+a[7]+"必要）":""}`;o.disabled=locked;
@@ -532,7 +775,7 @@ const curIt=cur?itemOf(cur):null;
 return `<details class="card" style="padding:6px;margin:4px 0"><summary class="mini"><b>${sl}</b>：${curIt?rarTag(curIt.rar)+(curIt.gem?"💎":"")+curIt.name+"+"+(curIt.enh||0):"なし"}${sl==="sub"&&canDual(c)?' <span style="color:#7fd7ff">二刀流OK</span>':""}</summary>${rows}${cur?`<div style="margin-top:4px"><button data-c="${i}" data-sl="${sl}" class="uneqBtn">外す</button></div>`:""}</details>`;}).join("");
 let btns="";
 if(c.level>=50&&!c.adv&&ADV_MAP[c.jobId])btns+=`<button data-c="${i}" class="promoBtn"><span class="adv">上級職転職：${JOBS[ADV_MAP[c.jobId]].nm}</span></button>`;
-if(c.level>=100&&c.adv&&(c.reinc||0)<5)btns+=`<button data-c="${i}" class="reincBtn"><span class="rc">転生（${(c.reinc||0)+1}回目）</span></button>`;
+if(c.level>=100&&c.adv)btns+=`<button data-c="${i}" class="reincBtn" ${(game.shards||0)>=SHARD_PER_REINC?"":"disabled"}><span class="rc">転生する（欠片${SHARD_PER_REINC}消費 / 所持${game.shards||0} / ${c.reinc||0}回目→${(c.reinc||0)+1}回目）</span></button>`;
 return `<div class="card"><h3>${c.name}</h3><div class="mini">${JOBS[c.jobId].nm} Lv${c.level} / SP${c.sp||0} / 転生${c.reinc||0} / セット${si.sc}</div>
 <div class="mini bw">HP ${c.currentHp??t.hp}/${t.hp} ${bar(c.currentHp??t.hp,t.hp)}</div>
 <div class="mini bw">MP ${c.currentMp??t.mp}/${t.mp} ${bar(c.currentMp??t.mp,t.mp,"mp")}</div>
@@ -555,7 +798,7 @@ return `<div class="mini" style="margin:4px 0;padding:4px;border-bottom:1px dott
 document.querySelectorAll(".enhBtn").forEach(b=>b.onclick=e=>{const k=e.currentTarget.dataset.k;const p=parseKey(k);
 if(!game.inv[k]||p.enh>=10)return;const avail=game.inv[k]-equippedCount(k);const cost=enhCost(p);
 if(avail<=0||game.gold<cost)return;game.gold-=cost;
-if(Math.random()*100<enhChance(p)){removeItem(k);addItem(itemKey({...p,enh:p.enh+1}));alert("強化成功！ +"+(p.enh+1));}else alert("強化失敗…（ゴールドのみ消費）");
+if(Math.random()*100<enhChance(p)){removeItem(k);addItem(itemKey({...p,enh:p.enh+1}));smsg("強化成功！ +"+(p.enh+1));}else smsg("強化失敗…（ゴールドのみ消費）");
 saveGame();renderParty();});
 document.querySelectorAll(".sellBtn").forEach(b=>b.onclick=e=>{const k=e.currentTarget.dataset.k;const p=parseKey(k);
 const avail=(game.inv[k]||0)-equippedCount(k);if(avail<=0)return;
@@ -575,8 +818,10 @@ const jobIds=(SKILLS[oldJob]||[]).map(s=>s.id);const kept=(c.skills||[]).filter(
 const shared=(c.skills||[]).filter(id=>!jobIds.includes(id));
 c.skills=[...shared,...kept];c.jobId=advId;c.level=1;c.exp=0;c.sp=(c.sp||0)+10;c.adv=true;
 const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();alert(c.name+"は"+JOBS[advId].nm+"に転職！");}
-function reincarnate(c){if(c.level<100||!c.adv||(c.reinc||0)>=5)return;c.reinc=(c.reinc||0)+1;c.level=1;c.exp=0;c.sp=(c.sp||0)+20;
-const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();alert(c.name+"は転生した！（"+c.reinc+"回目）");}
+function reincarnate(c){if(c.level<100||!c.adv||(game.shards||0)<SHARD_PER_REINC)return;
+game.shards-=SHARD_PER_REINC;c.reinc=(c.reinc||0)+1;c.level=1;c.exp=0;c.sp=(c.sp||0)+20;
+const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;saveGame();renderParty();renderDaily();
+alert(c.name+"は転生した！（"+c.reinc+"回目 / 全ステ+10%）");}
 
 const SRC_TAG={job:'<span class="eff">[職業]</span>',spec:'<span class="res">[系統]</span>',talent:'<span class="res">[才能]</span>',adv:'<span class="adv">[上級]</span>',ult:'<span class="gold">[奥義]</span>',rc:'<span class="rc">[転生]</span>'};
 const SRC_RANK={job:0,spec:1,talent:2,adv:3,ult:4,rc:5};
@@ -631,7 +876,7 @@ $("storageType").textContent="保存方式："+storage.type+" / 最終更新："
 $("savePreview").textContent=JSON.stringify(game,null,1).slice(0,2500);}
 function statesText(m){const ks=Object.keys(m.states||{});if(!ks.length)return"";return " ["+ks.map(k=>ST_NM[k]||k).join(",")+"]";}
 function renderStatus(){const el=$("battleStatus");if(!battle){el.innerHTML="戦闘未開始 / タワー階層："+game.tower+" / 撃破："+(game.kills||0)+" / ボス撃破："+(game.bossKills||0);return;}
-el.innerHTML=battle.enemies.map(e=>`<div class="mini"><b>${e.name}</b> Lv${e.level} ${e.hp}/${e.stats.hp} <span class="bw" style="flex:1">${bar(e.hp,e.stats.hp,"en")}</span> <span class="brk">Brk${e.break||0}</span>${e.charge?' <span class="brk">溜め!</span>':""}${statesText(e)}</div>`).join("")+
+el.innerHTML=battle.enemies.map(e=>`<div class="mini">${RACE_ICON[e.race]||"👾"} <b>${e.name}</b> Lv${e.level} ${e.hp}/${e.stats.hp} <span class="bw" style="flex:1">${bar(e.hp,e.stats.hp,"en")}</span> <span class="brk">Brk${e.break||0}</span>${e.charge?' <span class="brk">溜め!</span>':""}${statesText(e)}</div>`).join("")+
 `<div class="mini">連携${battle.combo}/${game.party.comboMax} / 速度${speed}x / ターン${battle.turn}</div><hr>`+battle.party.map(m=>`<div class="mini bw">${m.name}${m.guard>0?"🛡":""} HP${m.hp}/${m.maxHp} ${bar(m.hp,m.maxHp)} MP${m.mp}/${m.maxMp} ${bar(m.mp,m.maxMp,"mp")}${statesText(m)}</div>`).join("");}
 
 function makeChar(id,slot,name,job){const t=jobStats(job,1);return{id,slot,name,jobId:job,level:1,exp:0,sp:0,skills:[],equip:BLANK_EQUIP(),currentHp:t.hp,currentMp:t.mp,adv:false,reinc:0};}
@@ -639,7 +884,8 @@ function createParty(){const names=[],jobs=[];for(let i=1;i<=4;i++){names.push($
 const sn=$("name5").value.trim()||"ドゥカン";
 if(names.some(n=>!n))return alert("全キャラ名前を入力");const allN=[...names,sn];if(new Set(allN).size!==5)return alert("同じ名前は不可");
 if(game&&(game.characters.length||(game.kills||0)>0)&&!confirm("既存データを上書きして新規パーティを作成しますか？"))return;
-game=newGame();game.settings.showDamage=$("showDamage").checked;game.characters=names.map((n,idx)=>makeChar("c"+(idx+1),idx+1,n,jobs[idx]));game.smith=newSmith(sn);skillSel=0;openSkill=null;saveGame();renderAreas();switchTab("party");}
+game=newGame();game.settings.showDamage=$("showDamage").checked;game.characters=names.map((n,idx)=>makeChar("c"+(idx+1),idx+1,n,jobs[idx]));game.smith=newSmith(sn);skillSel=0;openSkill=null;
+track("party_created");saveGame();renderAreas();switchTab("party");}
 
 function weaponTypeOf(c){const k=c.equip&&c.equip.weapon;if(!k)return null;return parseKey(k).type;}
 function startBattle(enemyArr){stopAuto();if(!game||game.characters.length<2){alert("先にキャラ作成");return;}
@@ -656,13 +902,18 @@ battle.enemies.forEach(e=>{const re=RACE_ELEM[e.race]||{};if(re.weak)log(`${e.na
 const aliveE=()=>battle.enemies.filter(e=>e.hp>0);
 const pickE=()=>{const a=aliveE();return a.length?a[rnd(a.length)]:null;};
 function explore(){const a=AREAS.find(x=>x[0]===$("areaSelect").value);if(!a)return;
-if((game.kills||0)<a[7])return alert("このエリアはまだ解放されていない（撃破"+a[7]+"体必要）");
+if((game.kills||0)<a[7])return smsg("このエリアはまだ解放されていない（撃破"+a[7]+"体必要）");
+if(!spendSta("explore"))return;
 const lv=a[2]+rnd(a[3]-a[2]+1);startBattle([makeEnemy(Math.random()<.15?a[5]:pick(a[4]),lv)]);if(battle)battle.mode="explore";}
 function boss(){const a=AREAS.find(x=>x[0]===$("areaSelect").value);if(!a)return;
-if((game.kills||0)<a[7])return alert("このエリアはまだ解放されていない");
-if(!a[6])return alert("ボスなし");startBattle([makeEnemy(a[6],a[3])]);if(battle)battle.mode="boss";}
-function tower(){const lv=5+game.tower*3;startBattle([makeEnemy(pick(["stone_golem","death_knight","dragon_whelp","void_watcher","shadow_wraith","star_beast"]),lv)]);if(battle)battle.tower=true;}
-function raid(){const n=2+(Math.random()<.5?0:1);const lv=50+rnd(40);const pool=["gargoyle","death_knight","chimera","lake_dragon","chaos_beast","dragon_whelp","void_watcher"];
+if((game.kills||0)<a[7])return smsg("このエリアはまだ解放されていない");
+if(!a[6])return smsg("このエリアにボスはいない");
+if(!spendSta("boss"))return;
+startBattle([makeEnemy(a[6],a[3])]);if(battle)battle.mode="boss";}
+function tower(){if(!spendSta("tower"))return;
+const lv=5+game.tower*3;startBattle([makeEnemy(pick(["stone_golem","death_knight","dragon_whelp","void_watcher","shadow_wraith","star_beast"]),lv)]);if(battle)battle.tower=true;}
+function raid(){if(!spendSta("raid"))return;
+const n=2+(Math.random()<.5?0:1);const lv=50+rnd(40);const pool=["gargoyle","death_knight","chimera","lake_dragon","chaos_beast","dragon_whelp","void_watcher"];
 const arr=[];for(let i=0;i<n;i++)arr.push(makeEnemy(pick(pool),lv));startBattle(arr);if(battle)battle.raid=true;}
 function lowestAlly(){return battle.party.filter(m=>m.hp>0).sort((x,y)=>x.hp/x.maxHp-y.hp/y.maxHp)[0];}
 const mpCost=(s,c)=>Math.floor((s.mp||0)*((c.flags&&c.flags.mpReduce)?0.8:1));
@@ -761,7 +1012,7 @@ else if(m.hp<m.maxHp*.25&&(game.items.elixir||0)>0){game.items.elixir--;m.hp=m.m
 battle.party.forEach(m=>{if(m.hp>0&&m.mp<m.maxMp*.3&&(game.items.ether||0)>0&&m.maxMp>=35){game.items.ether--;const r=Math.floor(m.maxMp*.4);m.mp=Math.min(m.maxMp,m.mp+r);log(`${m.name}はエーテルを飲んだ。`);showDmg(`→ MP${r}回復。`);}});}
 function checkEnd(){if(!battle||!battle.active)return true;
 if(aliveE().length===0){battle.active=false;stopAuto();victory();return true;}
-if(battle.party.every(m=>m.hp<=0)){battle.active=false;stopAuto();log("パーティは力尽きた……かろうじて離脱する。");sync();return true;}return false;}
+if(battle.party.every(m=>m.hp<=0)){battle.active=false;stopAuto();battle.defeated=true;log("パーティは力尽きた……かろうじて離脱する。");sync();return true;}return false;}
 function victory(){const es=battle.enemies;log(`=== ${es.map(e=>e.name).join(" / ")} を倒した。 ===`);
 const maxLv=Math.max(...es.map(e=>e.level));const cnt=es.length;const anyBoss=es.some(e=>e.rar==="boss"||e.rar==="rare");
 game.kills=(game.kills||0)+cnt;if(anyBoss)game.bossKills=(game.bossKills||0)+1;
@@ -773,7 +1024,10 @@ let boost=0;if(battle.mode==="boss")boost=30;if(battle.tower)boost=20+Math.min(6
 for(let i=0;i<cnt;i++){if(Math.random()*100<25+battle.party[0].stats.luk/2){
 const k=genEquipKey(maxLv,pick(game.characters).jobId,boost);addItem(k);const it=itemOf(k);
 log(`→ ${rarTag(it.rar)}${it.gem?"💎":""}<b>${it.name}</b> を入手！`);}}
-game.party.combo=battle.combo;saveGame();renderParty();renderAreas();renderStatus();}
+bumpDaily();game.daily.wins++;
+track("battle_win",{mode:battle.mode||"explore",boss:!!anyBoss});
+if(anyBoss)track("boss_win");
+game.party.combo=battle.combo;saveGame();renderParty();renderAreas();renderStatus();renderGoals();renderDaily();}
 function sync(){battle.party.forEach(m=>{const c=game.characters.find(x=>x.id===m.ref);if(c){c.currentHp=Math.max(1,m.hp);c.currentMp=Math.max(0,m.mp);}});saveGame();renderParty();renderStatus();}
 function playTurn(){if(!battle||!battle.active)return;if(checkEnd())return;battle.turn++;log(`--- ターン${battle.turn} ---`);autoItems();
 const actors=[...battle.party.filter(m=>m.hp>0),...aliveE()].map(a=>({a,v:Math.floor(a.stats.agi*(a.states.slow?0.6:1))+rnd(6)})).sort((x,y)=>y.v-x.v).map(x=>x.a);
@@ -793,26 +1047,50 @@ else enemyAct(act);
 tickStates(act);renderStatus();if(checkEnd())break;}
 if(battle&&battle.active){battle.party.forEach(m=>{if(m.guard>0)m.guard--;if(m.shield>0)m.shield--;});renderStatus();}}
 function stopAuto(){if(autoTimer){clearInterval(autoTimer);autoTimer=null;}$("autoBtn").textContent="オート開始";}
-function toggleAuto(){if(!battle||!battle.active)explore();if(!battle||!battle.active)return;if(autoTimer){stopAuto();return;}
-autoTimer=setInterval(()=>{if(battle&&battle.active)playTurn();else stopAuto();},1000/speed);$("autoBtn").textContent="オート停止";}
+function makeAutoTimer(){if(autoTimer)clearInterval(autoTimer);
+autoTimer=setInterval(()=>{if(battle&&battle.active){playTurn();return;}
+if($("autoLoop").checked&&game.characters.length&&!(battle&&battle.defeated)){
+updateStamina();
+const a=AREAS.find(x=>x[0]===$("areaSelect").value);
+if(a&&(game.kills||0)>=a[7]&&game.stamina.cur>=STA_COST.explore){explore();return;}}
+stopAuto();},1000/speed);
+$("autoBtn").textContent="オート停止";}
+function toggleAuto(){if(!battle||!battle.active)explore();if(!battle||!battle.active)return;if(autoTimer){stopAuto();return;}makeAutoTimer();}
 
 function init(){
 $("createBoxes").innerHTML=[1,2,3,4].map(i=>`<div class="card"><div class="two"><div><label>キャラ${i}名前</label><input id="name${i}" maxlength="12" value="${["アキラ","ヒスイ","レン","ユキ"][i-1]}"></div><div><label>職業</label><select id="job${i}"></select></div></div></div>`).join("");
-Object.entries(JOBS).forEach(([id,j])=>{if(Object.values(ADV_MAP).includes(id))return;for(let i=1;i<=4;i++){const o=document.createElement("option");o.value=id;o.textContent=j.nm;$("job"+i).appendChild(o);}});
+Object.entries(JOBS).forEach(([id,j])=>{if(Object.values(ADV_MAP).includes(id))return;for(let i=1;i<=4;i++){const o=document.createElement("option");o.value=id;o.textContent=`${j.nm}（${JOB_ROLE[id]||""}）`;$("job"+i).appendChild(o);}});
 $("job2").value="healer";
+loadStats();
+recordLogin();
+$("playerName").value=stats.playerName||"";
+document.addEventListener("click",()=>lastAct=Date.now());
+document.addEventListener("keydown",()=>lastAct=Date.now());
+setInterval(statsTick,1000);
+setInterval(()=>{if($("tab-battle").classList.contains("active"))renderStamina();},10000);
+window.addEventListener("beforeunload",saveStats);
 if(!loadGame())game=newGame();
+try{const pm=new URLSearchParams(location.search).get("premium");
+if(pm&&PREMIUM_CODES.includes(pm)){grantPremium();setTimeout(()=>alert("プレミアムコードを確認しました。買い切りプレミアムが有効です。"),300);}}catch(e){}
 saveGame();
 renderAreas();
 $("showDamage").checked=!!game.settings.showDamage;$("autoItem").checked=!!game.settings.autoItem;
 document.querySelectorAll(".tabbtn").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
 $("createBtn").onclick=createParty;
 $("restBtn").onclick=()=>{game.characters.forEach(c=>{const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;});saveGame();renderParty();alert("全回復した。");};
-$("towerViewBtn").onclick=()=>alert("タワー："+game.tower+" 階 / 撃破："+game.kills+" / ボス撃破："+game.bossKills);
-$("respecBtn").onclick=()=>{if(game.gold>=500||(game.items.respec||0)>0){if((game.items.respec||0)>0)game.items.respec--;else game.gold-=500;
+$("towerViewBtn").onclick=()=>alert("タワー："+game.tower+" 階 / 撃破："+game.kills+" / ボス撃破："+game.bossKills+" / 転生の欠片："+(game.shards||0));
+$("respecBtn").onclick=()=>{
+const orphan=game.characters.some(c=>(c.skills||[]).some(id=>!SKILL_INDEX[id]))||(game.smith.skills||[]).some(id=>!SKILL_INDEX[id]);
+if(orphan){
+game.characters.forEach(c=>{c.skills=[];c.sp=(c.level-1)+(c.adv?10:0)+(c.reinc||0)*20;});
+game.smith.skills=[];game.smith.sp=game.smith.level-1;
+openSkill=null;saveGame();renderSkills();renderParty();renderSmith();
+alert("スキル再編の対象スキルがあったため、無料でリセットしSPを全返還しました。");return;}
+if(game.gold>=500||(game.items.respec||0)>0){if((game.items.respec||0)>0)game.items.respec--;else game.gold-=500;
 game.characters.forEach(c=>{c.skills=[];c.sp=(c.level-1)+(c.adv?10:0)+(c.reinc||0)*20;});
 game.smith.skills=[];game.smith.sp=game.smith.level-1;
 openSkill=null;saveGame();renderSkills();renderParty();renderSmith();alert("スキルを全てリセットし、SPを返還した。");}else alert("Gまたは券が不足");};
-$("speedSel").onchange=e=>{speed=+e.target.value;if(autoTimer){stopAuto();autoTimer=setInterval(()=>{if(battle&&battle.active)playTurn();else stopAuto();},1000/speed);$("autoBtn").textContent="オート停止";}if(battle)renderStatus();};
+$("speedSel").onchange=e=>{speed=+e.target.value;if(autoTimer)makeAutoTimer();if(battle)renderStatus();};
 $("exploreBtn").onclick=explore;$("bossBtn").onclick=boss;$("towerBtn").onclick=tower;$("raidBtn").onclick=raid;$("turnBtn").onclick=playTurn;$("autoBtn").onclick=toggleAuto;$("stopBtn").onclick=stopAuto;
 $("mineBtn").onclick=()=>doMine(1);$("mine5Btn").onclick=()=>doMine(5);
 $("refineBtn").onclick=refine;$("craftBtn").onclick=craft;
@@ -820,13 +1098,30 @@ $("refineBtn").onclick=refine;$("craftBtn").onclick=craft;
 $("showDamage").onchange=e=>{game.settings.showDamage=e.target.checked;saveGame();};
 $("autoItem").onchange=e=>{game.settings.autoItem=e.target.checked;saveGame();};
 $("saveBtn").onclick=()=>{$("saveMsg").textContent=saveGame()?"セーブした":"失敗";renderSave();};
-$("loadBtn").onclick=()=>{if(loadGame()){saveGame();$("saveMsg").textContent="ロードした";renderAreas();renderParty();renderSkills();renderSave();renderSmith();}else $("saveMsg").textContent="セーブなし";};
+$("loadBtn").onclick=()=>{if(loadGame()){saveGame();$("saveMsg").textContent="ロードした";renderAreas();renderParty();renderSkills();renderSave();renderSmith();renderGoals();renderDaily();}else $("saveMsg").textContent="セーブなし";};
 $("loadOldBtn").onclick=()=>{if(!confirm("旧バックアップ（v8）を読み込み、現在のデータに上書きします。よろしいですか？"))return;
-if(loadGame("text_rpg_v8")){saveGame();$("saveMsg").textContent="v8バックアップから復元した";renderAreas();renderParty();renderSkills();renderSave();renderSmith();}else $("saveMsg").textContent="バックアップの読み込みに失敗";};
-$("deleteBtn").onclick=()=>{if(!confirm("セーブデータを削除しますか？（旧バックアップも消えます）"))return;storage.del(SAVE_KEY);OLD_KEYS.forEach(k=>storage.del(k));game=newGame();renderAreas();renderParty();renderSave();renderSmith();};
+if(loadGame("text_rpg_v8")){saveGame();$("saveMsg").textContent="v8バックアップから復元した";renderAreas();renderParty();renderSkills();renderSave();renderSmith();renderGoals();renderDaily();}else $("saveMsg").textContent="バックアップの読み込みに失敗";};
+$("deleteBtn").onclick=()=>{if(!confirm("セーブデータを削除しますか？（旧バックアップも消えます。プレイ記録は残ります）"))return;storage.del(SAVE_KEY);OLD_KEYS.forEach(k=>storage.del(k));game=newGame();renderAreas();renderParty();renderSave();renderSmith();};
 $("exportBtn").onclick=()=>{$("saveText").value=exportSave();};
-$("importBtn").onclick=()=>{if(importSave($("saveText").value)){$("saveMsg").textContent="インポート成功";renderAreas();renderParty();renderSkills();renderSave();renderSmith();}else $("saveMsg").textContent="インポート失敗（文字列を確認）";};
-renderParty();renderSave();}
+$("importBtn").onclick=()=>{if(importSave($("saveText").value)){$("saveMsg").textContent="インポート成功";renderAreas();renderParty();renderSkills();renderSave();renderSmith();renderGoals();renderDaily();}else $("saveMsg").textContent="インポート失敗（文字列を確認）";};
+$("playerNameBtn").onclick=()=>{stats.playerName=($("playerName").value||"").trim();saveStats();$("playerMsg").textContent="保存しました："+(playerName());renderStats();};
+$("adRecoverBtn").onclick=()=>{updateStamina();const st=game.stamina;
+if(isPremium()){st.cur=st.max;saveGame();renderStamina();return;}
+if(st.adViews.count>=AD_LIMIT)return smsg("本日の広告視聴回数（5回）に達しています");
+playRewardedAd(()=>{updateStamina();st.adViews.count++;st.cur=Math.min(st.max,st.cur+AD_RECOVER);saveGame();renderStamina();});};
+$("adCloseBtn").onclick=()=>{closeAdModal();const cb=adRewardCb;adRewardCb=null;if(cb)cb();};
+$("premiumBtn").onclick=()=>{renderStamina();$("prModal").style.display="flex";};
+$("prPayBtn").onclick=()=>alert("ここにStripe Payment Link（500円の1回払い）のURLを配置します。\n決済完了後は ?premium=コード 付きURLへリダイレクト設定すると自動で有効化されます。");
+$("prTestBtn").onclick=()=>{grantPremium();renderStamina();alert("テスト用：買い切りプレミアムを有効化しました");};
+$("prCloseBtn").onclick=()=>{$("prModal").style.display="none";};
+$("tutOpenBtn").onclick=showTut;
+$("tutPrev").onclick=()=>{if(tutIdx>0){tutIdx--;drawTut();}};
+$("tutNext").onclick=()=>{if(tutIdx<TUT.length-1){tutIdx++;drawTut();}else closeTut();};
+$("tutSkip").onclick=closeTut;
+$("guideLink").innerHTML=GUIDE_URL?`<a href="${GUIDE_URL}?utm_source=game&utm_medium=guide" target="_blank" rel="noopener">攻略サイトはこちら（別ウィンドウ）</a>`:"攻略サイト：準備中（GUIDE_URLを設定するとリンクが表示されます）";
+renderParty();renderSave();renderGoals();renderDaily();
+track("game_start");
+if(!game.flags||!game.flags.tutorialDone)showTut();}
 document.addEventListener("DOMContentLoaded",init);
 </script>
 </body>
