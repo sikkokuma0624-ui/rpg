@@ -2,14 +2,14 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>鋼と言霊のサーガ</title>
 <style>
-*{box-sizing:border-box}body{margin:0;padding:10px;font-family:"Hiragino Sans","Noto Sans JP",sans-serif;background:#0d1117;color:#eef3f8}
+*{box-sizing:border-box}body{margin:0;padding:10px;padding-bottom:calc(18px + env(safe-area-inset-bottom));font-family:"Hiragino Sans","Noto Sans JP",sans-serif;background:#0d1117;color:#eef3f8}
 h1{font-size:19px;margin:6px 0 12px}h2{font-size:16px;margin:6px 0}h3{font-size:14px;margin:6px 0}
 button,select,input,textarea{font-size:13px;padding:8px;border-radius:9px;border:1px solid #44505c;background:#1b232c;color:#eef3f8;width:100%}
 button{cursor:pointer;background:#24313d;font-weight:bold}button:disabled{opacity:.4;cursor:not-allowed}
-.tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:10px}
+.tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:10px}
 .tabbtn{padding:8px 2px;font-size:11px}.tabbtn.active{background:#35506b}
 .tab{display:none}.tab.active{display:block}
 .card{background:#161d26;border:1px solid #2c3b4a;border-radius:12px;padding:10px;margin-bottom:10px}
@@ -24,13 +24,17 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 .bar{height:7px;background:#22303c;border-radius:4px;overflow:hidden;margin:2px 0;min-width:60px}
 .bar i{display:block;height:100%;background:#4caf7d}.bar.mp i{background:#42a5f5}.bar.en i{background:#ef5350}
 .bw{display:flex;align-items:center;gap:6px}
+.overlay{position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,#080b10,#182534 55%,#0b1118);display:flex;align-items:center;justify-content:center;padding:18px}.startbox{width:min(520px,100%);border:1px solid #50677c;border-radius:18px;padding:22px;background:rgba(13,17,23,.96);box-shadow:0 18px 60px #000}.startbox h1{font-size:28px;color:#e8c675;text-align:center}.startbox .catch{text-align:center;color:#a9bfd2;margin-bottom:22px}.modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:16px}.modalbox{width:min(560px,100%);max-height:88vh;overflow:auto;background:#161d26;border:1px solid #657b8e;border-radius:16px;padding:18px}.story{line-height:1.9;white-space:pre-line;color:#dae4ed}.stamina{color:#7fd7ff;font-weight:bold}.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.statbtn{min-height:42px}.guide{border-color:#806b3a;background:#201c13}
 </style>
 </head>
 <body>
+<section id="startScreen" class="overlay"><div class="startbox"><h1>鋼と言霊のサーガ</h1><div class="catch">言葉は刃となり、誓いは鋼となる。</div><button id="continueBtn">続きから</button><button id="newBtn">新しく物語を始める</button><div class="mini" style="margin-top:12px;text-align:center">端末内に自動保存されます</div></div></section>
+<div id="storyModal" class="modal"><div class="modalbox"><h2 id="storyTitle"></h2><div id="storyBody" class="story"></div><button id="storyNext" style="margin-top:14px">次へ</button></div></div>
 <h1>鋼と言霊のサーガ <span class="mini">β版</span></h1>
 <div class="tabs">
 <button class="tabbtn active" data-tab="create">作成</button>
 <button class="tabbtn" data-tab="party">パーティ</button>
+<button class="tabbtn" data-tab="status">能力</button>
 <button class="tabbtn" data-tab="skill">スキル</button>
 <button class="tabbtn" data-tab="battle">戦闘</button>
 <button class="tabbtn" data-tab="shop">ショップ</button>
@@ -46,19 +50,22 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 <h3>消耗品</h3><div id="itemList"></div>
 <h3>所持装備</h3><div id="invList"></div></section>
 
+<section id="tab-status" class="tab"><h2>基礎ステータス</h2><div class="card guide mini">レベルアップで各キャラクターに1ポイント獲得。能力は職業ステータスへ加算されます。</div><div id="primaryStatusList"></div></section>
+
 <section id="tab-skill" class="tab"><h2>スキル</h2>
 <div class="two"><button id="respecBtn">スキルリセット（500G）</button></div>
 <div id="learnModal" class="card" style="display:none"><h3 id="lmName"></h3><div class="mini" id="lmFl"></div><div class="mini" id="lmDesc"></div><div class="two"><button id="lmYes">習得する</button><button id="lmNo">やめる</button></div></div>
 <div id="skillList"></div></section>
 
 <section id="tab-battle" class="tab"><h2>戦闘</h2>
+<div class="card"><div>スタミナ：<span id="staminaView" class="stamina">0/100</span></div><div class="mini" id="staminaRegen">回復まで--:--</div></div>
 <div class="card"><div class="row">
-<div><label>エリア</label><select id="areaSelect"></select></div>
+<div><label>エリア</label><select id="areaSelect"></select><div id="areaStory" class="mini"></div></div>
 <div class="two"><label>速度<select id="speedSel"><option value="1">1x</option><option value="2">2x</option><option value="4">4x</option></select></label>
 <div class="check"><input type="checkbox" id="showDamage" checked><span>ダメージ表示</span></div></div>
 <div class="check"><input type="checkbox" id="autoItem" checked><span>ポーション自動</span></div>
-<div class="three"><button id="exploreBtn">探索</button><button id="bossBtn">ボス</button><button id="towerBtn">タワー</button></div>
-<div class="two"><button id="raidBtn">レイド</button><button id="autoBtn">オート開始</button></div>
+<div class="three"><button id="exploreBtn">探索（5）</button><button id="bossBtn">ボス（10）</button><button id="towerBtn">タワー（10）</button></div>
+<div class="two"><button id="raidBtn">レイド（20）</button><button id="autoBtn">オート開始</button></div>
 <div class="two"><button id="turnBtn">1ターン</button><button id="stopBtn">停止</button></div>
 </div></div>
 <div id="battleStatus" class="card">戦闘未開始</div>
@@ -82,7 +89,7 @@ catch(e){err=(e&&e.name||"Error")+":"+(e&&e.message||"");const m={};
 return{type:"memory",err,get:k=>m[k]??null,set:(k,v)=>{m[k]=v},del:k=>{delete m[k]}};}})();
 const SAVE_KEY="text_rpg_v9";
 const BACKUP_KEY="text_rpg_backup_v1";
-const SAVE_VERSION=10;
+const SAVE_VERSION=11;
 const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const pick=a=>a[Math.floor(Math.random()*a.length)];const rnd=n=>Math.floor(Math.random()*n);
 const fill=(t,p={})=>t.replace(/\{(\w+)\}/g,(_,k)=>p[k]??"");
@@ -90,6 +97,24 @@ const STAT_KEYS=["hp","mp","atk","def","matk","mdef","agi","luk","hit","eva"];
 const STAT_NM={hp:"HP",mp:"MP",atk:"物攻",def:"物防",matk:"魔攻",mdef:"魔防",agi:"素早",luk:"運",hit:"命中",eva:"回避"};
 const ST_NM={poison:"毒",burn:"燃焼",bleed:"出血",confuse:"混乱",blind:"暗闇",stun:"スタン",curse:"呪い",slow:"鈍足",vulnerable:"脆弱",defdown:"防御低下",regen:"再生"};
 const EL_NM={fire:"火",water:"水",wind:"風",earth:"地",light:"光",dark:"闇",none:"無"};
+const PRIMARY_KEYS=["str","dex","agi","vit","luk","int"];
+const PRIMARY_NM={str:"筋力",dex:"器用さ",agi:"俊敏",vit:"耐久",luk:"運",int:"知力"};
+const PRIMARY_DESC={str:"物攻・物防・素早さ",dex:"命中・会心",agi:"素早さ・回避",vit:"HP・物防",luk:"ドロップ・回避・命中・会心",int:"MP・魔攻"};
+const STAMINA_MAX=100,STAMINA_REGEN_MS=180000;
+const STAMINA_COST={explore:5,boss:10,tower:10,raid:20};
+const PROLOGUE=[
+{t:"序章　言葉が鋼だった時代",b:"かつて、この世界で言葉には重さがあった。\n誓いは盾となり、祈りは傷を癒やし、偽りは呪いとなった。\n鍛冶師たちは言葉を炉へ吹き込み、魂を宿した金属――『言鋼』を生み出した。"},
+{t:"沈黙王の災厄",b:"百年前、真の名を奪う王が現れた。\n人々が名を失うたび、記憶と歴史は白紙へ変わった。王は『沈黙王』と呼ばれ、最後には自らの名さえ世界から消した。\n封印されたはずの沈黙が、いま各地の迷宮から漏れ始めている。"},
+{t:"四人の綴り手",b:"王都の地下で、名を持たない四振りの言鋼が目覚めた。\nその刃を握れるのは、失われた言葉を取り戻す『綴り手』だけ。\n四人は散らばった原初の言葉を集め、沈黙王の正体と、この世界から消された最後の一文を追う。"}
+];
+const TUTORIAL=[
+{t:"指南一　四人を編成",b:"最初に四人の名前と職業を決めます。盾役・回復役・攻撃役を組み合わせると、序盤が安定します。"},
+{t:"指南二　探索とスタミナ",b:"探索はスタミナ5、ボスとタワーは10、レイドは20消費します。スタミナは3分ごとに1回復し、端末を閉じている間も回復します。"},
+{t:"指南三　戦闘",b:"『1ターン』で手動進行、『オート開始』で自動戦闘です。弱点属性・ブレイク・状態異常・四人の連携が勝敗を左右します。"},
+{t:"指南四　成長",b:"レベルアップでSPと基礎ステータスポイントを1ずつ獲得します。SPはスキル、能力ポイントは筋力・器用さ・俊敏・耐久・運・知力へ割り振ります。"},
+{t:"指南五　言葉を取り戻す",b:"各地のボスを倒すと物語が進みます。装備を集め、Lv50で上級職へ進み、原初の門を目指してください。",next:"冒険を始める"}
+];
+const AREA_STORY={area01:["第一章　声を失った草原","風は吹いているのに、草木の擦れる音だけがない。沈黙王の眷属が最初の言葉を喰らっている。"],area02:["第二章　森に残る呼び声","名を呼ばれなくなった獣たちが狂い始めた。森の奥で、誰かが四人の名を知っている。"],area03:["第三章　消された街道","地図から消えた宿場町へ続く道。盗賊たちは奪った言葉を武器として売っていた。"],area04:["第四章　誓約の遺跡","守るという誓いだけを残し、主を忘れた騎士が門を塞ぐ。刃に刻まれた古い王家の紋章が光る。"],area05:["第五章　反響なき洞窟","叫びも足音も返らない洞窟。闇の底で、四振りの言鋼が失った名の一部が眠る。"],area06:["第六章　風を縛る断崖","空から風の名が奪われ、翼ある魔物が墜ち始めた。沈黙は世界の法則まで書き換えつつある。"],area07:["第七章　偽りを祀る闇祠","人々の偽りを集めて神に変える祭壇。沈黙王は災厄ではなく、かつて英雄だったという記録が見つかる。"],area08:["第八章　記憶を映す霧湖","湖面に映るのは自分ではなく、忘れたはずの過去。四人のうち一人が、百年前の封印に関わっていた。"],area09:["第九章　名なき旧王都","すべての墓碑から名が削られた都。呪縛の王が守る玉座には、沈黙王の本当の名が刻まれている。"],area10:["終章　原初の門","世界で最初に発せられた言葉が眠る門。原初竜の咆哮を越えた時、消された最後の一文が姿を現す。"]};
 
 const FLAVOR={
 ss01:"剣と盾の基礎を鍛える。",ss02:"盾が身体の一部となる。",ss03:"盾で打ちつけ敵の注意を引く。",ss04:"守りを固め攻撃に備える。",ss05:"仲間の前に立ち攻撃を肩代わりする。",ss06:"聖なる光で仲間の守りを強める。",ss07:"窮地でこそ守りは輝く。",ss08:"絶対の聖盾が仲間を包む。",
@@ -171,13 +196,13 @@ necromancer:[{id:"nc01",nm:"死体収集",ty:"P",sp:2,lv:1,k:"flag",fl:"corpse",
 gunner:[{id:"gn01",nm:"銃器熟練",ty:"P",sp:2,lv:1,k:"flag",fl:"hit",val:5},{id:"gn02",nm:"スナップショット",ty:"A",sp:2,lv:5,mp:5,k:"dmg",pw:110},{id:"gn03",nm:"貫通弾",ty:"A",sp:3,lv:10,mp:7,k:"dmg",pw:120,pen:15,brk:15},{id:"gn04",nm:"連射",ty:"A",sp:3,lv:20,mp:9,k:"dmg",pw:70,hits:2},{id:"gn05",nm:"弱点狙い",ty:"P",sp:4,lv:30,k:"flag",fl:"critRate",val:8},{id:"gn06",nm:"炸裂弾",ty:"A",sp:4,lv:40,mp:14,k:"dmg",pw:90,tg:"all",brk:20},{id:"gn07",nm:"特殊弾薬",ty:"P",sp:5,lv:60,k:"flag",fl:"critDmg",val:20},{id:"gn08",nm:"フィニッシュバレット",ty:"A",sp:8,lv:90,mp:25,k:"dmg",pw:280,hm:100}],
 berserker:[{id:"bk01",nm:"剛力",ty:"P",sp:2,lv:1,k:"stat",stat:"atk",pct:6},{id:"bk02",nm:"血の代償",ty:"P",sp:3,lv:5,k:"flag",fl:"hpCostPow",val:15},{id:"bk03",nm:"捨身斬り",ty:"A",sp:3,lv:10,mp:0,k:"dmg",pw:150,hpCost:5,brk:20},{id:"bk04",nm:"激怒",ty:"A",sp:3,lv:20,mp:6,k:"buff",stat:"atk",pct:20,tn:2,tg:"self"},{id:"bk05",nm:"怒りの血",ty:"P",sp:4,lv:30,k:"stat",stat:"atk",pct:15,cond:"hp50"},{id:"bk06",nm:"破壊の突進",ty:"A",sp:4,lv:40,mp:0,k:"dmg",pw:190,hm:-10,hpCost:8,brk:30},{id:"bk07",nm:"絶叫",ty:"P",sp:5,lv:60,k:"flag",fl:"critDmg",val:20},{id:"bk08",nm:"血滅斬",ty:"A",sp:8,lv:90,mp:0,k:"dmg",pw:280,hpCost:10,crit:20,brk:40}],
 onmyoji:[{id:"on01",nm:"呪力増幅",ty:"P",sp:2,lv:1,k:"stat",stat:"matk",pct:5},{id:"on02",nm:"火炎の術",ty:"A",sp:2,lv:5,mp:8,k:"dmg",mg:1,pw:125,st:"burn",el:"fire"},{id:"on03",nm:"氷縛の術",ty:"A",sp:3,lv:10,mp:10,k:"dmg",mg:1,pw:120,st:"slow",el:"water"},{id:"on04",nm:"式神召喚",ty:"A",sp:3,lv:15,mp:12,k:"summon",pw:70,tn:3},{id:"on05",nm:"属性精通",ty:"P",sp:4,lv:25,k:"flag",fl:"elemPow",val:15},{id:"on06",nm:"呪殺の印",ty:"A",sp:4,lv:35,mp:12,k:"debuff",stat:"mdef",pct:15,tn:3,el:"dark"},{id:"on07",nm:"方結界",ty:"A",sp:5,lv:50,mp:16,k:"shield",pct:25,tn:2,tg:"party"},{id:"on08",nm:"泰山府君祭",ty:"A",sp:8,lv:90,mp:35,k:"dmg",mg:1,pw:160,tg:"all",el:"light"}],
-spec_offense:[{id:"of01",nm:"攻撃の才能",ty:"P",sp:3,lv:10,k:"stat",stat:"atk",pct:6},{id:"of02",nm:"会心の才能",ty:"P",sp:3,lv:15,k:"flag",fl:"critRate",val:6},{id:"of03",nm:"猛撃",ty:"A",sp:4,lv:20,mp:10,k:"dmg",pw:140,hm:-5,brk:15},{id:"of04",nm:"貫通の才能",ty:"P",sp:4,lv:30,k:"flag",fl:"defPen",val:8},{id:"of05",nm:"会心威力の才能",ty:"P",sp:5,lv:40,k:"flag",fl:"critDmg",val:15},{id:"of06",nm:"全力強打",ty:"A",sp:5,lv:50,mp:14,k:"dmg",pw:200,hm:-10,brk:25},{id:"of07",nm:"連撃の才能",ty:"A",sp:6,lv:60,mp:16,k:"dmg",pw:110,hits:2},{id:"of08",nm:"破壊の才能",ty:"P",sp:7,lv:75,k:"stat",stat:"atk",pct:10}],
-spec_defense:[{id:"df01",nm:"防御の才能",ty:"P",sp:3,lv:10,k:"stat",stat:"def",pct:6},{id:"df02",nm:"体力の才能",ty:"P",sp:3,lv:15,k:"stat",stat:"hp",pct:8},{id:"df03",nm:"魔防の才能",ty:"P",sp:3,lv:20,k:"stat",stat:"mdef",pct:6},{id:"df04",nm:"鉄の意志",ty:"A",sp:4,lv:30,mp:10,k:"guard"},{id:"df05",nm:"庇護の才能",ty:"A",sp:5,lv:40,mp:14,k:"shield",pct:20,tn:2,tg:"party"},{id:"df06",nm:"被回復の才能",ty:"P",sp:4,lv:50,k:"flag",fl:"healRecv",val:10},{id:"df07",nm:"ダメージ軽減",ty:"P",sp:6,lv:60,k:"flag",fl:"dmgReduce",val:5},{id:"df08",nm:"不屈の才能",ty:"P",sp:7,lv:75,k:"stat",stat:"def",pct:10}],
-spec_support:[{id:"sp01",nm:"回復の才能",ty:"P",sp:3,lv:10,k:"flag",fl:"healPow",val:8},{id:"sp02",nm:"魔力の才能",ty:"P",sp:3,lv:15,k:"stat",stat:"mp",pct:10},{id:"sp03",nm:"小回復",ty:"A",sp:3,lv:20,mp:8,k:"heal",pw:70,tg:"party"},{id:"sp04",nm:"全体浄化",ty:"A",sp:4,lv:30,mp:12,k:"cleanse",tg:"party"},{id:"sp05",nm:"強化の才能",ty:"P",sp:4,lv:40,k:"flag",fl:"buffPow",val:8},{id:"sp06",nm:"魔力供給",ty:"A",sp:4,lv:50,mp:0,k:"mp",pw:12,tg:"party"},{id:"sp07",nm:"MP節約の才能",ty:"P",sp:5,lv:60,k:"flag",fl:"mpReduce",val:1},{id:"sp08",nm:"蘇生の才能",ty:"A",sp:7,lv:75,mp:25,k:"revive",pw:40}],
-spec_speed:[{id:"sd01",nm:"敏捷の才能",ty:"P",sp:3,lv:10,k:"stat",stat:"agi",pct:6},{id:"sd02",nm:"回避の才能",ty:"P",sp:3,lv:15,k:"flag",fl:"eva",val:6},{id:"sd03",nm:"連撃行動の才能",ty:"P",sp:4,lv:20,k:"flag",fl:"extraAct",val:6},{id:"sd04",nm:"命中の才能",ty:"P",sp:3,lv:30,k:"flag",fl:"hit",val:6},{id:"sd05",nm:"神速",ty:"A",sp:4,lv:40,mp:10,k:"buff",stat:"agi",pct:20,tn:2,tg:"self"},{id:"sd06",nm:"鈍足撃",ty:"A",sp:4,lv:50,mp:10,k:"dmg",pw:100,st:"slow"},{id:"sd07",nm:"先制の才能",ty:"P",sp:5,lv:60,k:"flag",fl:"firstStrike",val:10},{id:"sd08",nm:"双撃の才能",ty:"A",sp:6,lv:75,mp:14,k:"dmg",pw:90,hits:2}],
-talent:[{id:"tl01",nm:"才能:HP+5%",ty:"P",sp:2,lv:1,k:"stat",stat:"hp",pct:5},{id:"tl02",nm:"才能:物攻+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"atk",pct:4},{id:"tl03",nm:"才能:魔攻+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"matk",pct:4},{id:"tl04",nm:"才能:物防+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"def",pct:4},{id:"tl05",nm:"才能:素早さ+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"agi",pct:4},{id:"tl06",nm:"才能:運+4%",ty:"P",sp:2,lv:1,k:"stat",stat:"luk",pct:4},{id:"tl07",nm:"才能:命中+5",ty:"P",sp:2,lv:1,k:"flag",fl:"hit",val:5},{id:"tl08",nm:"才能:回避+5",ty:"P",sp:2,lv:1,k:"flag",fl:"eva",val:5},{id:"tl09",nm:"才能:会心+4",ty:"P",sp:2,lv:1,k:"flag",fl:"critRate",val:4},{id:"tl10",nm:"才能:MP+8%",ty:"P",sp:2,lv:1,k:"stat",stat:"mp",pct:8}],
-adv_attack:[{id:"va01",nm:"上級:攻撃+12%",ty:"P",sp:6,lv:50,k:"stat",stat:"atk",pct:12},{id:"va02",nm:"上級:会心+12",ty:"P",sp:6,lv:50,k:"flag",fl:"critRate",val:12},{id:"va03",nm:"上級撃",ty:"A",sp:7,lv:55,mp:20,k:"dmg",pw:240,brk:35},{id:"va04",nm:"上級:貫通+15",ty:"P",sp:7,lv:60,k:"flag",fl:"defPen",val:15},{id:"va05",nm:"上級連斬",ty:"A",sp:8,lv:65,mp:24,k:"dmg",pw:110,hits:3},{id:"va06",nm:"上級:HP+12%",ty:"P",sp:7,lv:70,k:"stat",stat:"hp",pct:12},{id:"va07",nm:"上級:溜め+70",ty:"A",sp:8,lv:75,mp:18,k:"chant",pct:70},{id:"va08",nm:"上級:会心威力+30",ty:"P",sp:9,lv:80,k:"flag",fl:"critDmg",val:30}],
-adv_support:[{id:"vs01",nm:"上級:魔攻+12%",ty:"P",sp:6,lv:50,k:"stat",stat:"matk",pct:12},{id:"vs02",nm:"上級:回復+20",ty:"P",sp:6,lv:50,k:"flag",fl:"healPow",val:20},{id:"vs03",nm:"上級治癒",ty:"A",sp:7,lv:55,mp:24,k:"heal",pw:140,tg:"party"},{id:"vs04",nm:"上級:MP+20%",ty:"P",sp:7,lv:60,k:"stat",stat:"mp",pct:20},{id:"vs05",nm:"上級結界",ty:"A",sp:8,lv:65,mp:28,k:"shield",pct:35,tn:2,tg:"party"},{id:"vs06",nm:"上級:強化+15",ty:"P",sp:7,lv:70,k:"flag",fl:"buffPow",val:15},{id:"vs07",nm:"上級蘇生",ty:"A",sp:9,lv:75,mp:32,k:"revive",pw:60},{id:"vs08",nm:"上級:軽減+10",ty:"P",sp:9,lv:80,k:"flag",fl:"dmgReduce",val:10}],
+spec_offense:[{id:"of01",nm:"戦鬼の刻印",ty:"P",sp:3,lv:10,k:"stat",stat:"atk",pct:6},{id:"of02",nm:"致命の眼",ty:"P",sp:3,lv:15,k:"flag",fl:"critRate",val:6},{id:"of03",nm:"猛撃",ty:"A",sp:4,lv:20,mp:10,k:"dmg",pw:140,hm:-5,brk:15},{id:"of04",nm:"穿鋼",ty:"P",sp:4,lv:30,k:"flag",fl:"defPen",val:8},{id:"of05",nm:"死線の一閃",ty:"P",sp:5,lv:40,k:"flag",fl:"critDmg",val:15},{id:"of06",nm:"砕城撃",ty:"A",sp:5,lv:50,mp:14,k:"dmg",pw:200,hm:-10,brk:25},{id:"of07",nm:"連環刃",ty:"A",sp:6,lv:60,mp:16,k:"dmg",pw:110,hits:2},{id:"of08",nm:"覇道の極み",ty:"P",sp:7,lv:75,k:"stat",stat:"atk",pct:10}],
+spec_defense:[{id:"df01",nm:"鋼身",ty:"P",sp:3,lv:10,k:"stat",stat:"def",pct:6},{id:"df02",nm:"生命脈動",ty:"P",sp:3,lv:15,k:"stat",stat:"hp",pct:8},{id:"df03",nm:"魔除けの血",ty:"P",sp:3,lv:20,k:"stat",stat:"mdef",pct:6},{id:"df04",nm:"鉄の意志",ty:"A",sp:4,lv:30,mp:10,k:"guard"},{id:"df05",nm:"守護結界",ty:"A",sp:5,lv:40,mp:14,k:"shield",pct:20,tn:2,tg:"party"},{id:"df06",nm:"癒しの器",ty:"P",sp:4,lv:50,k:"flag",fl:"healRecv",val:10},{id:"df07",nm:"不壊",ty:"P",sp:6,lv:60,k:"flag",fl:"dmgReduce",val:5},{id:"df08",nm:"金剛不倒",ty:"P",sp:7,lv:75,k:"stat",stat:"def",pct:10}],
+spec_support:[{id:"sp01",nm:"慈愛の灯",ty:"P",sp:3,lv:10,k:"flag",fl:"healPow",val:8},{id:"sp02",nm:"魔力炉心",ty:"P",sp:3,lv:15,k:"stat",stat:"mp",pct:10},{id:"sp03",nm:"癒しの波",ty:"A",sp:3,lv:20,mp:8,k:"heal",pw:70,tg:"party"},{id:"sp04",nm:"清浄の鐘",ty:"A",sp:4,lv:30,mp:12,k:"cleanse",tg:"party"},{id:"sp05",nm:"鼓舞の律",ty:"P",sp:4,lv:40,k:"flag",fl:"buffPow",val:8},{id:"sp06",nm:"マナ循環",ty:"A",sp:4,lv:50,mp:0,k:"mp",pw:12,tg:"party"},{id:"sp07",nm:"静謐詠唱",ty:"P",sp:5,lv:60,k:"flag",fl:"mpReduce",val:1},{id:"sp08",nm:"反魂の祈り",ty:"A",sp:7,lv:75,mp:25,k:"revive",pw:40}],
+spec_speed:[{id:"sd01",nm:"疾風の歩法",ty:"P",sp:3,lv:10,k:"stat",stat:"agi",pct:6},{id:"sd02",nm:"霞身",ty:"P",sp:3,lv:15,k:"flag",fl:"eva",val:6},{id:"sd03",nm:"追影",ty:"P",sp:4,lv:20,k:"flag",fl:"extraAct",val:6},{id:"sd04",nm:"鷹の眼",ty:"P",sp:3,lv:30,k:"flag",fl:"hit",val:6},{id:"sd05",nm:"神速",ty:"A",sp:4,lv:40,mp:10,k:"buff",stat:"agi",pct:20,tn:2,tg:"self"},{id:"sd06",nm:"縛風撃",ty:"A",sp:4,lv:50,mp:10,k:"dmg",pw:100,st:"slow"},{id:"sd07",nm:"先駆の刃",ty:"P",sp:5,lv:60,k:"flag",fl:"firstStrike",val:10},{id:"sd08",nm:"双牙連閃",ty:"A",sp:6,lv:75,mp:14,k:"dmg",pw:90,hits:2}],
+talent:[{id:"tl01",nm:"生命鍛錬",ty:"P",sp:2,lv:1,k:"stat",stat:"hp",pct:5},{id:"tl02",nm:"剛力鍛錬",ty:"P",sp:2,lv:1,k:"stat",stat:"atk",pct:4},{id:"tl03",nm:"魔導鍛錬",ty:"P",sp:2,lv:1,k:"stat",stat:"matk",pct:4},{id:"tl04",nm:"守勢鍛錬",ty:"P",sp:2,lv:1,k:"stat",stat:"def",pct:4},{id:"tl05",nm:"疾駆鍛錬",ty:"P",sp:2,lv:1,k:"stat",stat:"agi",pct:4},{id:"tl06",nm:"天運鍛錬",ty:"P",sp:2,lv:1,k:"stat",stat:"luk",pct:4},{id:"tl07",nm:"必中鍛錬",ty:"P",sp:2,lv:1,k:"flag",fl:"hit",val:5},{id:"tl08",nm:"幻歩鍛錬",ty:"P",sp:2,lv:1,k:"flag",fl:"eva",val:5},{id:"tl09",nm:"急所鍛錬",ty:"P",sp:2,lv:1,k:"flag",fl:"critRate",val:4},{id:"tl10",nm:"魔泉鍛錬",ty:"P",sp:2,lv:1,k:"stat",stat:"mp",pct:8}],
+adv_attack:[{id:"va01",nm:"闘神の膂力",ty:"P",sp:6,lv:50,k:"stat",stat:"atk",pct:12},{id:"va02",nm:"死兆の眼",ty:"P",sp:6,lv:50,k:"flag",fl:"critRate",val:12},{id:"va03",nm:"地裂撃",ty:"A",sp:7,lv:55,mp:20,k:"dmg",pw:240,brk:35},{id:"va04",nm:"鎧通しの理",ty:"P",sp:7,lv:60,k:"flag",fl:"defPen",val:15},{id:"va05",nm:"三界連斬",ty:"A",sp:8,lv:65,mp:24,k:"dmg",pw:110,hits:3},{id:"va06",nm:"巨神の血脈",ty:"P",sp:7,lv:70,k:"stat",stat:"hp",pct:12},{id:"va07",nm:"極意・蓄勢",ty:"A",sp:8,lv:75,mp:18,k:"chant",pct:70},{id:"va08",nm:"死線超越",ty:"P",sp:9,lv:80,k:"flag",fl:"critDmg",val:30}],
+adv_support:[{id:"vs01",nm:"賢者の魔核",ty:"P",sp:6,lv:50,k:"stat",stat:"matk",pct:12},{id:"vs02",nm:"聖癒の紋",ty:"P",sp:6,lv:50,k:"flag",fl:"healPow",val:20},{id:"vs03",nm:"天恵の雨",ty:"A",sp:7,lv:55,mp:24,k:"heal",pw:140,tg:"party"},{id:"vs04",nm:"星海の器",ty:"P",sp:7,lv:60,k:"stat",stat:"mp",pct:20},{id:"vs05",nm:"六華結界",ty:"A",sp:8,lv:65,mp:28,k:"shield",pct:35,tn:2,tg:"party"},{id:"vs06",nm:"霊唱共鳴",ty:"P",sp:7,lv:70,k:"flag",fl:"buffPow",val:15},{id:"vs07",nm:"魂魄帰還",ty:"A",sp:9,lv:75,mp:32,k:"revive",pw:60},{id:"vs08",nm:"聖域の衣",ty:"P",sp:9,lv:80,k:"flag",fl:"dmgReduce",val:10}],
 ult_holy_knight:[{id:"u01",nm:"聖域不動陣",ty:"A",sp:10,lv:70,mp:40,k:"shield",pct:50,tn:3,tg:"party"}],ult_war_god:[{id:"u02",nm:"軍神の断罪",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:350,crit:25,brk:50}],ult_sword_saint:[{id:"u03",nm:"無想連斬",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:120,hits:4,crit:20}],ult_assassin:[{id:"u04",nm:"影殺・絶",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:300,crit:40}],ult_bastion:[{id:"u05",nm:"絶対城塞",ty:"A",sp:10,lv:70,mp:40,k:"guard"}],ult_saint:[{id:"u06",nm:"聖母の祝福",ty:"A",sp:10,lv:70,mp:40,k:"heal",pw:200,tg:"party"}],ult_maestro:[{id:"u07",nm:"天地交響曲",ty:"A",sp:10,lv:70,mp:40,k:"buff",stat:"atk",pct:25,tn:3,tg:"party"}],ult_arch_summoner:[{id:"u08",nm:"神霊降臨",ty:"A",sp:10,lv:70,mp:40,k:"summon",pw:250,tn:3}],ult_beast_lord:[{id:"u09",nm:"百獣の咆哮",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:200,tg:"all",brk:40}],ult_arch_sage:[{id:"u10",nm:"大星脈陣",ty:"A",sp:10,lv:70,mp:40,k:"mp",pw:30,tg:"party"}],ult_archmage:[{id:"u11",nm:"禁呪・隕石",ty:"A",sp:10,lv:70,mp:40,k:"dmg",mg:1,pw:220,tg:"all",el:"fire"}],ult_shadow_master:[{id:"u12",nm:"影域支配",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:280,st:"stun",el:"dark"}],ult_death_lord:[{id:"u13",nm:"冥界の軍勢",ty:"A",sp:10,lv:70,mp:40,k:"summon",pw:150,tn:3}],ult_gunslinger:[{id:"u14",nm:"乱れ撃ち・極",ty:"A",sp:10,lv:70,mp:40,k:"dmg",pw:90,hits:5,crit:20}],ult_war_demon:[{id:"u15",nm:"戦鬼の血祭",ty:"A",sp:10,lv:70,mp:0,k:"dmg",pw:350,hpCost:12,brk:50}],ult_grand_onmyoji:[{id:"u16",nm:"陰陽転生陣",ty:"A",sp:10,lv:70,mp:40,k:"dmg",mg:1,pw:200,tg:"all",el:"light"}],
 reinc_pool:[{id:"rc01",nm:"転生:全ステ+8%",ty:"P",sp:8,lv:1,k:"stat",stat:"all",pct:8},{id:"rc02",nm:"転生:会心+15",ty:"P",sp:8,lv:1,k:"flag",fl:"critRate",val:15},{id:"rc03",nm:"転生撃",ty:"A",sp:9,lv:1,mp:20,k:"dmg",pw:260,tg:"all",brk:40},{id:"rc04",nm:"転生:軽減+12",ty:"P",sp:9,lv:1,k:"flag",fl:"dmgReduce",val:12}]
 };
@@ -240,8 +265,10 @@ function setInfo(c){const cnt={},rc={};let maxSer=0;(c.equip||[]).forEach(uid=>{
 if(it.series)cnt[it.series]=(cnt[it.series]||0)+1;rc[it.rar]=(rc[it.rar]||0)+1;maxSer=Math.max(maxSer,it.lv);});
 return{sc:Math.max(0,...Object.values(cnt),0),maxSer,sameRar:Math.max(0,...Object.values(rc),0)};}
 function equipSum(c){const t={};STAT_KEYS.forEach(k=>t[k]=0);(c.equip||[]).forEach(uid=>{const it=(game.inv||[]).find(x=>x.uid===uid);if(it){const enh=1+(it.enh||0)*.04;Object.entries(it.stats).forEach(([k,v])=>t[k]+=Math.round(v*enh));}});return t;}
-function calcTotal(c){const base=jobStats(c.jobId,c.level),eq=equipSum(c),pm=passiveMods(c),tb=titleBonus(),si=setInfo(c);const o={};
-STAT_KEYS.forEach(k=>{let v=base[k]+eq[k];v=Math.floor(v*(1+(pm.pct[k]||0)/100));if(pm.flat[k])v+=pm.flat[k];o[k]=Math.max(0,v);});
+function primaryMods(c){const a=Object.assign({str:0,dex:0,agi:0,vit:0,luk:0,int:0},c.primary||{}),s={hp:a.vit*6,mp:a.int*2,atk:a.str,def:a.str*.4+a.vit*.7,matk:a.int,mdef:0,agi:a.str*.25+a.agi,luk:a.luk,hit:a.dex*.7+a.luk*.2,eva:a.agi*.5+a.luk*.2};return{stats:s,crit:a.dex*.25+a.luk*.15,drop:a.luk*.4};}
+function calcTotal(c){const base=jobStats(c.jobId,c.level),eq=equipSum(c),pm=passiveMods(c),pr=primaryMods(c),tb=titleBonus(),si=setInfo(c);const o={};
+STAT_KEYS.forEach(k=>{let v=base[k]+eq[k]+(pr.stats[k]||0);v=Math.floor(v*(1+(pm.pct[k]||0)/100));if(pm.flat[k])v+=pm.flat[k];o[k]=Math.max(0,Math.floor(v));});
+pm.flags.critRate=(pm.flags.critRate||0)+pr.crit;pm.flags.dropRate=(pm.flags.dropRate||0)+pr.drop;
 if(pm.flags.allStatPct)STAT_KEYS.forEach(k=>o[k]=Math.ceil(o[k]*(1+pm.flags.allStatPct/100)));
 o.atk=Math.floor(o.atk*(1+tb.atk/100));o.def=Math.floor(o.def*(1+tb.def/100));o.hp=Math.floor(o.hp*(1+tb.hp/100));
 if(c.awakened)STAT_KEYS.forEach(k=>o[k]=Math.floor(o[k]*1.05));
@@ -253,14 +280,14 @@ if(si.sc>=4){o.hp=Math.floor(o.hp*(1+(hi?10:8)/100));pm.flags.critRate=(pm.flags
 if(si.sameRar>=4)pm.flags.critDmg=(pm.flags.critDmg||0)+10;
 o._flags=pm.flags;return o;}
 function nextExp(lv){return Math.floor(20*Math.pow(lv,1.6)+50);}
-function gainExp(c,amt){c.exp=(c.exp||0)+amt;while(c.level<100&&c.exp>=nextExp(c.level)){c.exp-=nextExp(c.level);c.level++;c.sp=(c.sp||0)+1;}}
+function gainExp(c,amt){c.exp=(c.exp||0)+amt;while(c.level<100&&c.exp>=nextExp(c.level)){c.exp-=nextExp(c.level);c.level++;c.sp=(c.sp||0)+1;c.statPoints=(c.statPoints||0)+1;}}
 function makeEnemy(id,lv){const m=MON_INDEX[id];if(!m)return makeEnemy("slime",lv);const r=RACES[m.type];const scale=1+0.15*Math.max(0,(game.characters.length-2));
 const s={hp:Math.round((40+lv*14)*r.hp*scale),mp:20,atk:Math.round((8+lv*2.2)*r.atk),def:Math.round((6+lv*1.6)*r.def),matk:Math.round((6+lv*1.8)*r.matk),mdef:Math.round((6+lv*1.5)*r.mdef),agi:Math.round((6+lv*1.2)*r.agi),luk:Math.round((5+lv)*r.luk),hit:Math.round((8+lv*1.4)*r.hit),eva:Math.round((4+lv*.9)*r.eva)};
 return{id,name:m.nm,race:m.type,type:"enemy",rar:m.rar,level:lv,stats:s};}
 
-function newGame(){return{v:SAVE_VERSION,settings:{showDamage:true,autoItem:true},party:{combo:0,comboMax:100},characters:[],inv:[],gold:100,items:{potion:2,ether:1,elixir:0,respec:0,box:0},tower:1,kills:0,bossKills:0,flags:{}};}
+function newGame(){return{v:SAVE_VERSION,settings:{showDamage:true,autoItem:true},party:{combo:0,comboMax:100},characters:[],inv:[],gold:100,items:{potion:2,ether:1,elixir:0,respec:0,box:0},stamina:STAMINA_MAX,staminaTs:Date.now(),tower:1,kills:0,bossKills:0,storyCleared:[],flags:{}};}
 function dedupeEquip(){const seen=new Set();(game.characters||[]).forEach(c=>{c.equip=(c.equip||[]).filter(u=>{if(seen.has(u))return false;seen.add(u);return true;});});}
-function migrateGame(s){if(!s||typeof s!=="object")throw new Error("invalid save");s.settings=Object.assign({showDamage:true,autoItem:true},s.settings||{});s.party=Object.assign({combo:0,comboMax:100},s.party||{});s.characters=Array.isArray(s.characters)?s.characters:[];s.inv=Array.isArray(s.inv)?s.inv:[];s.items=Object.assign({potion:0,ether:0,elixir:0,respec:0,box:0},s.items||{});s.gold=Number.isFinite(+s.gold)?Math.max(0,+s.gold):100;s.tower=Math.max(1,+s.tower||1);s.kills=Math.max(0,+s.kills||0);s.bossKills=Math.max(0,+s.bossKills||0);s.flags=s.flags||{};s.characters.forEach((c,i)=>{c.id=c.id||"c"+(i+1);c.slot=c.slot||i+1;c.level=clamp(+c.level||1,1,100);c.exp=Math.max(0,+c.exp||0);c.sp=Math.max(0,+c.sp||0);c.skills=Array.isArray(c.skills)?c.skills.filter(id=>SKILL_INDEX[id]):[];c.equip=Array.isArray(c.equip)?c.equip:[];c.reinc=clamp(+c.reinc||0,0,5);});s.v=SAVE_VERSION;return s;}
+function migrateGame(s){if(!s||typeof s!=="object")throw new Error("invalid save");s.settings=Object.assign({showDamage:true,autoItem:true},s.settings||{});s.party=Object.assign({combo:0,comboMax:100},s.party||{});s.characters=Array.isArray(s.characters)?s.characters:[];s.inv=Array.isArray(s.inv)?s.inv:[];s.items=Object.assign({potion:0,ether:0,elixir:0,respec:0,box:0},s.items||{});s.gold=Number.isFinite(+s.gold)?Math.max(0,+s.gold):100;s.stamina=clamp(Number.isFinite(+s.stamina)?+s.stamina:STAMINA_MAX,0,STAMINA_MAX);s.staminaTs=Number.isFinite(+s.staminaTs)?+s.staminaTs:Date.now();s.storyCleared=Array.isArray(s.storyCleared)?s.storyCleared:[];s.tower=Math.max(1,+s.tower||1);s.kills=Math.max(0,+s.kills||0);s.bossKills=Math.max(0,+s.bossKills||0);s.flags=s.flags||{};s.characters.forEach((c,i)=>{c.id=c.id||"c"+(i+1);c.slot=c.slot||i+1;c.level=clamp(+c.level||1,1,100);c.exp=Math.max(0,+c.exp||0);c.sp=Math.max(0,+c.sp||0);c.statPoints=Math.max(0,Number.isFinite(+c.statPoints)?+c.statPoints:Math.max(0,c.level-1));c.primary=Object.assign({str:0,dex:0,agi:0,vit:0,luk:0,int:0},c.primary||{});PRIMARY_KEYS.forEach(k=>c.primary[k]=Math.max(0,+c.primary[k]||0));c.skills=Array.isArray(c.skills)?c.skills.filter(id=>SKILL_INDEX[id]):[];c.equip=Array.isArray(c.equip)?c.equip:[];c.reinc=clamp(+c.reinc||0,0,5);});s.v=SAVE_VERSION;return s;}
 function saveGame(){try{game.updatedAt=new Date().toISOString();const old=storage.get(SAVE_KEY);if(old)storage.set(BACKUP_KEY,old);storage.set(SAVE_KEY,JSON.stringify(game));return true;}catch(e){return false;}}
 function loadGame(){try{const r=storage.get(SAVE_KEY);if(!r)return false;game=migrateGame(JSON.parse(r));dedupeEquip();return true;}catch(e){try{const b=storage.get(BACKUP_KEY);if(!b)return false;game=migrateGame(JSON.parse(b));dedupeEquip();storage.set(SAVE_KEY,JSON.stringify(game));return true;}catch(ignore){return false;}}}
 const exportSave=()=>btoa(unescape(encodeURIComponent(JSON.stringify(game))));
@@ -283,8 +310,9 @@ const enhChance=it=>clamp(100-(it.enh||0)*8,30,100);
 const sellVal=it=>Math.floor(10*seriesFor(it.lv)[2]*RARITY[it.rar].mult);
 
 function switchTab(n){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".tabbtn").forEach(b=>b.classList.remove("active"));$("tab-"+n).classList.add("active");document.querySelector(`[data-tab="${n}"]`).classList.add("active");
-if(n==="party")renderParty();if(n==="skill")renderSkills();if(n==="battle")renderStatus();if(n==="save")renderSave();if(n==="shop")renderShop();}
+if(n==="party")renderParty();if(n==="status")renderPrimaryStatus();if(n==="skill")renderSkills();if(n==="battle"){renderStatus();renderStamina();renderAreaStory();}if(n==="save")renderSave();if(n==="shop")renderShop();}
 function renderGold(){$("goldView").textContent=game.gold;$("goldView2").textContent=game.gold;}
+function renderPrimaryStatus(){const el=$("primaryStatusList");if(!game.characters.length){el.innerHTML='<div class="card">先にパーティを作成してください。</div>';return;}el.innerHTML=game.characters.map((c,i)=>`<div class="card"><h3>${c.name}　残り${c.statPoints||0}pt</h3><div class="statgrid">${PRIMARY_KEYS.map(k=>`<button class="statbtn" data-c="${i}" data-k="${k}" ${(c.statPoints||0)>0?"":"disabled"}><b>${PRIMARY_NM[k]} ${c.primary[k]||0}</b><br><span class="mini">${PRIMARY_DESC[k]}</span></button>`).join("")}</div></div>`).join("");document.querySelectorAll(".statbtn").forEach(b=>b.onclick=e=>{const x=e.target.closest(".statbtn"),c=game.characters[+x.dataset.c],k=x.dataset.k;if((c.statPoints||0)<=0)return;c.statPoints--;c.primary[k]=(c.primary[k]||0)+1;const t=calcTotal(c);c.currentHp=Math.min(c.currentHp??t.hp,t.hp);c.currentMp=Math.min(c.currentMp??t.mp,t.mp);saveGame();renderPrimaryStatus();});}
 function renderParty(){renderGold();const el=$("partyList");if(!game.characters.length){el.innerHTML='<div class="card">未作成</div>';$("itemList").innerHTML="";$("invList").innerHTML="";return;}
 el.innerHTML=game.characters.map((c,i)=>{const t=calcTotal(c);const si=setInfo(c);
 const usedBy={};game.characters.forEach((o,oi)=>{if(oi!==i)(o.equip||[]).forEach(u=>{usedBy[u]=o.name;});});
@@ -328,7 +356,7 @@ return `<div class="mini">${s.nm} [${s.ty==="P"?"被":"主"}] SP${s.sp} Lv${s.lv
 function renderSkills(){const el=$("skillList");if(!game.characters.length){el.innerHTML='<div class="card">未作成</div>';return;}
 el.innerHTML=game.characters.map((c,i)=>{let h=`<div class="card"><h3>${c.name}（SP ${c.sp||0}）${c.adv?' <span class="adv">上級</span>':""}${c.reinc?` <span class="rc">転生${c.reinc}</span>`:""}</h3><div class="mini">― 職業 ―</div>`+(SKILLS[c.jobId]||[]).map(s=>skillRow(c,i,s)).join("");
 [["spec_offense","攻撃"],["spec_defense","防御"],["spec_support","支援"],["spec_speed","速度"]].forEach(([k,nm])=>{h+=`<div class="mini"><b>${nm}系統</b></div>`+(SKILLS[k]||[]).map(s=>skillRow(c,i,s)).join("");});
-h+=`<div class="mini"><b>才能</b></div>`+(SKILLS.talent||[]).map(s=>skillRow(c,i,s)).join("");
+h+=`<div class="mini"><b>基礎鍛錬</b></div>`+(SKILLS.talent||[]).map(s=>skillRow(c,i,s)).join("");
 if(c.adv){const pool=COMBAT_JOBS.has(c.jobId)?"adv_attack":"adv_support";h+=`<hr><div class="mini adv"><b>上級スキル</b></div>`+(SKILLS[pool]||[]).map(s=>skillRow(c,i,s)).join("");
 h+=`<div class="mini adv"><b>奥義</b></div>`+(SKILLS["ult_"+c.jobId]||[]).map(s=>skillRow(c,i,s)).join("");}
 if(c.reinc)h+=`<hr><div class="mini rc"><b>転生スキル</b></div>`+(SKILLS.reinc_pool||[]).map(s=>skillRow(c,i,s)).join("");
@@ -346,12 +374,17 @@ function renderStatus(){const el=$("battleStatus");if(!battle){el.innerHTML="戦
 el.innerHTML=battle.enemies.map(e=>`<div class="mini"><b>${e.name}</b> Lv${e.level} ${e.hp}/${e.stats.hp} <span class="bw" style="flex:1">${bar(e.hp,e.stats.hp,"en")}</span> <span class="brk">Brk${e.break||0}</span>${e.charge?' <span class="brk">溜め!</span>':""}</div>`).join("")+
 `<div class="mini">連携${battle.combo}/${game.party.comboMax} / 死体${battle.corpses||0} / 速度${speed}x</div><hr>`+battle.party.map(m=>`<div class="mini bw">${m.name} HP${m.hp}/${m.maxHp} ${bar(m.hp,m.maxHp)} MP${m.mp}/${m.maxMp} ${bar(m.mp,m.maxMp,"mp")}</div>`).join("");}
 
-function makeChar(id,slot,name,job){const t=jobStats(job,1);return{id,slot,name,jobId:job,level:1,exp:0,sp:0,skills:[],equip:[],currentHp:t.hp,currentMp:t.mp,adv:false,reinc:0};}
+function makeChar(id,slot,name,job){const t=jobStats(job,1);return{id,slot,name,jobId:job,level:1,exp:0,sp:0,statPoints:0,primary:{str:0,dex:0,agi:0,vit:0,luk:0,int:0},skills:[],equip:[],currentHp:t.hp,currentMp:t.mp,adv:false,reinc:0};}
 function createParty(){const names=[],jobs=[];for(let i=1;i<=4;i++){names.push($("name"+i).value.trim());jobs.push($("job"+i).value);}
 if(names.some(n=>!n))return alert("全キャラ名前を入力");if(new Set(names).size!==4)return alert("同じ名前は不可");
 game=newGame();game.settings.showDamage=$("showDamage").checked;game.characters=names.map((n,idx)=>makeChar("c"+(idx+1),idx+1,n,jobs[idx]));saveGame();switchTab("party");}
 
 function weaponTypeOf(c){const uid=(c.equip||[]).find(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot==="weapon";});const it=game.inv.find(x=>x.uid===uid);return it?it.type:null;}
+function regenStamina(){if(!game)return;const now=Date.now(),elapsed=Math.max(0,now-(game.staminaTs||now)),gain=Math.floor(elapsed/STAMINA_REGEN_MS);if(gain>0){game.stamina=Math.min(STAMINA_MAX,(game.stamina||0)+gain);game.staminaTs+=(gain*STAMINA_REGEN_MS);saveGame();}}
+function spendStamina(n){regenStamina();if((game.stamina||0)<n){alert("スタミナが不足しています。3分ごとに1回復します。");renderStamina();return false;}const wasFull=game.stamina>=STAMINA_MAX;game.stamina-=n;if(wasFull||!game.staminaTs||game.staminaTs>Date.now())game.staminaTs=Date.now();saveGame();renderStamina();return true;}
+function renderStamina(){if(!$("staminaView"))return;regenStamina();$("staminaView").textContent=(game.stamina||0)+" / "+STAMINA_MAX;if(game.stamina>=STAMINA_MAX){$("staminaRegen").textContent="満タン";return;}const rem=Math.max(0,STAMINA_REGEN_MS-(Date.now()-(game.staminaTs||Date.now()))),m=Math.floor(rem/60000),s=Math.floor(rem%60000/1000);$("staminaRegen").textContent=`次の回復まで ${m}:${String(s).padStart(2,"0")}`;}
+function renderAreaStory(){const id=$("areaSelect").value,x=AREA_STORY[id];$("areaStory").textContent=x?x[0]+"｜"+x[1]:"";}
+function canBeginBattle(){if(!game||game.characters.length<2){alert("先に4人パーティを作成してください。");return false;}if(battle&&battle.active){alert("現在の戦闘を終えてから選択してください。");return false;}return true;}
 function startBattle(enemyArr){stopAuto();if(!game||game.characters.length<2){alert("先にキャラ作成");return;}
 const comp={tank:game.characters.some(c=>TANK_JOBS.has(c.jobId)),heal:game.characters.some(c=>HEAL_JOBS.has(c.jobId))};
 battle={turn:0,active:true,combo:game.party.combo||0,corpses:0,comp,
@@ -363,11 +396,11 @@ if(comp.tank)log("編成ボーナス：全体物防+10%");if(comp.heal)log("編�
 battle.enemies.forEach(e=>{const re=RACE_ELEM[e.race]||{};if(re.weak)log(`${e.name} 弱点：<span class="eff">${EL_NM[re.weak]}</span>`);});renderStatus();}
 const aliveE=()=>battle.enemies.filter(e=>e.hp>0);
 const pickE=()=>{const a=aliveE();return a.length?a[rnd(a.length)]:null;};
-function explore(){const a=AREAS.find(x=>x[0]===$("areaSelect").value);const lv=a[2]+rnd(a[3]-a[2]+1);startBattle([makeEnemy(Math.random()<.15?a[5]:pick(a[4]),lv)]);if(battle)battle.mode="explore";}
-function boss(){const a=AREAS.find(x=>x[0]===$("areaSelect").value);const bossId=a&&(a[6]||a[5]);if(!bossId)return alert("ボスなし");startBattle([makeEnemy(bossId,a[3])]);if(battle)battle.mode="boss";}
-function tower(){const lv=5+game.tower*3;startBattle([makeEnemy(pick(["stone_golem","death_knight","dragon_whelp","void_watcher","shadow_wraith","star_beast"]),lv)]);if(battle)battle.tower=true;}
+function explore(){if(!canBeginBattle()||!spendStamina(STAMINA_COST.explore))return;const a=AREAS.find(x=>x[0]===$("areaSelect").value);const lv=a[2]+rnd(a[3]-a[2]+1);startBattle([makeEnemy(Math.random()<.15?a[5]:pick(a[4]),lv)]);if(battle){battle.mode="explore";battle.areaId=a[0];}}
+function boss(){if(!canBeginBattle())return;const a=AREAS.find(x=>x[0]===$("areaSelect").value);const bossId=a&&(a[6]||a[5]);if(!bossId)return alert("ボスなし");if(!spendStamina(STAMINA_COST.boss))return;startBattle([makeEnemy(bossId,a[3])]);if(battle){battle.mode="boss";battle.areaId=a[0];}}
+function tower(){if(!canBeginBattle()||!spendStamina(STAMINA_COST.tower))return;const lv=5+game.tower*3;startBattle([makeEnemy(pick(["stone_golem","death_knight","dragon_whelp","void_watcher","shadow_wraith","star_beast"]),lv)]);if(battle){battle.tower=true;battle.mode="tower";}}
 function raid(){const n=2+(Math.random()<.5?0:1);const lv=50+rnd(40);const pool=["gargoyle","death_knight","chimera","lake_dragon","chaos_beast","dragon_whelp","void_watcher"];
-const arr=[];for(let i=0;i<n;i++)arr.push(makeEnemy(pick(pool),lv));startBattle(arr);if(battle)battle.raid=true;}
+if(!canBeginBattle()||!spendStamina(STAMINA_COST.raid))return;const arr=[];for(let i=0;i<n;i++)arr.push(makeEnemy(pick(pool),lv));startBattle(arr);if(battle){battle.raid=true;battle.mode="raid";}}
 function lowestAlly(){return battle.party.filter(m=>m.hp>0).sort((x,y)=>x.hp/x.maxHp-y.hp/y.maxHp)[0];}
 const mpCost=(s,c)=>Math.floor((s.mp||0)*(c.flags.mpReduce?.8:1));
 const hitCh=(a,d,m=0)=>clamp(75+a.stats.hit-d.stats.eva+m-(a.states&&a.states.blind?25:0)-(a.states&&a.states.slow?10:0),20,98);
@@ -447,9 +480,9 @@ const mult=anyBoss?2:1;const exp=Math.floor((maxLv*12+8)*mult*(1+0.5*(cnt-1)));c
 game.gold+=gold;log(`→ 経験値${exp} / <span class="gold">${gold}G</span> を獲得。`);
 battle.party.forEach(m=>{const c=game.characters.find(x=>x.id===m.ref);if(c){gainExp(c,exp);c.currentHp=Math.max(1,m.hp);c.currentMp=Math.max(0,m.mp);}});
 if(battle.tower){game.tower++;log(`→ タワー ${game.tower} 階へ進んだ。`);}
-const area=AREAS.find(a=>a[0]===$("areaSelect").value);
-for(let i=0;i<cnt;i++){if(Math.random()*100<25+battle.party[0].stats.luk/2){const it=genEquip(area?area[7]:maxLv,pick(game.characters).jobId);game.inv.push(it);log(`→ ${it.name} を入手！`);}}
-game.party.combo=battle.combo;saveGame();renderParty();renderStatus();}
+const area=AREAS.find(a=>a[0]===(battle.areaId||$("areaSelect").value));
+const dropBonus=battle.party.reduce((n,m)=>n+(m.flags.dropRate||0),0)/Math.max(1,battle.party.length);for(let i=0;i<cnt;i++){if(Math.random()*100<25+battle.party[0].stats.luk/2+dropBonus){const it=genEquip(area?area[7]:maxLv,pick(game.characters).jobId);game.inv.push(it);log(`→ ${it.name} を入手！`);}}
+const newChapter=battle.mode==="boss"&&battle.areaId&&game.storyCleared.indexOf(battle.areaId)<0?battle.areaId:null;if(newChapter)game.storyCleared.push(newChapter);game.party.combo=battle.combo;saveGame();renderParty();renderStatus();if(newChapter)setTimeout(()=>showAreaChapter(newChapter),250);}
 function sync(){battle.party.forEach(m=>{const c=game.characters.find(x=>x.id===m.ref);if(c){c.currentHp=Math.max(1,m.hp);c.currentMp=Math.max(0,m.mp);}});saveGame();renderParty();renderStatus();}
 function playTurn(){if(!battle||!battle.active)return;if(checkEnd())return;battle.turn++;log(`--- ターン${battle.turn} ---`);autoItems();
 const actors=[...battle.party.filter(m=>m.hp>0),...aliveE()].map(a=>({a,v:a.stats.agi*(a.states&&a.states.slow ? 0.7 : 1)+rnd(6)})).sort((x,y)=>y.v-x.v).map(x=>x.a);
@@ -468,18 +501,24 @@ function stopAuto(){if(autoTimer){clearInterval(autoTimer);autoTimer=null;}$("au
 function toggleAuto(){if(!battle||!battle.active)explore();if(!battle||!battle.active)return;if(autoTimer){stopAuto();return;}
 autoTimer=setInterval(()=>{if(battle&&battle.active)playTurn();else stopAuto();},1000/speed);$("autoBtn").textContent="オート停止";}
 
+function hideStart(){$("startScreen").style.display="none";}
+function showSequence(items,i=0,done){if(i>=items.length){$("storyModal").style.display="none";if(done)done();return;}const x=items[i];$("storyTitle").textContent=x.t;$("storyBody").textContent=x.b;$("storyModal").style.display="flex";$("storyNext").textContent=x.next||(i===items.length-1?(done?"次へ":"閉じる"):"次へ");$("storyNext").onclick=()=>showSequence(items,i+1,done);}
+function startNewStory(){if(storage.get(SAVE_KEY)&&!confirm("新しい物語を始めますか？\n現在のデータは、4人パーティを作成した時点で上書きされます。"))return;game=newGame();battle=null;hideStart();switchTab("create");showSequence(PROLOGUE,0,()=>showSequence(TUTORIAL));}
+function continueStory(){if(!loadGame())return alert("続きから読めるセーブデータがありません。");hideStart();regenStamina();renderParty();renderPrimaryStatus();renderStamina();}
+function showAreaChapter(id){const x=AREA_STORY[id];if(!x)return;showSequence([{t:x[0]+"　踏破",b:x[1]+"\n\nボスを退けた四人の言鋼に、失われた言葉の欠片が刻まれた。物語は次の地へ続く。"}]);}
+
 function init(){
 $("createBoxes").innerHTML=[1,2,3,4].map(i=>`<div class="card"><div class="two"><div><label>キャラ${i}名前</label><input id="name${i}" maxlength="12" value="${["アキラ","ヒスイ","レン","ユキ"][i-1]}"></div><div><label>職業</label><select id="job${i}"></select></div></div></div>`).join("");
 Object.entries(JOBS).forEach(([id,j])=>{if(Object.values(ADV_MAP).includes(id))return;for(let i=1;i<=4;i++){const o=document.createElement("option");o.value=id;o.textContent=j.nm;$("job"+i).appendChild(o);}});
 $("job2").value="healer";AREAS.forEach(a=>{const o=document.createElement("option");o.value=a[0];o.textContent=`${a[1]} Lv${a[2]}-${a[3]}`;$("areaSelect").appendChild(o);});
-if(!loadGame())game=newGame();$("showDamage").checked=!!game.settings.showDamage;$("autoItem").checked=!!game.settings.autoItem;
+const hasStored=!!storage.get(SAVE_KEY);if(!loadGame())game=newGame();$("continueBtn").disabled=!hasStored;$("continueBtn").onclick=continueStory;$("newBtn").onclick=startNewStory;$("showDamage").checked=!!game.settings.showDamage;$("autoItem").checked=!!game.settings.autoItem;
 document.querySelectorAll(".tabbtn").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
 $("createBtn").onclick=createParty;
 $("restBtn").onclick=()=>{game.characters.forEach(c=>{const t=calcTotal(c);c.currentHp=t.hp;c.currentMp=t.mp;});saveGame();renderParty();alert("全回復した。");};
 $("towerViewBtn").onclick=()=>alert("タワー："+game.tower+" / 撃破："+game.kills+" / ボス："+game.bossKills);
 $("respecBtn").onclick=()=>{if(game.gold>=500||(game.items.respec||0)>0){if(game.items.respec>0)game.items.respec--;else game.gold-=500;game.characters.forEach(c=>{const jobIds=(SKILLS[c.jobId]||[]).map(s=>s.id);c.skills=(c.skills||[]).filter(id=>!jobIds.includes(id));c.sp=c.level-1;});saveGame();renderSkills();renderParty();alert("職スキルをリセットした。");}else alert("Gまたは券が不足");};
 $("lmYes").onclick=confirmLearn;$("lmNo").onclick=()=>{pendingLearn=null;$("learnModal").style.display="none";};
-$("speedSel").onchange=e=>{speed=+e.target.value;renderStatus();if(autoTimer){stopAuto();toggleAuto();}};
+$("speedSel").onchange=e=>{speed=+e.target.value;renderStatus();if(autoTimer){stopAuto();toggleAuto();}};$("areaSelect").onchange=renderAreaStory;
 $("exploreBtn").onclick=explore;$("bossBtn").onclick=boss;$("towerBtn").onclick=tower;$("raidBtn").onclick=raid;$("turnBtn").onclick=playTurn;$("autoBtn").onclick=toggleAuto;$("stopBtn").onclick=stopAuto;
 $("showDamage").onchange=e=>{game.settings.showDamage=e.target.checked;saveGame();};
 $("autoItem").onchange=e=>{game.settings.autoItem=e.target.checked;saveGame();};
@@ -488,7 +527,7 @@ $("loadBtn").onclick=()=>{if(loadGame()){$("saveMsg").textContent="ロードし�
 $("deleteBtn").onclick=()=>{if(!confirm("セーブデータと緊急バックアップを削除しますか？\nこの操作は元に戻せません。"))return;storage.del(SAVE_KEY);storage.del(BACKUP_KEY);game=newGame();battle=null;stopAuto();renderParty();renderStatus();renderSave();$("saveMsg").textContent="削除しました";};
 $("exportBtn").onclick=()=>{$("saveText").value=exportSave();};
 $("importBtn").onclick=()=>{if(importSave($("saveText").value)){$("saveMsg").textContent="インポート成功";renderParty();renderSkills();renderSave();}else $("saveMsg").textContent="失敗";};
-renderParty();renderSave();}
+renderParty();renderPrimaryStatus();renderAreaStory();renderStamina();renderSave();setInterval(renderStamina,1000);}
 document.addEventListener("DOMContentLoaded",init);
 </script>
 </body>
