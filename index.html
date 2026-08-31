@@ -5,26 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>鋼と言霊のサーガ</title>
 <style>
-*{box-sizing:border-box}body{margin:0;padding:10px;padding-bottom:calc(18px + env(safe-area-inset-bottom));font-family:"Hiragino Sans","Noto Sans JP",sans-serif;background:#0d1117;color:#eef3f8}
+*{box-sizing:border-box}body{margin:0;padding:10px;padding-bottom:calc(18px + env(safe-area-inset-bottom));font-family:"Hiragino Sans","Noto Sans JP",sans-serif;background:linear-gradient(180deg,#eef6fc 0,#f8fbfe 42%,#edf4f8 100%);color:#243447;max-width:760px;margin-inline:auto}
 h1{font-size:19px;margin:6px 0 12px}h2{font-size:16px;margin:6px 0}h3{font-size:14px;margin:6px 0}
-button,select,input,textarea{font-size:13px;padding:8px;border-radius:9px;border:1px solid #44505c;background:#1b232c;color:#eef3f8;width:100%}
-button{cursor:pointer;background:#24313d;font-weight:bold}button:disabled{opacity:.4;cursor:not-allowed}
-.tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:10px}
-.tabbtn{padding:8px 2px;font-size:11px}.tabbtn.active{background:#35506b}
+button,select,input,textarea{font-size:13px;padding:9px;border-radius:9px;border:1px solid #aebdca;background:#fff;color:#243447;width:100%}
+button{cursor:pointer;background:#e7f0f7;border-color:#9db1c1;color:#23425c;font-weight:bold;box-shadow:0 1px 2px rgba(34,58,78,.1);min-height:42px}button:active{transform:translateY(1px);box-shadow:none}button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid rgba(30,116,174,.28);outline-offset:1px}button:disabled{opacity:.48;cursor:not-allowed;filter:grayscale(.25)}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:10px}
+.tabbtn{padding:8px 2px;font-size:11px;background:#e4edf4;color:#354b5e}.tabbtn.active{color:#fff;border-color:transparent;box-shadow:0 2px 6px rgba(35,67,93,.22)}
+.tabbtn:nth-child(1).active,.tabbtn:nth-child(2).active{background:#397ba8}.tabbtn:nth-child(3).active,.tabbtn:nth-child(4).active{background:#7859a6}.tabbtn:nth-child(5).active{background:#2477b3}.tabbtn:nth-child(6).active,.tabbtn:nth-child(7).active{background:#348166}.tabbtn:nth-child(8).active{background:#b96d28}.tabbtn:nth-child(9).active{background:#627387}
 .tab{display:none}.tab.active{display:block}
-.card{background:#161d26;border:1px solid #2c3b4a;border-radius:12px;padding:10px;margin-bottom:10px}
+.card{background:#fff;border:1px solid #c9d7e2;border-left:4px solid #7da5bf;border-radius:12px;padding:10px;margin-bottom:10px;box-shadow:0 2px 8px rgba(50,75,95,.07)}
+#tab-create .card,#tab-party .card{border-left-color:#3b82ad}#tab-status .card,#tab-skill .card{border-left-color:#8662b0}#tab-battle .card{border-left-color:#2382bd}#tab-daily .card,#tab-record .card{border-left-color:#3c9874}#tab-shop .card{border-left-color:#d48435}#tab-save .card{border-left-color:#74879a}
 .row{display:grid;gap:7px;margin-bottom:8px}.two{display:grid;grid-template-columns:1fr 1fr;gap:7px}.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
-label{display:block;font-size:11px;color:#b8c4d0;margin-bottom:4px}
-.log{background:#0a0e12;border:1px solid #2c3b4a;border-radius:12px;min-height:220px;max-height:340px;overflow-y:auto;padding:10px;line-height:1.75;font-size:12px;white-space:pre-wrap}
-.log div{margin-bottom:6px}.mini{font-size:11px;color:#c9d5e1;margin-bottom:3px}
+label{display:block;font-size:11px;color:#52697c;margin-bottom:4px;font-weight:600}
+.log{background:#f7fbfe;border:1px solid #b9cddd;border-left:4px solid #2382bd;border-radius:12px;min-height:220px;max-height:340px;overflow-y:auto;padding:10px;line-height:1.75;font-size:12px;white-space:pre-wrap;color:#293d4f;box-shadow:inset 0 1px 4px rgba(50,75,95,.06)}
+.log div{margin-bottom:6px;padding-bottom:4px;border-bottom:1px dotted #dbe6ed}.mini{font-size:11px;color:#52697c;margin-bottom:3px}
 .check{display:flex;align-items:center;gap:7px;font-size:12px;margin:6px 0}.check input{width:auto}
-.pre{background:#0a0e12;border:1px solid #2c3b4a;border-radius:12px;padding:8px;font-size:10px;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
-.msg{margin:6px 0;font-size:12px;color:#9fe8a8}.gold{color:#ffd76a;font-weight:bold}.eff{color:#7fd7ff}.res{color:#93a1af}.brk{color:#ff9f6a}.aw{color:#e6b3ff}.adv{color:#ffd76a}.rc{color:#7fffd4}
-hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
-.bar{height:7px;background:#22303c;border-radius:4px;overflow:hidden;margin:2px 0;min-width:60px}
-.bar i{display:block;height:100%;background:#4caf7d}.bar.mp i{background:#42a5f5}.bar.en i{background:#ef5350}
+.pre{background:#f3f7fa;border:1px solid #c5d3de;border-radius:12px;padding:8px;font-size:10px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;color:#3d5365}
+.msg{margin:6px 0;font-size:12px;color:#227350}.gold{color:#9b6500;font-weight:bold}.eff{color:#006ca8;font-weight:bold}.res{color:#667786}.brk{color:#bc4b18;font-weight:bold}.aw{color:#7b3ca4}.adv{color:#946000}.rc{color:#087d69}
+hr{border:none;border-top:1px solid #d2dee7;margin:7px 0}
+.bar{height:8px;background:#d8e2e9;border:1px solid #c3d0d9;border-radius:5px;overflow:hidden;margin:2px 0;min-width:60px}
+.bar i{display:block;height:100%;background:#37a169}.bar.mp i{background:#318bc7}.bar.en i{background:#df5656}
 .bw{display:flex;align-items:center;gap:6px}
-.overlay{position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,#080b10,#182534 55%,#0b1118);display:flex;align-items:center;justify-content:center;padding:18px}.startbox{width:min(520px,100%);border:1px solid #50677c;border-radius:18px;padding:22px;background:rgba(13,17,23,.96);box-shadow:0 18px 60px #000}.startbox h1{font-size:28px;color:#e8c675;text-align:center}.startbox .catch{text-align:center;color:#a9bfd2;margin-bottom:22px}.modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:16px}.modalbox{width:min(560px,100%);max-height:88vh;overflow:auto;background:#161d26;border:1px solid #657b8e;border-radius:16px;padding:18px}.story{line-height:1.9;white-space:pre-line;color:#dae4ed}.stamina{color:#7fd7ff;font-weight:bold}.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.statbtn{min-height:42px}.guide{border-color:#806b3a;background:#201c13}
+.overlay{position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,#dcecf7,#f7fbfe 55%,#e7f0f6);display:flex;align-items:center;justify-content:center;padding:18px}.startbox{width:min(520px,100%);border:1px solid #9cb5c8;border-radius:18px;padding:22px;background:rgba(255,255,255,.97);box-shadow:0 18px 60px rgba(45,72,94,.22)}.startbox h1{font-size:28px;color:#285f85;text-align:center}.startbox .catch{text-align:center;color:#536f84;margin-bottom:22px}.modal{position:fixed;inset:0;z-index:60;background:rgba(36,52,71,.52);display:none;align-items:center;justify-content:center;padding:16px}.modalbox{width:min(560px,100%);max-height:88vh;overflow:auto;background:#fff;border:1px solid #9eb5c7;border-radius:16px;padding:18px;box-shadow:0 14px 45px rgba(24,47,66,.25)}.story{line-height:1.9;white-space:pre-line;color:#354b5d}.stamina{color:#0875ad;font-weight:bold}.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.statbtn{min-height:42px;background:#f0eafa;border-color:#b9a5d2;color:#553c75}.guide{border-color:#d6b366!important;background:#fff8e7!important;color:#6b5320}
+#createBtn,#continueBtn,#newBtn,#storyNext,#exploreBtn,#autoBtn,#turnBtn{background:#2e7fac;color:#fff;border-color:#246b92}#explore10Btn,#explore30Btn{background:#dceef8;color:#185f88;border-color:#87bad5}#bossBtn,#raidBtn{background:#c95b4c;color:#fff;border-color:#ad493d}#towerBtn{background:#7655a2;color:#fff;border-color:#62458a}#stopBtn,#deleteBtn{background:#f9e3e1;color:#a23d35;border-color:#dfa6a1}#restBtn{background:#e1f3e9;color:#246c4b;border-color:#9bcdb2}#saveBtn,#loadBtn,#exportBtn,#importBtn{background:#e6eef4;color:#34566f;border-color:#a9bdcc}#respecBtn{background:#f7eddb;color:#805718;border-color:#dac08f}.dailyClaim,#dailyAllBtn{background:#3b916f;color:#fff;border-color:#307a5d}.titleBtn{background:#e9e1f5;color:#66458d;border-color:#b7a0d1;min-height:34px;width:auto;padding:5px 10px}.buyBtn{background:#d98132;color:#fff;border-color:#bd6d27}.lockBtn{background:#e9e3f4;color:#604681;border-color:#b8a7cd}.enhBtn{background:#fff0d2;color:#7b570e;border-color:#dbbb73}.sellBtn,#sellCommonBtn,#sellUncommonBtn{background:#edf1f4;color:#536474;border-color:#bbc7d0}
+@media(max-width:360px){body{padding-inline:7px}.tabs{gap:3px}.tabbtn{font-size:10px}.three{gap:4px}button,select,input,textarea{font-size:12px;padding:8px 5px}.card{padding:8px}.statgrid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -37,6 +41,8 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 <button class="tabbtn" data-tab="status">能力</button>
 <button class="tabbtn" data-tab="skill">スキル</button>
 <button class="tabbtn" data-tab="battle">戦闘</button>
+<button class="tabbtn" data-tab="daily">日課</button>
+<button class="tabbtn" data-tab="record">記録</button>
 <button class="tabbtn" data-tab="shop">ショップ</button>
 <button class="tabbtn" data-tab="save">セーブ</button>
 </div>
@@ -47,8 +53,9 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 <div class="mini">ゴールド：<span class="gold" id="goldView">0</span> G</div>
 <div id="partyList"></div>
 <div class="two"><button id="restBtn">休憩して全回復</button><button id="towerViewBtn">実績/タワー</button></div>
+<div class="mini" id="hpRegenView"></div>
 <h3>消耗品</h3><div id="itemList"></div>
-<h3>所持装備</h3><div id="invList"></div></section>
+<h3>所持装備</h3><div class="two"><button id="sellCommonBtn">普通を一括売却</button><button id="sellUncommonBtn">上級以下を一括売却</button></div><div id="invList"></div></section>
 
 <section id="tab-status" class="tab"><h2>基礎ステータス</h2><div class="card guide mini">レベルアップで各キャラクターに1ポイント獲得。能力は職業ステータスへ加算されます。</div><div id="primaryStatusList"></div></section>
 
@@ -64,12 +71,19 @@ hr{border:none;border-top:1px solid #2c3b4a;margin:7px 0}
 <div class="two"><label>速度<select id="speedSel"><option value="1">1x</option><option value="2">2x</option><option value="4">4x</option></select></label>
 <div class="check"><input type="checkbox" id="showDamage" checked><span>ダメージ表示</span></div></div>
 <div class="check"><input type="checkbox" id="autoItem" checked><span>ポーション自動</span></div>
-<div class="three"><button id="exploreBtn">探索（5）</button><button id="bossBtn">ボス（10）</button><button id="towerBtn">タワー（10）</button></div>
+<div id="gateProgress" class="mini"></div>
+<div class="three"><button id="exploreBtn">1回探索（5）</button><button id="explore10Btn">10回探索</button><button id="explore30Btn">30回探索</button></div>
+<div class="two"><button id="bossBtn">ボス（10）</button><button id="towerBtn">タワー（10）</button></div>
 <div class="two"><button id="raidBtn">レイド（20）</button><button id="autoBtn">オート開始</button></div>
 <div class="two"><button id="turnBtn">1ターン</button><button id="stopBtn">停止</button></div>
 </div></div>
 <div id="battleStatus" class="card">戦闘未開始</div>
+<div id="postBattleActions" class="card" style="display:none"></div>
 <div id="battleLog" class="log"></div></section>
+
+<section id="tab-daily" class="tab"><h2>デイリー任務</h2><div id="dailyList"></div></section>
+
+<section id="tab-record" class="tab"><h2>記録・図鑑・称号</h2><div id="recordContent"></div></section>
 
 <section id="tab-shop" class="tab"><h2>ショップ</h2><div class="mini">G：<span class="gold" id="goldView2">0</span></div><div id="shopList"></div></section>
 
@@ -89,7 +103,7 @@ catch(e){err=(e&&e.name||"Error")+":"+(e&&e.message||"");const m={};
 return{type:"memory",err,get:k=>m[k]??null,set:(k,v)=>{m[k]=v},del:k=>{delete m[k]}};}})();
 const SAVE_KEY="text_rpg_v9";
 const BACKUP_KEY="text_rpg_backup_v1";
-const SAVE_VERSION=11;
+const SAVE_VERSION=12;
 const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const pick=a=>a[Math.floor(Math.random()*a.length)];const rnd=n=>Math.floor(Math.random()*n);
 const fill=(t,p={})=>t.replace(/\{(\w+)\}/g,(_,k)=>p[k]??"");
@@ -102,6 +116,10 @@ const PRIMARY_NM={str:"筋力",dex:"器用さ",agi:"俊敏",vit:"耐久",luk:"�
 const PRIMARY_DESC={str:"物攻・物防・素早さ",dex:"命中・会心",agi:"素早さ・回避",vit:"HP・物防",luk:"ドロップ・回避・命中・会心",int:"MP・魔攻"};
 const STAMINA_MAX=100,STAMINA_REGEN_MS=180000;
 const STAMINA_COST={explore:5,boss:10,tower:10,raid:20};
+const HP_REGEN_MS=300000,HP_REGEN_PCT=.01;
+const AREA_TARGET=[3,5,6,7,8,9,10,12,14,16];
+const DAILY_TASKS=[{id:"wins",nm:"戦闘に3回勝利",need:3,reward:"100G",gold:100},{id:"explores",nm:"探索を5回完了",need:5,reward:"ポーション2個",item:"potion",qty:2},{id:"bosses",nm:"ボスを1体討伐",need:1,reward:"装備箱1個",item:"box",qty:1},{id:"enhances",nm:"装備を1回強化",need:1,reward:"200G",gold:200}];
+const TITLES=[{id:"first",nm:"言鋼の綴り手",desc:"最初の戦闘に勝利",ok:()=>game.kills>=1},{id:"hunter",nm:"百討の刃",desc:"通算100体撃破",ok:()=>game.kills>=100},{id:"boss",nm:"王喰らい",desc:"ボス10体討伐",ok:()=>game.bossKills>=10},{id:"tower",nm:"天塔踏破者",desc:"タワー30階到達",ok:()=>game.tower>=30},{id:"reinc",nm:"輪廻を越えし者",desc:"誰かが転生",ok:()=>game.characters.some(c=>(c.reinc||0)>=1)},{id:"ending",nm:"沈黙を破る者",desc:"原初の門を踏破",ok:()=>game.storyCleared.includes("area10")}];
 const PROLOGUE=[
 {t:"序章　言葉が鋼だった時代",b:"かつて、この世界で言葉には重さがあった。\n誓いは盾となり、祈りは傷を癒やし、偽りは呪いとなった。\n鍛冶師たちは言葉を炉へ吹き込み、魂を宿した金属――『言鋼』を生み出した。"},
 {t:"沈黙王の災厄",b:"百年前、真の名を奪う王が現れた。\n人々が名を失うたび、記憶と歴史は白紙へ変わった。王は『沈黙王』と呼ばれ、最後には自らの名さえ世界から消した。\n封印されたはずの沈黙が、いま各地の迷宮から漏れ始めている。"},
@@ -251,7 +269,7 @@ status:["{e}の体に変調が走る。","{e}は苦悶の表情を浮かべた�
 const JOB_TEXT={sword_shield:["{a}は剣と盾の連動で{e}を押し込む。","{a}は盾で軸を作り、剣を{e}へ閃かせる。"],great_sword:["{a}は大剣を振り抜き、{e}を吹き飛ばす。","{a}の渾身の一振りが{e}を打ち据える。"],blade_master:["{a}は風のように回り込み、{e}を斬る。","{a}の刃が軌道を描き、{e}の隙を突く。"],twin_dagger:["{a}は双剣を交差させ、{e}を刻む。","{a}の左右の刃が時間差で{e}を裂く。"],guardian:["{a}は盾で前へ出て、{e}を打ち据える。","{a}の重厚な突進が{e}を揺さぶる。"],healer:["{a}の聖術が{e}を焼く。","{a}は祈りの光を{e}へ放つ。"],buffer_debuffer:["{a}の音色が{e}の体勢を狂わせる。","{a}の呪歌が{e}の力を削ぐ。"],summoner:["{a}の従者が{e}へ襲いかかる。","{a}の指示で精霊が{e}を打つ。"],tamer:["{a}の合図で獣が{e}へ飛びかかる。","{a}は獣と連動して{e}を挟撃する。"],sage:["{a}の星術が{e}の周囲で弾ける。","{a}は陣を展開し{e}を縛る。"],attack_mage:["{a}の詠唱が完了し、{e}へ術式が炸裂する。","{a}の魔力が{e}を飲み込む。"],shadow_user:["{a}は影から現れ、{e}の急所を突く。","{a}の短刀が影とともに{e}を裂く。"],necromancer:["{a}の呪力が{e}の生気を削る。","{a}の死霊術が{e}を蝕む。"],gunner:["{a}の銃声が響き、{e}が跳ねる。","{a}は狙いを定め、{e}を撃ち抜く。"],berserker:["{a}は雄叫びとともに{e}を叩き斬る。","{a}の荒々しい一撃が{e}を薙ぐ。"],onmyoji:["{a}の符が舞い、{e}を呪縛する。","{a}の陰陽術が{e}を打ち据える。"]};
 const WEAPON_TEXT={one_hand_sword:["{a}の片手剣が鋭く{e}を突く。","{a}は剣先で{e}のガードを崩す。"],great_sword:["{a}の大剣が唸り、{e}を両断せんと振るわれる。","重い一撃。{a}の大剣が{e}を打ち砕く。"],light_two_hand:["{a}の両手剣が流れるように{e}を斬る。","{a}は剣速で{e}を翻弄する。"],twin_daggers:["{a}の双剣が連続して{e}を刻む。","{a}は刃の雨を{e}へ浴びせる。"],dagger:["{a}の短刀が{e}の隙を突く。","{a}は素早い刺突で{e}を穿つ。"],staff:["{a}の杖先から魔力が{e}へ奔る。","{a}は杖で術式を導き{e}を打つ。"],orb:["{a}の宝玉が輝き、{e}を焼く。","{a}の宝珠が{e}へ魔力を放つ。"],grimoire:["{a}の魔導書が頁をめくり、{e}を呪う。","{a}は書から術を解放し{e}を打つ。"],instrument:["{a}の音色が刃となり{e}を裂く。","{a}の旋律が{e}を切り刻む。"],gun:["{a}の銃口が火を噴き、{e}が跳ねる。","{a}の連射が{e}を穿つ。"],axe:["{a}の戦斧が{e}を叩き割る。","{a}は斧を振り回し{e}を薙ぐ。"],whip:["{a}の鞭が唸り、{e}を打ち据える。","{a}の鞭が{e}の体勢を崩す。"],astrolabe:["{a}の星盤が回転し、{e}へ星力を放つ。","{a}は星を導き{e}を撃つ。"]};
 
-let game=null,battle=null,autoTimer=null,uidSeq=1,speed=1;
+let game=null,battle=null,autoTimer=null,uidSeq=1,speed=1,exploreChain=null,lastBattleSpec=null;
 
 function jobStats(j,lv){const b=JOBS[j].base,g=JOBS[j].g,o={};STAT_KEYS.forEach(k=>o[k]=Math.floor(b[k]+g[k]*(lv-1)));return o;}
 function titleBonus(){const b={atk:0,def:0,hp:0};const k=game.kills||0,bk=game.bossKills||0,tw=game.tower||1;
@@ -285,13 +303,31 @@ function makeEnemy(id,lv){const m=MON_INDEX[id];if(!m)return makeEnemy("slime",l
 const s={hp:Math.round((40+lv*14)*r.hp*scale),mp:20,atk:Math.round((8+lv*2.2)*r.atk),def:Math.round((6+lv*1.6)*r.def),matk:Math.round((6+lv*1.8)*r.matk),mdef:Math.round((6+lv*1.5)*r.mdef),agi:Math.round((6+lv*1.2)*r.agi),luk:Math.round((5+lv)*r.luk),hit:Math.round((8+lv*1.4)*r.hit),eva:Math.round((4+lv*.9)*r.eva)};
 return{id,name:m.nm,race:m.type,type:"enemy",rar:m.rar,level:lv,stats:s};}
 
-function newGame(){return{v:SAVE_VERSION,settings:{showDamage:true,autoItem:true},party:{combo:0,comboMax:100},characters:[],inv:[],gold:100,items:{potion:2,ether:1,elixir:0,respec:0,box:0},stamina:STAMINA_MAX,staminaTs:Date.now(),tower:1,kills:0,bossKills:0,storyCleared:[],flags:{}};}
+function newGame(){return{v:SAVE_VERSION,settings:{showDamage:true,autoItem:true},party:{combo:0,comboMax:100},characters:[],inv:[],gold:100,items:{potion:2,ether:1,elixir:0,respec:0,box:0},stamina:STAMINA_MAX,staminaTs:Date.now(),hpTs:Date.now(),tower:1,kills:0,bossKills:0,storyCleared:[],areaProgress:{},daily:newDaily(),encyclopedia:{},titles:[],activeTitle:null,flags:{}};}
 function dedupeEquip(){const seen=new Set();(game.characters||[]).forEach(c=>{c.equip=(c.equip||[]).filter(u=>{if(seen.has(u))return false;seen.add(u);return true;});});}
-function migrateGame(s){if(!s||typeof s!=="object")throw new Error("invalid save");s.settings=Object.assign({showDamage:true,autoItem:true},s.settings||{});s.party=Object.assign({combo:0,comboMax:100},s.party||{});s.characters=Array.isArray(s.characters)?s.characters:[];s.inv=Array.isArray(s.inv)?s.inv:[];s.items=Object.assign({potion:0,ether:0,elixir:0,respec:0,box:0},s.items||{});s.gold=Number.isFinite(+s.gold)?Math.max(0,+s.gold):100;s.stamina=clamp(Number.isFinite(+s.stamina)?+s.stamina:STAMINA_MAX,0,STAMINA_MAX);s.staminaTs=Number.isFinite(+s.staminaTs)?+s.staminaTs:Date.now();s.storyCleared=Array.isArray(s.storyCleared)?s.storyCleared:[];s.tower=Math.max(1,+s.tower||1);s.kills=Math.max(0,+s.kills||0);s.bossKills=Math.max(0,+s.bossKills||0);s.flags=s.flags||{};s.characters.forEach((c,i)=>{c.id=c.id||"c"+(i+1);c.slot=c.slot||i+1;c.level=clamp(+c.level||1,1,100);c.exp=Math.max(0,+c.exp||0);c.sp=Math.max(0,+c.sp||0);c.statPoints=Math.max(0,Number.isFinite(+c.statPoints)?+c.statPoints:Math.max(0,c.level-1));c.primary=Object.assign({str:0,dex:0,agi:0,vit:0,luk:0,int:0},c.primary||{});PRIMARY_KEYS.forEach(k=>c.primary[k]=Math.max(0,+c.primary[k]||0));c.skills=Array.isArray(c.skills)?c.skills.filter(id=>SKILL_INDEX[id]):[];c.equip=Array.isArray(c.equip)?c.equip:[];c.reinc=clamp(+c.reinc||0,0,5);});s.v=SAVE_VERSION;return s;}
+function migrateGame(s){if(!s||typeof s!=="object")throw new Error("invalid save");s.settings=Object.assign({showDamage:true,autoItem:true},s.settings||{});s.party=Object.assign({combo:0,comboMax:100},s.party||{});s.characters=Array.isArray(s.characters)?s.characters:[];s.inv=Array.isArray(s.inv)?s.inv:[];s.items=Object.assign({potion:0,ether:0,elixir:0,respec:0,box:0},s.items||{});s.gold=Number.isFinite(+s.gold)?Math.max(0,+s.gold):100;s.stamina=clamp(Number.isFinite(+s.stamina)?+s.stamina:STAMINA_MAX,0,STAMINA_MAX);s.staminaTs=Number.isFinite(+s.staminaTs)?+s.staminaTs:Date.now();s.hpTs=Number.isFinite(+s.hpTs)?+s.hpTs:Date.now();s.storyCleared=Array.isArray(s.storyCleared)?s.storyCleared:[];s.areaProgress=s.areaProgress&&typeof s.areaProgress==="object"?s.areaProgress:{};s.daily=s.daily&&typeof s.daily==="object"?s.daily:newDaily();s.encyclopedia=s.encyclopedia&&typeof s.encyclopedia==="object"?s.encyclopedia:{};s.titles=Array.isArray(s.titles)?s.titles:[];s.activeTitle=s.activeTitle||null;s.tower=Math.max(1,+s.tower||1);s.kills=Math.max(0,+s.kills||0);s.bossKills=Math.max(0,+s.bossKills||0);s.flags=s.flags||{};s.inv.forEach(it=>it.locked=!!it.locked);s.characters.forEach((c,i)=>{c.id=c.id||"c"+(i+1);c.slot=c.slot||i+1;c.level=clamp(+c.level||1,1,100);c.exp=Math.max(0,+c.exp||0);c.sp=Math.max(0,+c.sp||0);c.statPoints=Math.max(0,Number.isFinite(+c.statPoints)?+c.statPoints:Math.max(0,c.level-1));c.primary=Object.assign({str:0,dex:0,agi:0,vit:0,luk:0,int:0},c.primary||{});PRIMARY_KEYS.forEach(k=>c.primary[k]=Math.max(0,+c.primary[k]||0));c.skills=Array.isArray(c.skills)?c.skills.filter(id=>SKILL_INDEX[id]):[];c.equip=Array.isArray(c.equip)?c.equip:[];c.reinc=clamp(+c.reinc||0,0,5);});s.v=SAVE_VERSION;return s;}
 function saveGame(){try{game.updatedAt=new Date().toISOString();const old=storage.get(SAVE_KEY);if(old)storage.set(BACKUP_KEY,old);storage.set(SAVE_KEY,JSON.stringify(game));return true;}catch(e){return false;}}
 function loadGame(){try{const r=storage.get(SAVE_KEY);if(!r)return false;game=migrateGame(JSON.parse(r));dedupeEquip();return true;}catch(e){try{const b=storage.get(BACKUP_KEY);if(!b)return false;game=migrateGame(JSON.parse(b));dedupeEquip();storage.set(SAVE_KEY,JSON.stringify(game));return true;}catch(ignore){return false;}}}
 const exportSave=()=>btoa(unescape(encodeURIComponent(JSON.stringify(game))));
 function importSave(s){try{const incoming=migrateGame(JSON.parse(decodeURIComponent(escape(atob(s.trim())))));game=incoming;dedupeEquip();saveGame();return true;}catch(e){return false;}}
+
+function dayKey(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function newDaily(){return{date:dayKey(),progress:{wins:0,explores:0,bosses:0,enhances:0},claimed:{},allClaimed:false};}
+function ensureDaily(){if(!game.daily||game.daily.date!==dayKey()){game.daily=newDaily();return true;}game.daily.progress=Object.assign({wins:0,explores:0,bosses:0,enhances:0},game.daily.progress||{});game.daily.claimed=game.daily.claimed||{};return false;}
+function dailyAdd(k,n=1){ensureDaily();game.daily.progress[k]=Math.max(0,(game.daily.progress[k]||0)+n);saveGame();}
+function claimDaily(id){ensureDaily();const t=DAILY_TASKS.find(x=>x.id===id);if(!t||game.daily.claimed[id]||(game.daily.progress[id]||0)<t.need)return;game.daily.claimed[id]=true;if(t.gold)game.gold+=t.gold;if(t.item)game.items[t.item]=(game.items[t.item]||0)+(t.qty||1);saveGame();renderDaily();}
+function claimDailyAll(){ensureDaily();if(game.daily.allClaimed||!DAILY_TASKS.every(t=>game.daily.claimed[t.id]))return;game.daily.allClaimed=true;game.gold+=500;game.stamina=Math.min(STAMINA_MAX,game.stamina+20);saveGame();renderDaily();renderStamina();}
+function renderDaily(){if(ensureDaily())saveGame();const d=game.daily;$("dailyList").innerHTML=DAILY_TASKS.map(t=>{const p=Math.min(t.need,d.progress[t.id]||0),done=p>=t.need,claimed=!!d.claimed[t.id];return `<div class="card"><b>${t.nm}</b><div class="mini">${p}/${t.need}　報酬：${t.reward}</div><button class="dailyClaim" data-id="${t.id}" ${done&&!claimed?"":"disabled"}>${claimed?"受取済み":"受け取る"}</button></div>`;}).join("")+`<div class="card guide"><b>全任務達成報酬</b><div class="mini">500G＋スタミナ20</div><button id="dailyAllBtn" ${DAILY_TASKS.every(t=>d.claimed[t.id])&&!d.allClaimed?"":"disabled"}>${d.allClaimed?"受取済み":"まとめて受け取る"}</button></div>`;document.querySelectorAll(".dailyClaim").forEach(b=>b.onclick=e=>claimDaily(e.target.dataset.id));$("dailyAllBtn").onclick=claimDailyAll;}
+function areaProgress(id){if(!game.areaProgress[id])game.areaProgress[id]={kills:0,cleared:false};return game.areaProgress[id];}
+function areaUnlocked(i){if(i<=0)return true;const prev=AREAS[i-1][0];return game.storyCleared.includes(prev)||!!game.areaProgress[prev]?.cleared;}
+function updateAreaOptions(){const cur=$("areaSelect").value;Array.from($("areaSelect").options).forEach((o,i)=>o.disabled=!areaUnlocked(i));const selected=Array.from($("areaSelect").options).find(o=>o.value===cur&&!o.disabled);if(!selected)$("areaSelect").value=Array.from($("areaSelect").options).filter(o=>!o.disabled).pop()?.value||"area01";renderAreaStory();renderGateProgress();}
+function bossAvailable(id){const i=AREAS.findIndex(a=>a[0]===id),p=areaProgress(id);return p.cleared||p.kills>=AREA_TARGET[i];}
+function renderGateProgress(){if(!$("gateProgress"))return;const id=$("areaSelect").value,i=AREAS.findIndex(a=>a[0]===id),p=areaProgress(id),need=AREA_TARGET[i];$("gateProgress").textContent=p.cleared?`総討伐${p.kills}体／ボス撃破済み`:`ボス出現まで ${Math.min(p.kills,need)}/${need}体`;$("bossBtn").disabled=!bossAvailable(id)||(battle&&battle.active);}
+function regenPartyHp(){if(!game||!game.characters.length)return;const now=Date.now(),elapsed=Math.max(0,now-(game.hpTs||now)),ticks=Math.floor(elapsed/HP_REGEN_MS);if(ticks<=0)return;game.characters.forEach(c=>{const t=calcTotal(c),cur=c.currentHp??t.hp;c.currentHp=Math.min(t.hp,cur+Math.max(1,Math.floor(t.hp*HP_REGEN_PCT))*ticks);});game.hpTs+=(ticks*HP_REGEN_MS);saveGame();}
+function renderHpRegen(){if(!$("hpRegenView"))return;regenPartyHp();const rem=Math.max(0,HP_REGEN_MS-(Date.now()-(game.hpTs||Date.now()))),m=Math.floor(rem/60000),s=Math.floor(rem%60000/1000);$("hpRegenView").textContent=`HPは5分ごとに最大値の1%回復／次回 ${m}:${String(s).padStart(2,"0")}`;}
+function checkTitles(){TITLES.forEach(t=>{if(t.ok()&&!game.titles.includes(t.id))game.titles.push(t.id);});if(game.activeTitle&&!game.titles.includes(game.activeTitle))game.activeTitle=null;}
+function setTitle(id){game.activeTitle=game.activeTitle===id?null:id;saveGame();renderRecord();renderParty();}
+function renderRecord(){checkTitles();const discovered=Object.keys(game.encyclopedia).length,total=MONSTERS.length;const monsterHtml=MONSTERS.map(m=>{const r=game.encyclopedia[m[0]],n=typeof r==="number"?r:(r?.defeated||0);return `<div class="mini">${n?m[1]:"？？？？"}　${n?`討伐${n}体／${m[2]}`:"未発見"}</div>`;}).join("");const titleHtml=TITLES.map(t=>{const got=game.titles.includes(t.id);return `<div class="mini">${got?t.nm:"？？？？"}｜${got?t.desc:"条件未達成"} ${got?`<button class="titleBtn" data-id="${t.id}">${game.activeTitle===t.id?"表示中":"表示する"}</button>`:""}</div>`;}).join("");$("recordContent").innerHTML=`<div class="card"><b>冒険記録</b><div class="mini">撃破${game.kills}／ボス${game.bossKills}／タワー${game.tower}階／図鑑${discovered}/${total}</div></div><div class="card"><h3>称号</h3>${titleHtml}</div><div class="card"><h3>魔物図鑑</h3>${monsterHtml}</div>`;document.querySelectorAll(".titleBtn").forEach(b=>b.onclick=e=>setTitle(e.target.dataset.id));saveGame();}
 
 function log(t){const el=$("battleLog");const d=document.createElement("div");d.innerHTML=t;el.appendChild(d);el.scrollTop=el.scrollHeight;}
 const clearLog=()=>$("battleLog").innerHTML="";
@@ -310,7 +346,7 @@ const enhChance=it=>clamp(100-(it.enh||0)*8,30,100);
 const sellVal=it=>Math.floor(10*seriesFor(it.lv)[2]*RARITY[it.rar].mult);
 
 function switchTab(n){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));document.querySelectorAll(".tabbtn").forEach(b=>b.classList.remove("active"));$("tab-"+n).classList.add("active");document.querySelector(`[data-tab="${n}"]`).classList.add("active");
-if(n==="party")renderParty();if(n==="status")renderPrimaryStatus();if(n==="skill")renderSkills();if(n==="battle"){renderStatus();renderStamina();renderAreaStory();}if(n==="save")renderSave();if(n==="shop")renderShop();}
+if(n==="party"){regenPartyHp();renderParty();renderHpRegen();}if(n==="status")renderPrimaryStatus();if(n==="skill")renderSkills();if(n==="battle"){renderStatus();renderStamina();renderAreaStory();renderGateProgress();}if(n==="daily")renderDaily();if(n==="record")renderRecord();if(n==="save")renderSave();if(n==="shop")renderShop();}
 function renderGold(){$("goldView").textContent=game.gold;$("goldView2").textContent=game.gold;}
 function renderPrimaryStatus(){const el=$("primaryStatusList");if(!game.characters.length){el.innerHTML='<div class="card">先にパーティを作成してください。</div>';return;}el.innerHTML=game.characters.map((c,i)=>`<div class="card"><h3>${c.name}　残り${c.statPoints||0}pt</h3><div class="statgrid">${PRIMARY_KEYS.map(k=>`<button class="statbtn" data-c="${i}" data-k="${k}" ${(c.statPoints||0)>0?"":"disabled"}><b>${PRIMARY_NM[k]} ${c.primary[k]||0}</b><br><span class="mini">${PRIMARY_DESC[k]}</span></button>`).join("")}</div></div>`).join("");document.querySelectorAll(".statbtn").forEach(b=>b.onclick=e=>{const x=e.target.closest(".statbtn"),c=game.characters[+x.dataset.c],k=x.dataset.k;if((c.statPoints||0)<=0)return;c.statPoints--;c.primary[k]=(c.primary[k]||0)+1;const t=calcTotal(c);c.currentHp=Math.min(c.currentHp??t.hp,t.hp);c.currentMp=Math.min(c.currentMp??t.mp,t.mp);saveGame();renderPrimaryStatus();});}
 function renderParty(){renderGold();const el=$("partyList");if(!game.characters.length){el.innerHTML='<div class="card">未作成</div>';$("itemList").innerHTML="";$("invList").innerHTML="";return;}
@@ -324,7 +360,7 @@ return `<label>${sl}<select data-c="${i}" data-s="${sl}" class="eqsel"><option v
 let btns="";
 if(c.level>=50&&!c.adv&&ADV_MAP[c.jobId])btns+=`<button data-c="${i}" class="promoBtn"><span class="adv">上級職転職：${JOBS[ADV_MAP[c.jobId]].nm}</span></button>`;
 if(c.level>=100&&c.adv&&(c.reinc||0)<5)btns+=`<button data-c="${i}" class="reincBtn"><span class="rc">転生（${(c.reinc||0)+1}回目）</span></button>`;
-return `<div class="card"><h3>${c.name}</h3><div class="mini">${JOBS[c.jobId].nm} Lv${c.level} / SP${c.sp||0} / 転生${c.reinc||0} / セット${si.sc}</div>
+return `<div class="card"><h3>${c.name}${game.activeTitle?` <span class="gold">《${TITLES.find(t=>t.id===game.activeTitle)?.nm||""}》</span>`:""}</h3><div class="mini">${JOBS[c.jobId].nm} Lv${c.level} / SP${c.sp||0} / 転生${c.reinc||0} / セット${si.sc}</div>
 <div class="mini bw">HP ${c.currentHp??t.hp}/${t.hp} ${bar(c.currentHp??t.hp,t.hp)}</div>
 <div class="mini bw">MP ${c.currentMp??t.mp}/${t.mp} ${bar(c.currentMp??t.mp,t.mp,"mp")}</div>
 <div class="mini">物攻${t.atk} 物防${t.def} 魔攻${t.matk} 魔防${t.mdef} 素早${t.agi} 運${t.luk} 命中${t.hit} 回避${t.eva}</div>
@@ -334,14 +370,16 @@ if(v)game.characters.forEach(o=>{o.equip=(o.equip||[]).filter(u=>u!==v);});
 c.equip=(c.equip||[]).filter(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot!==sl;});if(v)c.equip.push(v);saveGame();renderParty();}));
 document.querySelectorAll(".promoBtn").forEach(b=>b.onclick=e=>{const c=game.characters[+e.target.closest(".card").querySelector(".promoBtn").dataset.c];promote(c);});
 document.querySelectorAll(".reincBtn").forEach(b=>b.onclick=e=>{const c=game.characters[+e.target.closest(".card").querySelector(".reincBtn").dataset.c];reincarnate(c);});
-$("invList").innerHTML=(game.inv||[]).map(it=>`<div class="mini">${it.name}+${it.enh||0} [${RARITY[it.rar].nm}] Lv${it.lv} <button data-e="${it.uid}" class="enhBtn" ${game.gold>=enhCost(it)&&it.enh<10?"":"disabled"}>強化${enhCost(it)}G(${enhChance(it)}%)</button> <button data-e="${it.uid}" class="sellBtn">売${sellVal(it)}G</button></div>`).join("")||'<div class="mini">なし</div>';
+$("invList").innerHTML=(game.inv||[]).map(it=>`<div class="mini">${it.locked?"🔒 ":""}${it.name}+${it.enh||0} [${RARITY[it.rar].nm}] Lv${it.lv} <button data-e="${it.uid}" class="lockBtn">${it.locked?"保護解除":"保護"}</button> <button data-e="${it.uid}" class="enhBtn" ${game.gold>=enhCost(it)&&it.enh<10?"":"disabled"}>強化${enhCost(it)}G(${enhChance(it)}%)</button> <button data-e="${it.uid}" class="sellBtn" ${it.locked?"disabled":""}>売${sellVal(it)}G</button></div>`).join("")||'<div class="mini">なし</div>';
+document.querySelectorAll(".lockBtn").forEach(b=>b.onclick=e=>{const it=game.inv.find(x=>x.uid===e.target.dataset.e);if(!it)return;it.locked=!it.locked;saveGame();renderParty();});
 document.querySelectorAll(".enhBtn").forEach(b=>b.onclick=e=>{const it=game.inv.find(x=>x.uid===e.target.dataset.e);const cost=enhCost(it);if(game.gold>=cost&&it.enh<10){game.gold-=cost;
-if(Math.random()*100<enhChance(it)){it.enh=(it.enh||0)+1;alert("強化成功！ +"+it.enh);}else alert("強化失敗…");saveGame();renderParty();}});
-document.querySelectorAll(".sellBtn").forEach(b=>b.onclick=e=>{const it=game.inv.find(x=>x.uid===e.target.dataset.e);game.gold+=sellVal(it);game.inv=game.inv.filter(x=>x.uid!==it.uid);game.characters.forEach(c=>c.equip=(c.equip||[]).filter(u=>u!==it.uid));saveGame();renderParty();});renderItems();}
+dailyAdd("enhances");if(Math.random()*100<enhChance(it)){it.enh=(it.enh||0)+1;alert("強化成功！ +"+it.enh);}else alert("強化失敗…");saveGame();renderParty();}});
+document.querySelectorAll(".sellBtn").forEach(b=>b.onclick=e=>{const it=game.inv.find(x=>x.uid===e.target.dataset.e);if(!it||it.locked)return;game.gold+=sellVal(it);game.inv=game.inv.filter(x=>x.uid!==it.uid);game.characters.forEach(c=>c.equip=(c.equip||[]).filter(u=>u!==it.uid));saveGame();renderParty();});renderItems();}
 function renderItems(){const it=game.items||{};$("itemList").innerHTML=`<div class="card"><div class="mini">ポーション ${it.potion||0}個（HP40%） / エーテル ${it.ether||0}個（MP40%） / エリクサー ${it.elixir||0}個（HP・MP全回復） / 装備箱 ${it.box||0}個</div>${game.characters.map((c,i)=>`<div class="three"><button class="useItemBtn" data-c="${i}" data-i="potion" ${(it.potion||0)>0?"":"disabled"}>${c.name}にHP</button><button class="useItemBtn" data-c="${i}" data-i="ether" ${(it.ether||0)>0?"":"disabled"}>${c.name}にMP</button><button class="useItemBtn" data-c="${i}" data-i="elixir" ${(it.elixir||0)>0?"":"disabled"}>${c.name}を全快</button></div>`).join("")}<button id="openBoxBtn" ${(it.box||0)>0?"":"disabled"}>装備箱を開ける</button></div>`;
 document.querySelectorAll(".useItemBtn").forEach(b=>b.onclick=e=>useFieldItem(+e.target.dataset.c,e.target.dataset.i));const ob=$("openBoxBtn");if(ob)ob.onclick=openEquipBox;}
 function useFieldItem(i,id){const c=game.characters[i],n=game.items[id]||0;if(!c||n<=0)return;const t=calcTotal(c);if(id==="potion"){if((c.currentHp??t.hp)>=t.hp)return alert("HPは満タンです");c.currentHp=Math.min(t.hp,(c.currentHp??t.hp)+Math.floor(t.hp*.4));}else if(id==="ether"){if((c.currentMp??t.mp)>=t.mp)return alert("MPは満タンです");c.currentMp=Math.min(t.mp,(c.currentMp??t.mp)+Math.floor(t.mp*.4));}else{if((c.currentHp??t.hp)>=t.hp&&(c.currentMp??t.mp)>=t.mp)return alert("HP・MPは満タンです");c.currentHp=t.hp;c.currentMp=t.mp;}game.items[id]--;saveGame();renderParty();}
 function openEquipBox(){if((game.items.box||0)<=0||!game.characters.length)return;const c=pick(game.characters),lv=Math.max(...game.characters.map(x=>x.level));game.items.box--;const eq=genEquip(lv,c.jobId);game.inv.push(eq);saveGame();renderParty();alert(eq.name+" ["+RARITY[eq.rar].nm+"]を入手！");}
+function bulkSell(maxRank){const order={common:0,uncommon:1,rare:2,epic:3,legend:4},equipped=new Set(game.characters.flatMap(c=>c.equip||[])),targets=game.inv.filter(it=>!it.locked&&!equipped.has(it.uid)&&(order[it.rar]??99)<=maxRank);if(!targets.length)return alert("売却できる対象がありません。");const total=targets.reduce((n,it)=>n+sellVal(it),0);if(!confirm(`${targets.length}個を${total}Gで売却しますか？\n保護中・装備中の品は除外されます。`))return;const ids=new Set(targets.map(it=>it.uid));game.inv=game.inv.filter(it=>!ids.has(it.uid));game.gold+=total;saveGame();renderParty();}
 function promote(c){const oldJob=c.jobId;const advId=ADV_MAP[oldJob];if(!advId)return;
 const jobIds=(SKILLS[oldJob]||[]).map(s=>s.id);const kept=(c.skills||[]).filter(id=>jobIds.includes(id)).slice(0,3);
 const shared=(c.skills||[]).filter(id=>!jobIds.includes(id));
@@ -377,7 +415,7 @@ el.innerHTML=battle.enemies.map(e=>`<div class="mini"><b>${e.name}</b> Lv${e.lev
 function makeChar(id,slot,name,job){const t=jobStats(job,1);return{id,slot,name,jobId:job,level:1,exp:0,sp:0,statPoints:0,primary:{str:0,dex:0,agi:0,vit:0,luk:0,int:0},skills:[],equip:[],currentHp:t.hp,currentMp:t.mp,adv:false,reinc:0};}
 function createParty(){const names=[],jobs=[];for(let i=1;i<=4;i++){names.push($("name"+i).value.trim());jobs.push($("job"+i).value);}
 if(names.some(n=>!n))return alert("全キャラ名前を入力");if(new Set(names).size!==4)return alert("同じ名前は不可");
-game=newGame();game.settings.showDamage=$("showDamage").checked;game.characters=names.map((n,idx)=>makeChar("c"+(idx+1),idx+1,n,jobs[idx]));saveGame();switchTab("party");}
+game=newGame();game.settings.showDamage=$("showDamage").checked;game.characters=names.map((n,idx)=>makeChar("c"+(idx+1),idx+1,n,jobs[idx]));saveGame();updateAreaOptions();switchTab("party");}
 
 function weaponTypeOf(c){const uid=(c.equip||[]).find(u=>{const it=game.inv.find(x=>x.uid===u);return it&&it.slot==="weapon";});const it=game.inv.find(x=>x.uid===uid);return it?it.type:null;}
 function regenStamina(){if(!game)return;const now=Date.now(),elapsed=Math.max(0,now-(game.staminaTs||now)),gain=Math.floor(elapsed/STAMINA_REGEN_MS);if(gain>0){game.stamina=Math.min(STAMINA_MAX,(game.stamina||0)+gain);game.staminaTs+=(gain*STAMINA_REGEN_MS);saveGame();}}
@@ -396,11 +434,19 @@ if(comp.tank)log("編成ボーナス：全体物防+10%");if(comp.heal)log("編�
 battle.enemies.forEach(e=>{const re=RACE_ELEM[e.race]||{};if(re.weak)log(`${e.name} 弱点：<span class="eff">${EL_NM[re.weak]}</span>`);});renderStatus();}
 const aliveE=()=>battle.enemies.filter(e=>e.hp>0);
 const pickE=()=>{const a=aliveE();return a.length?a[rnd(a.length)]:null;};
-function explore(){if(!canBeginBattle()||!spendStamina(STAMINA_COST.explore))return;const a=AREAS.find(x=>x[0]===$("areaSelect").value);const lv=a[2]+rnd(a[3]-a[2]+1);startBattle([makeEnemy(Math.random()<.15?a[5]:pick(a[4]),lv)]);if(battle){battle.mode="explore";battle.areaId=a[0];}}
-function boss(){if(!canBeginBattle())return;const a=AREAS.find(x=>x[0]===$("areaSelect").value);const bossId=a&&(a[6]||a[5]);if(!bossId)return alert("ボスなし");if(!spendStamina(STAMINA_COST.boss))return;startBattle([makeEnemy(bossId,a[3])]);if(battle){battle.mode="boss";battle.areaId=a[0];}}
-function tower(){if(!canBeginBattle()||!spendStamina(STAMINA_COST.tower))return;const lv=5+game.tower*3;startBattle([makeEnemy(pick(["stone_golem","death_knight","dragon_whelp","void_watcher","shadow_wraith","star_beast"]),lv)]);if(battle){battle.tower=true;battle.mode="tower";}}
+function explore(fromChain=false){if(!canBeginBattle()||!spendStamina(STAMINA_COST.explore)){if(fromChain)finishExploreChain("スタミナ不足");return;}hidePostBattle();const a=AREAS.find(x=>x[0]===$("areaSelect").value);const lv=a[2]+rnd(a[3]-a[2]+1);startBattle([makeEnemy(Math.random()<.15?a[5]:pick(a[4]),lv)]);if(battle){battle.mode="explore";battle.areaId=a[0];lastBattleSpec={mode:"explore",areaId:a[0]};if(fromChain)setTimeout(()=>toggleAuto(),100);}}
+function startExploreChain(count){if(!canBeginBattle())return;exploreChain={remaining:count,completed:0,total:count};explore(true);}
+function finishExploreChain(reason){stopAuto();const done=exploreChain?exploreChain.completed:0;exploreChain=null;if(reason)showPostBattle(`<b>連続探索終了</b><div class="mini">${done}回完了／${reason}</div><button onclick="returnFromBattle()">帰還する</button>`);}
+function stopExploreChain(){if(!exploreChain)return;finishExploreChain("手動停止");}
+function boss(){if(!canBeginBattle())return;const a=AREAS.find(x=>x[0]===$("areaSelect").value);const bossId=a&&(a[6]||a[5]);if(!bossId)return alert("ボスなし");if(!bossAvailable(a[0]))return alert(`ボス出現まであと${Math.max(0,AREA_TARGET[AREAS.indexOf(a)]-areaProgress(a[0]).kills)}体です。`);if(!spendStamina(STAMINA_COST.boss))return;hidePostBattle();startBattle([makeEnemy(bossId,a[3])]);if(battle){battle.mode="boss";battle.areaId=a[0];lastBattleSpec={mode:"boss",areaId:a[0]};}}
+function tower(){if(!canBeginBattle()||!spendStamina(STAMINA_COST.tower))return;hidePostBattle();const lv=5+game.tower*3;startBattle([makeEnemy(pick(["stone_golem","death_knight","dragon_whelp","void_watcher","shadow_wraith","star_beast"]),lv)]);if(battle){battle.tower=true;battle.mode="tower";lastBattleSpec={mode:"tower"};}}
 function raid(){const n=2+(Math.random()<.5?0:1);const lv=50+rnd(40);const pool=["gargoyle","death_knight","chimera","lake_dragon","chaos_beast","dragon_whelp","void_watcher"];
-if(!canBeginBattle()||!spendStamina(STAMINA_COST.raid))return;const arr=[];for(let i=0;i<n;i++)arr.push(makeEnemy(pick(pool),lv));startBattle(arr);if(battle){battle.raid=true;battle.mode="raid";}}
+if(!canBeginBattle()||!spendStamina(STAMINA_COST.raid))return;hidePostBattle();const arr=[];for(let i=0;i<n;i++)arr.push(makeEnemy(pick(pool),lv));startBattle(arr);if(battle){battle.raid=true;battle.mode="raid";lastBattleSpec={mode:"raid"};}}
+function showPostBattle(h){$("postBattleActions").innerHTML=h;$("postBattleActions").style.display="block";}
+function hidePostBattle(){$("postBattleActions").style.display="none";$("postBattleActions").innerHTML="";}
+function returnFromBattle(){stopAuto();exploreChain=null;battle=null;hidePostBattle();regenPartyHp();renderStatus();renderParty();renderGateProgress();}
+function continueAfterBattle(){battle=null;hidePostBattle();explore(false);}
+function retryLastBattle(){const s=lastBattleSpec;if(!s)return returnFromBattle();battle=null;hidePostBattle();if(s.areaId)$("areaSelect").value=s.areaId;if(s.mode==="boss")boss();else if(s.mode==="tower")tower();else if(s.mode==="raid")raid();else explore(false);}
 function lowestAlly(){return battle.party.filter(m=>m.hp>0).sort((x,y)=>x.hp/x.maxHp-y.hp/y.maxHp)[0];}
 const mpCost=(s,c)=>Math.floor((s.mp||0)*(c.flags.mpReduce?.8:1));
 const hitCh=(a,d,m=0)=>clamp(75+a.stats.hit-d.stats.eva+m-(a.states&&a.states.blind?25:0)-(a.states&&a.states.slow?10:0),20,98);
@@ -472,17 +518,29 @@ if(s.regen&&m.hp>0){const h=Math.floor(m.maxHp*.06);m.hp=Math.min(m.maxHp,m.hp+h
 function autoItems(){if(!game.settings.autoItem)return;battle.party.forEach(m=>{if(m.hp>0&&m.hp<m.maxHp*.4&&(game.items.potion||0)>0){game.items.potion--;const h=Math.floor(m.maxHp*.4);m.hp=Math.min(m.maxHp,m.hp+h);log(`${m.name}はポーションを飲み干した。`);showDmg(`→ HP${h}回復。`);}});}
 function checkEnd(){if(!battle||!battle.active)return true;
 if(aliveE().length===0){battle.active=false;stopAuto();victory();return true;}
-if(battle.party.every(m=>m.hp<=0)){battle.active=false;stopAuto();log("パーティは力尽きた……かろうじて離脱する。");sync();return true;}return false;}
+if(battle.party.every(m=>m.hp<=0)){battle.active=false;stopAuto();handleDefeat();return true;}return false;}
+function handleDefeat(){const lost=Math.floor((game.gold||0)*.05);game.gold=Math.max(0,(game.gold||0)-lost);exploreChain=null;
+battle.party.forEach(m=>{const c=game.characters.find(x=>x.id===m.ref);if(c){const t=calcTotal(c);c.currentHp=Math.max(1,Math.floor(t.hp*.3));c.currentMp=Math.floor(t.mp*.2);}});
+log(`パーティは力尽きた……撤退費として${lost}Gを失い、拠点へ搬送された。`);game.hpTs=Date.now();saveGame();renderParty();renderStatus();renderPrimaryStatus();
+showPostBattle(`<b>敗北・緊急撤退</b><div class="mini">${lost}Gを失いました。HP30%・MP20%で復帰します。</div><div class="two"><button onclick="retryLastBattle()">再挑戦</button><button onclick="returnFromBattle()">拠点へ戻る</button></div>`);}
 function victory(){const es=battle.enemies;log(`=== ${es.map(e=>e.name).join(" / ")} を倒した。 ===`);
-const maxLv=Math.max(...es.map(e=>e.level));const cnt=es.length;const anyBoss=es.some(e=>e.rar==="boss"||e.rar==="rare");
-game.kills=(game.kills||0)+cnt;if(anyBoss)game.bossKills=(game.bossKills||0)+1;
+const maxLv=Math.max(...es.map(e=>e.level));const cnt=es.length;const anyBoss=es.some(e=>e.rar==="boss"||e.rar==="rare"),mode=battle.mode;
+game.kills=(game.kills||0)+cnt;if(mode==="boss")game.bossKills=(game.bossKills||0)+1;
+es.forEach(e=>{const x=game.encyclopedia[e.id]||(game.encyclopedia[e.id]={seen:0,defeated:0,name:e.name});x.seen++;x.defeated++;});
 const mult=anyBoss?2:1;const exp=Math.floor((maxLv*12+8)*mult*(1+0.5*(cnt-1)));const gold=Math.floor(maxLv*5*mult*cnt);
 game.gold+=gold;log(`→ 経験値${exp} / <span class="gold">${gold}G</span> を獲得。`);
 battle.party.forEach(m=>{const c=game.characters.find(x=>x.id===m.ref);if(c){gainExp(c,exp);c.currentHp=Math.max(1,m.hp);c.currentMp=Math.max(0,m.mp);}});
 if(battle.tower){game.tower++;log(`→ タワー ${game.tower} 階へ進んだ。`);}
 const area=AREAS.find(a=>a[0]===(battle.areaId||$("areaSelect").value));
 const dropBonus=battle.party.reduce((n,m)=>n+(m.flags.dropRate||0),0)/Math.max(1,battle.party.length);for(let i=0;i<cnt;i++){if(Math.random()*100<25+battle.party[0].stats.luk/2+dropBonus){const it=genEquip(area?area[7]:maxLv,pick(game.characters).jobId);game.inv.push(it);log(`→ ${it.name} を入手！`);}}
-const newChapter=battle.mode==="boss"&&battle.areaId&&game.storyCleared.indexOf(battle.areaId)<0?battle.areaId:null;if(newChapter)game.storyCleared.push(newChapter);game.party.combo=battle.combo;saveGame();renderParty();renderStatus();if(newChapter)setTimeout(()=>showAreaChapter(newChapter),250);}
+const newChapter=mode==="boss"&&battle.areaId&&game.storyCleared.indexOf(battle.areaId)<0?battle.areaId:null;if(newChapter){game.storyCleared.push(newChapter);areaProgress(battle.areaId).cleared=true;}
+if(mode==="explore"&&battle.areaId)areaProgress(battle.areaId).kills+=cnt;
+ensureDaily();game.daily.progress.wins++;if(mode==="explore")game.daily.progress.explores++;if(mode==="boss")game.daily.progress.bosses++;
+game.party.combo=battle.combo;checkTitles();saveGame();renderParty();renderStatus();renderGateProgress();updateAreaOptions();
+if(exploreChain){exploreChain.completed++;exploreChain.remaining--;const done=exploreChain.completed;if(exploreChain.remaining>0){log(`連続探索 ${done}/${exploreChain.total} 完了。`);battle=null;setTimeout(()=>explore(true),350);}else{exploreChain=null;showPostBattle(`<b>連続探索完了</b><div class="mini">${done}回の探索を完了しました。</div><button onclick="returnFromBattle()">帰還する</button>`);}return;}
+if(newChapter)setTimeout(()=>showAreaChapter(newChapter),250);
+const retry=mode==="explore"?`<button onclick="continueAfterBattle()">もう一度進む</button>`:`<button onclick="retryLastBattle()">再挑戦</button>`;
+showPostBattle(`<b>戦闘勝利</b><div class="two">${retry}<button onclick="returnFromBattle()">帰還する</button></div>`);}
 function sync(){battle.party.forEach(m=>{const c=game.characters.find(x=>x.id===m.ref);if(c){c.currentHp=Math.max(1,m.hp);c.currentMp=Math.max(0,m.mp);}});saveGame();renderParty();renderStatus();}
 function playTurn(){if(!battle||!battle.active)return;if(checkEnd())return;battle.turn++;log(`--- ターン${battle.turn} ---`);autoItems();
 const actors=[...battle.party.filter(m=>m.hp>0),...aliveE()].map(a=>({a,v:a.stats.agi*(a.states&&a.states.slow ? 0.7 : 1)+rnd(6)})).sort((x,y)=>y.v-x.v).map(x=>x.a);
@@ -504,7 +562,7 @@ autoTimer=setInterval(()=>{if(battle&&battle.active)playTurn();else stopAuto();}
 function hideStart(){$("startScreen").style.display="none";}
 function showSequence(items,i=0,done){if(i>=items.length){$("storyModal").style.display="none";if(done)done();return;}const x=items[i];$("storyTitle").textContent=x.t;$("storyBody").textContent=x.b;$("storyModal").style.display="flex";$("storyNext").textContent=x.next||(i===items.length-1?(done?"次へ":"閉じる"):"次へ");$("storyNext").onclick=()=>showSequence(items,i+1,done);}
 function startNewStory(){if(storage.get(SAVE_KEY)&&!confirm("新しい物語を始めますか？\n現在のデータは、4人パーティを作成した時点で上書きされます。"))return;game=newGame();battle=null;hideStart();switchTab("create");showSequence(PROLOGUE,0,()=>showSequence(TUTORIAL));}
-function continueStory(){if(!loadGame())return alert("続きから読めるセーブデータがありません。");hideStart();regenStamina();renderParty();renderPrimaryStatus();renderStamina();}
+function continueStory(){if(!loadGame())return alert("続きから読めるセーブデータがありません。");hideStart();regenStamina();regenPartyHp();updateAreaOptions();renderParty();renderPrimaryStatus();renderStamina();renderHpRegen();renderGateProgress();}
 function showAreaChapter(id){const x=AREA_STORY[id];if(!x)return;showSequence([{t:x[0]+"　踏破",b:x[1]+"\n\nボスを退けた四人の言鋼に、失われた言葉の欠片が刻まれた。物語は次の地へ続く。"}]);}
 
 function init(){
@@ -518,16 +576,17 @@ $("restBtn").onclick=()=>{game.characters.forEach(c=>{const t=calcTotal(c);c.cur
 $("towerViewBtn").onclick=()=>alert("タワー："+game.tower+" / 撃破："+game.kills+" / ボス："+game.bossKills);
 $("respecBtn").onclick=()=>{if(game.gold>=500||(game.items.respec||0)>0){if(game.items.respec>0)game.items.respec--;else game.gold-=500;game.characters.forEach(c=>{const jobIds=(SKILLS[c.jobId]||[]).map(s=>s.id);c.skills=(c.skills||[]).filter(id=>!jobIds.includes(id));c.sp=c.level-1;});saveGame();renderSkills();renderParty();alert("職スキルをリセットした。");}else alert("Gまたは券が不足");};
 $("lmYes").onclick=confirmLearn;$("lmNo").onclick=()=>{pendingLearn=null;$("learnModal").style.display="none";};
-$("speedSel").onchange=e=>{speed=+e.target.value;renderStatus();if(autoTimer){stopAuto();toggleAuto();}};$("areaSelect").onchange=renderAreaStory;
-$("exploreBtn").onclick=explore;$("bossBtn").onclick=boss;$("towerBtn").onclick=tower;$("raidBtn").onclick=raid;$("turnBtn").onclick=playTurn;$("autoBtn").onclick=toggleAuto;$("stopBtn").onclick=stopAuto;
+$("speedSel").onchange=e=>{speed=+e.target.value;renderStatus();if(autoTimer){stopAuto();toggleAuto();}};$("areaSelect").onchange=()=>{renderAreaStory();renderGateProgress();};
+$("exploreBtn").onclick=()=>explore(false);$("explore10Btn").onclick=()=>startExploreChain(10);$("explore30Btn").onclick=()=>startExploreChain(30);$("bossBtn").onclick=boss;$("towerBtn").onclick=tower;$("raidBtn").onclick=raid;$("turnBtn").onclick=playTurn;$("autoBtn").onclick=toggleAuto;$("stopBtn").onclick=()=>{stopAuto();stopExploreChain();};
+$("sellCommonBtn").onclick=()=>bulkSell(0);$("sellUncommonBtn").onclick=()=>bulkSell(1);
 $("showDamage").onchange=e=>{game.settings.showDamage=e.target.checked;saveGame();};
 $("autoItem").onchange=e=>{game.settings.autoItem=e.target.checked;saveGame();};
 $("saveBtn").onclick=()=>{$("saveMsg").textContent=saveGame()?"セーブした":"失敗";renderSave();};
-$("loadBtn").onclick=()=>{if(loadGame()){$("saveMsg").textContent="ロードした";renderParty();renderSkills();renderSave();}else $("saveMsg").textContent="セーブなし";};
-$("deleteBtn").onclick=()=>{if(!confirm("セーブデータと緊急バックアップを削除しますか？\nこの操作は元に戻せません。"))return;storage.del(SAVE_KEY);storage.del(BACKUP_KEY);game=newGame();battle=null;stopAuto();renderParty();renderStatus();renderSave();$("saveMsg").textContent="削除しました";};
+$("loadBtn").onclick=()=>{if(loadGame()){$("saveMsg").textContent="ロードした";updateAreaOptions();renderParty();renderSkills();renderGateProgress();renderSave();}else $("saveMsg").textContent="セーブなし";};
+$("deleteBtn").onclick=()=>{if(!confirm("セーブデータと緊急バックアップを削除しますか？\nこの操作は元に戻せません。"))return;storage.del(SAVE_KEY);storage.del(BACKUP_KEY);game=newGame();battle=null;stopAuto();updateAreaOptions();renderParty();renderStatus();renderGateProgress();renderSave();$("saveMsg").textContent="削除しました";};
 $("exportBtn").onclick=()=>{$("saveText").value=exportSave();};
-$("importBtn").onclick=()=>{if(importSave($("saveText").value)){$("saveMsg").textContent="インポート成功";renderParty();renderSkills();renderSave();}else $("saveMsg").textContent="失敗";};
-renderParty();renderPrimaryStatus();renderAreaStory();renderStamina();renderSave();setInterval(renderStamina,1000);}
+$("importBtn").onclick=()=>{if(importSave($("saveText").value)){$("saveMsg").textContent="インポート成功";updateAreaOptions();renderParty();renderSkills();renderGateProgress();renderSave();}else $("saveMsg").textContent="失敗";};
+updateAreaOptions();renderParty();renderPrimaryStatus();renderAreaStory();renderStamina();renderHpRegen();renderGateProgress();renderSave();setInterval(()=>{renderStamina();renderHpRegen();},1000);}
 document.addEventListener("DOMContentLoaded",init);
 </script>
 </body>
