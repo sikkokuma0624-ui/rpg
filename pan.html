@@ -12,7 +12,7 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
-body{font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif;background:radial-gradient(circle at 50% -10%,#fff7e3 0,var(--bg) 45%,var(--bg2) 100%) fixed;color:var(--ink);min-height:100vh;padding:12px 16px calc(20px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto}
+body{font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif;background:radial-gradient(circle at 50% -10%,#fff7e3 0,var(--bg) 45%,var(--bg2) 100%) fixed;color:var(--ink);min-height:100vh;padding:12px 16px calc(20px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;overflow-x:hidden}
 h1{font-size:26px;text-align:center;margin:18px 0 4px;letter-spacing:.06em}
 h2{font-size:18px;margin:8px 0}
 .sub{color:var(--sub);font-size:13px}
@@ -23,21 +23,13 @@ button{font:inherit;border:none;cursor:pointer}
 .btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--crust-d)}
 .btn.ghost{background:var(--card);color:var(--crust-d);box-shadow:0 3px 0 var(--line);border:1px solid var(--line)}
 .btn:disabled{opacity:.45}
-.row{display:flex;gap:8px}
-.row .btn{flex:1}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 2px 8px rgba(120,80,30,.08)}
-.logo{font-size:64px;text-align:center;margin-top:10px;filter:drop-shadow(0 4px 6px rgba(150,90,20,.3))}
-input[type=text]{font:inherit;width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:16px;margin:4px 0}
-.stepper{display:flex;align-items:center;gap:12px;justify-content:center;margin:6px 0}
-.stepper button{width:44px;height:44px;border-radius:50%;background:var(--bg2);font-size:22px;color:var(--crust-d)}
-.stepper b{font-size:22px;min-width:3em;text-align:center}
+.logo{font-size:72px;text-align:center;margin-top:30px;filter:drop-shadow(0 0 16px rgba(240,180,40,.7));animation:float 2.4s ease-in-out infinite}
 
-/* top bar */
-.bar{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--sub)}
 .topic{background:#fff;border:2px dashed var(--crust);border-radius:14px;padding:12px;margin:8px 0;font-size:16px}
 .topic small{display:block;color:var(--sub);font-size:12px;margin-bottom:2px}
 
-/* oracle board */
+/* 神託ボード */
 .board{min-height:96px;background:linear-gradient(#fffdf7,#fff6e2);border:2px solid var(--gold);border-radius:16px;padding:10px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;position:relative}
 .board.empty::before{content:"下のカードをタップして神託を組み立てよ";color:#c3a77f;font-size:13px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .preview{font-size:15px;margin:8px 2px 0;min-height:1.4em;line-height:1.6}
@@ -45,32 +37,45 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border-radius:10px;bo
 .tools button{flex:1;padding:9px 4px;border-radius:10px;background:var(--bg2);color:var(--crust-d);font-weight:700;font-size:14px}
 .tools button:disabled{opacity:.35}
 
-/* cards */
+/* カード */
 .chip{padding:7px 10px;border-radius:10px;font-size:15px;background:#fff;border:2px solid var(--c,var(--k-noun));color:var(--ink);line-height:1.3}
 .chip.conn{--c:var(--k-conn);border-style:dashed;padding:5px 8px}
+.chip.conn.holy{--c:var(--gold);font-weight:700;color:#8a5a00;background:#fff8dc}
 .chip.sel{background:var(--c,var(--k-noun));color:#fff;transform:translateY(-2px)}
-.hand{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.hand{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px;position:relative;z-index:60}
 .card{position:relative;min-height:78px;padding:18px 6px 8px;border-radius:12px;background:var(--card);border:2px solid var(--c);box-shadow:0 3px 0 var(--c);font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3;word-break:break-all}
 .card .kind{position:absolute;top:0;left:0;right:0;font-size:10px;background:var(--c);color:#fff;border-radius:9px 9px 0 0;padding:2px 0;font-weight:400}
 .card.used{opacity:.25;box-shadow:none;transform:translateY(3px)}
+.card.wait{visibility:hidden}
+.card.landed{animation:land .6s ease-out}
+@keyframes land{0%{box-shadow:0 0 0 0 var(--c),0 0 40px 10px #ffd65a}100%{box-shadow:0 3px 0 var(--c),0 0 0 0 transparent}}
 .k-noun{--c:var(--k-noun)} .k-sim{--c:var(--k-sim)} .k-phr{--c:var(--k-phr)} .k-verb{--c:var(--k-verb)}
 .conns{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .conns .chip{font-size:14px}
-.label{font-size:12px;color:var(--sub);margin-top:12px;display:flex;justify-content:space-between}
+.label{font-size:12px;color:var(--sub);margin-top:12px;display:flex;justify-content:space-between;align-items:center}
 
-/* reveal */
-.oracle{background:radial-gradient(circle at 50% 0,#fffbe9,#fff1cc);border:2px solid var(--gold);border-radius:18px;padding:18px 14px;margin:12px 0;text-align:center;font-size:19px;line-height:1.7;font-weight:700;position:relative;box-shadow:0 0 0 4px rgba(224,165,38,.15)}
-.oracle .who{display:block;font-size:12px;color:var(--sub);font-weight:400;margin-top:6px}
-.oracle.pick{cursor:pointer}
-.oracle.win{box-shadow:0 0 0 4px var(--gold),0 0 24px rgba(224,165,38,.6)}
+/* 配る演出 */
+#dealOverlay{position:fixed;inset:0;z-index:50;background:radial-gradient(circle at 50% 30%,rgba(255,220,120,.35),rgba(40,20,5,.55));display:flex;flex-direction:column;align-items:center;pointer-events:auto;opacity:0;transition:opacity .3s}
+#dealOverlay.on{opacity:1}
+#dealOverlay .msg{margin-top:12vh;color:#fff;font-weight:700;font-size:20px;letter-spacing:.15em;text-shadow:0 0 12px #ffb300,0 0 24px #ff8a00;animation:pulse 1s ease-in-out infinite}
+#dealOverlay .rays{position:absolute;left:50%;top:30%;width:520px;height:520px;margin:-260px 0 0 -260px;background:repeating-conic-gradient(rgba(255,230,150,.35) 0 8deg,transparent 8deg 20deg);border-radius:50%;-webkit-mask:radial-gradient(circle,#000 20%,transparent 70%);mask:radial-gradient(circle,#000 20%,transparent 70%);animation:spin 10s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{opacity:.6;transform:scale(1.05)}}
+.flyer{position:fixed;z-index:70;border-radius:12px;pointer-events:none;transform-origin:center;will-change:transform}
+.back{background:radial-gradient(circle at 50% 40%,#ffe9a8,#d4902e 60%,#7a4512);border:3px solid #ffe08a;display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;text-shadow:0 0 8px #fff3b0;box-shadow:0 0 24px rgba(255,200,60,.9)}
+.back::after{content:"";position:absolute;inset:5px;border:1px dashed rgba(255,255,255,.7);border-radius:8px}
+.spark{position:fixed;z-index:80;pointer-events:none;font-size:16px;line-height:1}
+.flash{position:fixed;inset:0;z-index:75;background:#fff6d0;pointer-events:none}
+.shake{animation:shake .35s}
+@keyframes shake{20%{transform:translate(-5px,2px)}40%{transform:translate(5px,-2px)}60%{transform:translate(-3px,1px)}80%{transform:translate(3px,0)}}
+
+/* 発表 */
+.oracle{background:radial-gradient(circle at 50% 0,#fffbe9,#fff1cc);border:2px solid var(--gold);border-radius:18px;padding:22px 14px;margin:12px 0;text-align:center;font-size:21px;line-height:1.7;font-weight:700;box-shadow:0 0 0 4px var(--gold),0 0 32px rgba(224,165,38,.6)}
+.oracle .who{display:block;font-size:12px;color:var(--sub);font-weight:400;margin-top:8px}
 .halo{font-size:44px;text-align:center;animation:float 2.4s ease-in-out infinite}
 @keyframes float{50%{transform:translateY(-6px)}}
-.pop{animation:pop .5s ease-out}
-@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-.scores{list-style:none;padding:0;margin:0}
-.scores li{display:flex;justify-content:space-between;padding:8px 2px;border-bottom:1px dashed var(--line);font-size:15px}
-.scores li:last-child{border:none}
-.bread{letter-spacing:-2px}
+.pop{animation:pop .7s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
 </style>
 </head>
 <body>
@@ -80,42 +85,21 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border-radius:10px;bo
   <div class="logo">🍞</div>
   <h1>パン教祖爆誕</h1>
   <p class="center sub">迷える信者に、パンの神託を授けよ。</p>
-  <div class="panel">
-    <h2>教祖の人数</h2>
-    <div class="stepper"><button id="pMinus">−</button><b id="pCount">3人</b><button id="pPlus">＋</button></div>
-    <div id="nameBox"></div>
-    <p class="sub" id="soloNote">1人のときは採点なしで神託を作って楽しむモードです。</p>
-  </div>
-  <div class="panel">
-    <h2>ラウンド数</h2>
-    <div class="stepper"><button id="rMinus">−</button><b id="rCount">3</b><button id="rPlus">＋</button></div>
-  </div>
-  <button class="btn" id="startBtn">布教をはじめる</button>
+  <button class="btn" id="startBtn">神託を授かる</button>
   <details class="panel">
     <summary><b>あそびかた</b></summary>
     <ol class="sub" style="padding-left:1.2em;line-height:1.7">
       <li>信者のお悩みが届きます。</li>
-      <li>各教祖にカードが6枚配られます。タップして並べ、神託を作ります。カードは全部使わなくてOK。</li>
-      <li>「は・が・そして」などの<b>つなぎ言葉</b>は手札とは別に何度でも使えます。</li>
-      <li>並べた言葉をタップすると選択でき、◀▶で並べ替え、✕で手札に戻せます。</li>
+      <li>カードが6枚配られます。タップして並べ、神託を作ります。カードは全部使わなくてOK。</li>
+      <li>「神・あなた・は・そして」などの<b>つなぎ言葉</b>は手札とは別に何度でも使えます。</li>
+      <li>並べた言葉をタップすると選択でき、◀▶で並べ替え、✕で手札に戻せます。選択中に足した言葉はその後ろに入ります。</li>
       <li>手札の引き直しは1回だけできます。</li>
-      <li>全員の神託を名前を伏せて読み上げ、みんなで一番救われた神託を選びます。選ばれた教祖は信者が1人増えます。</li>
     </ol>
   </details>
 </section>
 
-<!-- 受け渡し -->
-<section id="sPass" class="hidden">
-  <div class="bar"><span id="passRound"></span><span></span></div>
-  <div class="halo" style="margin-top:40px">🥐</div>
-  <h1 id="passName"></h1>
-  <p class="center sub">スマホを渡してください。<br>他の人は画面を見ないでね。</p>
-  <button class="btn" id="passGo">神託を授かる</button>
-</section>
-
 <!-- 作成 -->
 <section id="sCompose" class="hidden">
-  <div class="bar"><span id="cRound"></span><span id="cName"></span></div>
   <div class="topic"><small>迷える信者のお悩み</small><span id="cTopic"></span></div>
   <div class="board" id="board"></div>
   <div class="preview" id="preview"></div>
@@ -131,35 +115,40 @@ input[type=text]{font:inherit;width:100%;padding:10px 12px;border-radius:10px;bo
 
 <!-- 発表 -->
 <section id="sReveal" class="hidden">
-  <div class="bar"><span id="rRound"></span><span></span></div>
+  <div class="halo" style="margin-top:20px">✨🍞✨</div>
+  <p class="center sub">神託が授けられた。</p>
   <div class="topic"><small>迷える信者のお悩み</small><span id="rTopic"></span></div>
-  <p class="center sub" id="rGuide">ひとつずつ読み上げて、いちばん救われた神託をみんなで選んでタップ！</p>
-  <div id="oracles"></div>
-  <button class="btn hidden" id="nextBtn">次へ</button>
+  <div class="oracle pop" id="oracle"></div>
+  <button class="btn" id="againBtn">次の信者を救う</button>
+  <button class="btn ghost" id="titleBtn">タイトルへ</button>
 </section>
 
-<!-- 結果 -->
-<section id="sFinal" class="hidden">
-  <div class="halo" style="margin-top:24px">👑🍞</div>
-  <h1 id="fTitle"></h1>
-  <p class="center sub">最も多くの信者を集めた教祖</p>
-  <div class="panel"><ul class="scores" id="fScores"></ul></div>
-  <div class="panel"><h2>授けられた神託</h2><div id="fLog"></div></div>
-  <button class="btn" id="againBtn">もう一度布教する</button>
-</section>
+<div id="dealOverlay" class="hidden"><div class="rays"></div><div class="msg">神託のカード降臨</div></div>
 
 <script>
 // ===== データ =====
-const K = {noun:"パン/名詞", sim:"たとえ", phr:"フレーズ", verb:"おこない"};
+const K = {noun:"名詞", sim:"たとえ", phr:"フレーズ", verb:"おこない"};
 const DECK = {
-  noun:["食パン","クロワッサン","バゲット","メロンパン","あんぱん","カレーパン","クリームパン","ベーグル","コッペパン","焼きそばパン","塩パン","ブリオッシュ","パンの耳","天然酵母","強力粉","バター","イースト菌","石窯","パン粉","いちごジャム","トースター","焦げ目","生地","ちくわパン","レーズン","マーガリン","バターロール","揚げパン",
-        "あなた","わたし","人生","愛","明日","過去","罪","涙","魂","運命","上司","元恋人","月曜日","宇宙","真実","心","世界","夢","隣人","財布","神","給料日","母","推し","体重計","目覚まし時計"],
-  sim:["焼きたてのように","まるでバターが溶けるように","発酵した生地のように","パンの耳のように静かに","トースターから飛び出すように","二次発酵を待つように","小麦畑を渡る風のように","クロワッサンの層のように","朝のパン屋の香りのように","食パンをくわえて走る少女のように","カチカチのフランスパンのように","袋の底のパンくずのように","閉店間際のパン屋のように","メロンパンの網目のように"],
-  phr:["に満たされた人生","外はカリッと中はふんわり","焼きたての","一斤の","罪深いほどの","毎朝の","耳まで愛される","冷めても美味しい","半額シールの貼られた","永遠に膨らむ","選ばれし","小麦色の","ひとかけらの","二度焼きされた","粉まみれの","バター多めの","賞味期限が近い","モチモチの","サクサクの","焼き直された"],
-  verb:["こねよ","焼き上がる","膨らむ","発酵を待て","ちぎれ","分け与えよ","トーストせよ","焦げてもよい","寝かせなさい","祈りなさい","赦される","救われる","満たされる","恐れるな","ふんわりと生きよ","はさめ","噛みしめよ","香ばしくなる","溶ける","包み込め"]
+  noun:[
+    // パン
+    "食パン","クロワッサン","バゲット","メロンパン","あんぱん","カレーパン","クリームパン","ベーグル","コッペパン","焼きそばパン","塩パン","ブリオッシュ","パンの耳","天然酵母","強力粉","バター","イースト菌","石窯","パン粉","いちごジャム","トースター","焦げ目","生地","ちくわパン","レーズン","バターロール","揚げパン","聖なる小麦",
+    // 日常・パンと無関係
+    "人生","愛","明日","過去","罪","涙","魂","運命","上司","元恋人","月曜日","宇宙","真実","心","世界","夢","隣人","財布","給料日","母","推し","体重計","目覚まし時計",
+    "冷蔵庫","消費税","ペンギン","満員電車","確定申告","靴下の片方","富士山","段ボール","洗濯機","エレベーター","電子レンジ","町内会","3丁目の田中さん","未読メール","有給休暇","筋肉","回覧板","住民票","カニ","Wi-Fi","昨日の晩ごはん",
+    // 宗教・狂気
+    "教義","聖典","生贄","洗礼","啓示","預言者","楽園","終末","信仰","煉獄","第三の目","原罪","輪廻","審判の日","救世主","異端者","供物","祭壇","聖痕","奇跡","教団","来世","前世","悪魔","天使の羽"
+  ],
+  sim:["焼きたてのように","まるでバターが溶けるように","発酵した生地のように","パンの耳のように静かに","トースターから飛び出すように","二次発酵を待つように","小麦畑を渡る風のように","クロワッサンの層のように","朝のパン屋の香りのように","食パンをくわえて走る少女のように","カチカチのフランスパンのように","袋の底のパンくずのように","閉店間際のパン屋のように",
+    "狂い咲く麦の穂のように","祭壇に捧げられた食パンのように","天から降り注ぐパンくずのように","終末のラッパが鳴り響くように","永遠に焼かれ続けるように","脳髄がとろけるように","三日三晩祈り続けるように","生贄の子羊のように","満員電車に押し込まれるように","確定申告の締切前夜のように","ペンギンが空を夢見るように","冷蔵庫の奥で眠るように"],
+  phr:["に満たされた人生","外はカリッと中はふんわり","焼きたての","一斤の","罪深いほどの","毎朝の","耳まで愛される","冷めても美味しい","半額シールの貼られた","永遠に膨らむ","選ばれし","小麦色の","ひとかけらの","二度焼きされた","粉まみれの","バター多めの","賞味期限が近い","モチモチの",
+    "魂ごと","全身全霊で","骨の髄まで","永遠に","千の目を持つ","血より濃い","生まれる前から決まっていた","選ばれなかった者の","声なき声で","一片の疑いもなく","救済の","聖なる","呪われた","光り輝く","逃れられない","すべてを焼き尽くす","目を閉じても見える","頭の中に直接響く"],
+  verb:["こねよ","焼き上がる","膨らむ","発酵を待て","ちぎれ","分け与えよ","トーストせよ","焦げてもよい","寝かせなさい","祈りなさい","赦される","救われる","満たされる","恐れるな","ふんわりと生きよ","はさめ","噛みしめよ","溶ける","包み込め",
+    "跪け","崇めよ","目覚めよ","捧げよ","悔い改めよ","信じよ","委ねよ","受け入れよ","唱えよ","還れ","生まれ変わる","ひとつになる","導かれる","浄化される","疑うな","叫べ","忘れよ","帰依せよ","焼かれよ","もう戻れない"]
 };
-const CONNS = ["は","が","を","に","の","と","も","で","へ","こそ","より","そして","しかし","だから","ならば","ように","、","。","！","……","よ","なのです","である","ではない","せよ","しか"];
+const HOLY = ["神","あなた"];
+const CONNS = [...HOLY,"は","が","を","に","の","と","も","で","へ","こそ","より","そして","しかし","だから","ならば","ように","、","。","！","……","よ","なのです","である","ではない","せよ","しか"];
 const TOPICS = ["仕事を辞めたいです","恋人ができません","朝どうしても起きられません","人生の意味がわかりません","ダイエットが続きません","上司が怖いです","お金がありません","推しが結婚しました","将来が不安です","友達とケンカしました","自分に自信がありません","夜眠れません","何をやっても長続きしません","試験に落ちました","隣の芝生が青く見えます","月曜日が来るのが怖いです","SNSを見て落ち込みます","部屋が片付けられません","親とうまく話せません","やる気が出ません"];
+const KCOLOR = {noun:"#ffb35a",sim:"#c98bff",phr:"#6fe39a",verb:"#ff6f5e"};
 
 // ===== ユーティリティ =====
 const $ = id => document.getElementById(id);
@@ -167,72 +156,104 @@ const shuffle = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){const j=Math
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const show = id => { document.querySelectorAll("body>section").forEach(s=>s.classList.add("hidden")); $(id).classList.remove("hidden"); window.scrollTo(0,0); };
 const joinText = toks => toks.map(t=>t.text).join("");
+const wait = ms => new Promise(r=>setTimeout(r,ms));
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // ===== 状態 =====
-let pCount = 3, rounds = 3;
-let G = null;     // ゲーム状態
-let deckPile = [], topicPile = [];
-
-function allCards(){ const out=[]; for(const k in DECK) DECK[k].forEach(t=>out.push({text:t,kind:k})); return out; }
+let G = null, deckPile = [], topicPile = [];
+function refill(){ const out=[]; for(const k in DECK) DECK[k].forEach(t=>out.push({text:t,kind:k})); deckPile = shuffle(out); }
 function draw(n){
-  // 手札の偏りを減らす：名詞多め＋たとえ/フレーズ/おこないを最低1枚ずつ混ぜる
-  const pick = []; const need = ["sim","phr","verb"];
-  for(const k of need){ const i = deckPile.findIndex(c=>c.kind===k); if(i>=0) pick.push(deckPile.splice(i,1)[0]); else { refill(); return draw(n); } }
-  while(pick.length<n){ if(!deckPile.length) refill(); pick.push(deckPile.pop()); }
-  return shuffle(pick).map((c,i)=>({...c,id:"c"+Date.now()+"_"+i+"_"+Math.random(),used:false}));
+  // 名詞多め＋たとえ/フレーズ/おこないを最低1枚ずつ
+  if(deckPile.length<n+10) refill();
+  const pick=[];
+  for(const k of ["sim","phr","verb"]){ const i=deckPile.findIndex(c=>c.kind===k); pick.push(deckPile.splice(i,1)[0]); }
+  while(pick.length<n) pick.push(deckPile.pop());
+  return shuffle(pick).map((c,i)=>({...c,id:"c"+i+"_"+Math.random(),used:false}));
 }
-function refill(){ deckPile = shuffle(allCards()); }
 function nextTopic(){ if(!topicPile.length) topicPile = shuffle(TOPICS); return topicPile.pop(); }
 
-// ===== タイトル =====
-function renderSetup(){
-  $("pCount").textContent = pCount+"人";
-  $("rCount").textContent = rounds;
-  $("soloNote").classList.toggle("hidden", pCount!==1);
-  const box = $("nameBox"); const old = [...box.querySelectorAll("input")].map(i=>i.value);
-  box.innerHTML = "";
-  for(let i=0;i<pCount;i++){
-    const inp = document.createElement("input"); inp.type="text"; inp.maxLength=10;
-    inp.placeholder = "教祖"+(i+1)+"の名前"; inp.value = old[i] ?? ""; box.appendChild(inp);
-  }
-}
-$("pMinus").onclick=()=>{ if(pCount>1){pCount--;renderSetup();} };
-$("pPlus").onclick =()=>{ if(pCount<8){pCount++;renderSetup();} };
-$("rMinus").onclick=()=>{ if(rounds>1){rounds--;renderSetup();} };
-$("rPlus").onclick =()=>{ if(rounds<10){rounds++;renderSetup();} };
-$("startBtn").onclick=()=>{
-  const names = [...$("nameBox").querySelectorAll("input")].map((i,n)=>i.value.trim()||("教祖"+(n+1)));
-  refill(); topicPile = shuffle(TOPICS);
-  G = { players:names.map(n=>({name:n,score:0})), round:1, rounds, log:[] };
-  startRound();
-};
-
-// ===== ラウンド =====
-function startRound(){
-  G.topic = nextTopic(); G.turn = 0; G.oracles = [];
-  beginTurn();
-}
-function beginTurn(){
-  const p = G.players[G.turn];
-  G.hand = draw(6); G.sentence = []; G.sel = -1; G.redeals = 1;
-  if(G.players.length===1){ openCompose(); return; }
-  $("passRound").textContent = `第${G.round}ラウンド / ${G.rounds}`;
-  $("passName").textContent = p.name+" 様";
-  show("sPass");
-}
-$("passGo").onclick = openCompose;
-
-function openCompose(){
-  const p = G.players[G.turn];
-  $("cRound").textContent = `第${G.round}ラウンド / ${G.rounds}`;
-  $("cName").textContent = "教祖 "+p.name;
+// ===== 開始 =====
+function startGame(){
+  G = { topic:nextTopic(), hand:draw(6), sentence:[], sel:-1, redeals:1, dealing:true };
   $("cTopic").textContent = "「"+G.topic+"」";
   renderConns(); renderCompose(); show("sCompose");
+  dealAnimation();
 }
+$("startBtn").onclick = startGame;
+$("againBtn").onclick = startGame;
+$("titleBtn").onclick = ()=>show("sTitle");
+
+// ===== 配る演出 =====
+async function dealAnimation(){
+  G.dealing = true; renderCompose();
+  const ov=$("dealOverlay"); ov.classList.remove("hidden"); await wait(20); ov.classList.add("on");
+  const hand=$("hand"); hand.scrollIntoView({block:"center",behavior:reduced?"auto":"smooth"});
+  await wait(reduced?50:550);
+  const cards=[...hand.querySelectorAll(".card")];
+  for(let i=0;i<cards.length;i++){
+    await dealOne(cards[i], G.hand[i], i===cards.length-1);
+  }
+  await wait(250);
+  ov.classList.remove("on"); await wait(300); ov.classList.add("hidden");
+  G.dealing=false; renderCompose();
+}
+async function dealOne(el, c, last){
+  const r = el.getBoundingClientRect();
+  const fly = document.createElement("div");
+  fly.className="flyer back"; fly.textContent="🍞";
+  Object.assign(fly.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});
+  document.body.appendChild(fly);
+  const sx = innerWidth/2 - (r.left+r.width/2), sy = innerHeight*0.3 - (r.top+r.height/2);
+  const spin = (Math.random()<.5?-1:1)*(360+Math.random()*180);
+  if(!reduced){
+    // 天から降臨：中央で巨大化→回転しながら所定の位置へ
+    await fly.animate([
+      {transform:`translate(${sx}px,${sy-120}px) scale(.2) rotate(0deg)`,opacity:0},
+      {transform:`translate(${sx}px,${sy}px) scale(1.7) rotate(0deg)`,opacity:1,offset:.35},
+      {transform:`translate(${sx}px,${sy}px) scale(1.8) rotate(0deg)`,offset:.5},
+      {transform:`translate(0,0) scale(1) rotate(${spin}deg)`}
+    ],{duration:620,easing:"cubic-bezier(.3,.7,.3,1)"}).finished;
+    // 裏返す
+    await fly.animate([{transform:"scaleX(1)"},{transform:"scaleX(0)"}],{duration:110,easing:"ease-in"}).finished;
+  }
+  fly.remove();
+  el.classList.remove("wait");
+  el.classList.add("landed");
+  if(!reduced){
+    el.animate([{transform:"scaleX(0)"},{transform:"scaleX(1.15) scaleY(1.15)"},{transform:"scale(1)"}],{duration:260,easing:"ease-out"});
+    burst(r, KCOLOR[c.kind], last);
+    if(navigator.vibrate) try{navigator.vibrate(last?[30,40,60]:20);}catch(e){}
+  }
+  await wait(reduced?60:(last?320:140));
+}
+function burst(r, color, big){
+  const cx=r.left+r.width/2, cy=r.top+r.height/2;
+  const syms=["✦","✧","★","🍞","✨","☩"];
+  const n = big?22:12;
+  for(let i=0;i<n;i++){
+    const s=document.createElement("span"); s.className="spark";
+    s.textContent=syms[Math.random()*syms.length|0];
+    s.style.left=cx+"px"; s.style.top=cy+"px"; s.style.color=color; s.style.textShadow=`0 0 8px ${color}`;
+    s.style.fontSize=(12+Math.random()*(big?18:10))+"px";
+    document.body.appendChild(s);
+    const a=Math.random()*Math.PI*2, d=50+Math.random()*(big?140:80);
+    s.animate([
+      {transform:"translate(-50%,-50%) scale(.3)",opacity:1},
+      {transform:`translate(calc(-50% + ${Math.cos(a)*d}px),calc(-50% + ${Math.sin(a)*d}px)) scale(1) rotate(${Math.random()*360}deg)`,opacity:0}
+    ],{duration:600+Math.random()*400,easing:"cubic-bezier(.1,.8,.3,1)"}).finished.then(()=>s.remove());
+  }
+  if(big){
+    const f=document.createElement("div"); f.className="flash"; document.body.appendChild(f);
+    f.animate([{opacity:.85},{opacity:0}],{duration:450}).finished.then(()=>f.remove());
+    document.body.classList.add("shake"); setTimeout(()=>document.body.classList.remove("shake"),400);
+  }
+}
+
+// ===== 作成画面 =====
 function renderConns(){
   const box=$("conns"); box.innerHTML="";
-  CONNS.forEach(t=>{ const b=document.createElement("button"); b.className="chip conn"; b.textContent=t;
-    b.onclick=()=>addToken({text:t,kind:"conn"}); box.appendChild(b); });
+  CONNS.forEach(t=>{ const b=document.createElement("button"); b.className="chip conn"+(HOLY.includes(t)?" holy":""); b.textContent=t;
+    b.onclick=()=>{ if(!G.dealing) addToken({text:t,kind:"conn"}); }; box.appendChild(b); });
 }
 function addToken(tok){
   if(G.sel>=0){ G.sentence.splice(G.sel+1,0,tok); G.sel++; } else G.sentence.push(tok);
@@ -241,9 +262,9 @@ function addToken(tok){
 function renderCompose(){
   const hand=$("hand"); hand.innerHTML="";
   G.hand.forEach(c=>{
-    const b=document.createElement("button"); b.className=`card k-${c.kind}`+(c.used?" used":"");
+    const b=document.createElement("button"); b.className=`card k-${c.kind}`+(c.used?" used":"")+(G.dealing?" wait":"");
     b.innerHTML=`<span class="kind">${K[c.kind]}</span>${esc(c.text)}`;
-    b.disabled=c.used;
+    b.disabled=c.used||G.dealing;
     b.onclick=()=>{ c.used=true; addToken({text:c.text,kind:c.kind,cid:c.id}); };
     hand.appendChild(b);
   });
@@ -251,7 +272,7 @@ function renderCompose(){
   board.classList.toggle("empty", !G.sentence.length);
   G.sentence.forEach((t,i)=>{
     const b=document.createElement("button");
-    b.className="chip "+(t.kind==="conn"?"conn":"k-"+t.kind)+(i===G.sel?" sel":"");
+    b.className="chip "+(t.kind==="conn"?"conn"+(HOLY.includes(t.text)?" holy":""):"k-"+t.kind)+(i===G.sel?" sel":"");
     b.textContent=t.text;
     b.onclick=()=>{ G.sel = (G.sel===i?-1:i); renderCompose(); };
     board.appendChild(b);
@@ -260,8 +281,8 @@ function renderCompose(){
   const s=G.sel>=0;
   $("tLeft").disabled=!s||G.sel===0; $("tRight").disabled=!s||G.sel===G.sentence.length-1;
   $("tDel").disabled=!s; $("tClear").disabled=!G.sentence.length;
-  $("submitBtn").disabled = !G.sentence.some(t=>t.kind!=="conn");
-  const r=$("redeal"); r.textContent = G.redeals?"引き直す（残り1回）":"引き直し済み"; r.disabled=!G.redeals;
+  $("submitBtn").disabled = G.dealing || !G.sentence.some(t=>t.kind!=="conn");
+  const r=$("redeal"); r.textContent = G.redeals?"引き直す（残り1回）":"引き直し済み"; r.disabled=!G.redeals||G.dealing;
 }
 function move(d){ const i=G.sel,j=i+d; [G.sentence[i],G.sentence[j]]=[G.sentence[j],G.sentence[i]]; G.sel=j; renderCompose(); }
 $("tLeft").onclick=()=>move(-1);
@@ -269,75 +290,25 @@ $("tRight").onclick=()=>move(1);
 $("tDel").onclick=()=>{
   const t=G.sentence.splice(G.sel,1)[0];
   if(t.cid){ const c=G.hand.find(c=>c.id===t.cid); if(c) c.used=false; }
-  G.sel = Math.min(G.sel, G.sentence.length-1); if(!G.sentence.length) G.sel=-1;
+  G.sel = Math.min(G.sel, G.sentence.length-1);
   renderCompose();
 };
 $("tClear").onclick=()=>{ G.sentence=[]; G.sel=-1; G.hand.forEach(c=>c.used=false); renderCompose(); };
 $("redeal").onclick=()=>{
-  if(!G.redeals) return;
+  if(!G.redeals||G.dealing) return;
   if(G.sentence.length && !confirm("並べた神託は消えます。引き直しますか？")) return;
-  G.redeals=0; G.hand=draw(6); G.sentence=[]; G.sel=-1; renderCompose();
-};
-$("submitBtn").onclick=()=>{
-  G.oracles.push({p:G.turn, text:joinText(G.sentence)});
-  G.turn++;
-  if(G.turn<G.players.length) beginTurn(); else openReveal();
+  G.redeals=0; G.hand=draw(6); G.sentence=[]; G.sel=-1;
+  dealAnimation();
 };
 
 // ===== 発表 =====
-function openReveal(){
-  $("rRound").textContent = `第${G.round}ラウンド / ${G.rounds}`;
-  $("rTopic").textContent = "「"+G.topic+"」";
-  const solo = G.players.length===1;
-  $("rGuide").textContent = solo ? "神託が授けられた。" : "ひとつずつ読み上げて、いちばん救われた神託をみんなで選んでタップ！";
-  const box=$("oracles"); box.innerHTML="";
-  const order = shuffle(G.oracles);
-  order.forEach((o,i)=>{
-    const d=document.createElement("div"); d.className="oracle pop"+(solo?"":" pick");
-    d.style.animationDelay=(i*.12)+"s";
-    d.innerHTML = `${solo?'<div class="halo" style="font-size:32px">✨🍞✨</div>':""}「${esc(o.text)}」<span class="who">${solo?"— 教祖 "+esc(G.players[0].name):"神託 その"+(i+1)}</span>`;
-    d.dataset.p=o.p;
-    if(!solo) d.onclick=()=>choose(o,d);
-    box.appendChild(d);
-  });
-  if(solo){ G.log.push({topic:G.topic,text:G.oracles[0].text,name:G.players[0].name}); G.players[0].score++; }
-  $("nextBtn").classList.toggle("hidden", !solo);
-  $("nextBtn").textContent = G.round<G.rounds ? "次のお悩みへ" : "結果を見る";
+$("submitBtn").onclick=()=>{
+  $("rTopic").textContent="「"+G.topic+"」";
+  $("oracle").innerHTML=`「${esc(joinText(G.sentence))}」<span class="who">— パン教祖より</span>`;
   show("sReveal");
-}
-function choose(o,el){
-  if(!$("nextBtn").classList.contains("hidden")) return;
-  const p=G.players[o.p];
-  if(!confirm(`この神託を選びますか？\n「${o.text}」`)) return;
-  p.score++;
-  G.log.push({topic:G.topic,text:o.text,name:p.name});
-  el.classList.add("win");
-  // 作者を明かす
-  document.querySelectorAll("#oracles .oracle").forEach(d=>{
-    d.classList.remove("pick");
-    d.querySelector(".who").textContent = (d===el?"👑 信者+1 — ":"— ")+"教祖 "+G.players[+d.dataset.p].name;
-  });
-  $("rGuide").textContent = `${p.name} 様の神託が信者を救った！`;
-  $("nextBtn").classList.remove("hidden");
-}
-$("nextBtn").onclick=()=>{
-  if(G.round<G.rounds){ G.round++; startRound(); } else openFinal();
+  const o=$("oracle"); o.classList.remove("pop"); void o.offsetWidth; o.classList.add("pop");
+  if(!reduced) setTimeout(()=>burst(o.getBoundingClientRect(),"#ffcc33",true),250);
 };
-
-// ===== 結果 =====
-function openFinal(){
-  const ps=G.players.slice().sort((a,b)=>b.score-a.score);
-  const solo=G.players.length===1;
-  const top=ps[0].score, winners=ps.filter(p=>p.score===top);
-  $("fTitle").textContent = solo ? "布教おつかれさま" : (winners.length>1 ? "大教祖が並び立った！" : "大教祖 "+winners[0].name+" 爆誕");
-  $("fScores").innerHTML = solo ? `<li><span>授けた神託</span><b>${G.log.length}</b></li>` :
-    ps.map(p=>`<li><span>${esc(p.name)}</span><span>信者 ${p.score}人 <span class="bread">${"🍞".repeat(p.score)}</span></span></li>`).join("");
-  $("fLog").innerHTML = G.log.map(l=>`<div class="oracle" style="font-size:16px;padding:12px"><span class="sub" style="font-weight:400;display:block;font-size:12px">お悩み「${esc(l.topic)}」</span>「${esc(l.text)}」<span class="who">— 教祖 ${esc(l.name)}</span></div>`).join("");
-  show("sFinal");
-}
-$("againBtn").onclick=()=>{ renderSetup(); show("sTitle"); };
-
-renderSetup();
 </script>
 </body>
 </html>
