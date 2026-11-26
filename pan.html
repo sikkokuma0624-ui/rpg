@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>パン教祖爆誕</title>
+<meta name="description" content="迷える信者のお悩みに、パンの神託で答えよ。カードを並べて神託をつくるゲーム。">
+<meta property="og:title" content="パン教祖爆誕">
+<meta property="og:description" content="迷える信者のお悩みに、パンの神託で答えよ。">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@700;800&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
@@ -198,9 +203,169 @@ button{font:inherit;border:none;cursor:pointer;color:inherit}
 @keyframes pop{from{transform:scale(.4) rotate(-6deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
 .seal.stampin{animation:stamp .5s .6s both cubic-bezier(.3,1.6,.5,1)}
 @keyframes stamp{from{transform:scale(2.4) rotate(10deg);opacity:0}to{transform:scale(1) rotate(-12deg);opacity:1}}
+
+/* Refined materials and candlelit atmosphere — CSS-only presentation layer. */
+:root{--paper:#f6ecd5;--paper2:#e8d5ae;--ink:#382719;--sub:#80684c;--gold:#d6b66b;--gold-d:#9c7737;--wine:#702333;--wine-d:#36121d}
+html{background:#24170f;overflow-x:clip}
+body{
+  padding:20px 20px calc(30px + env(safe-area-inset-bottom));
+  background:
+    radial-gradient(ellipse at 50% 0,rgba(236,183,101,.17),transparent 58%),
+    radial-gradient(ellipse at 50% 100%,rgba(12,6,4,.65),transparent 75%),
+    repeating-linear-gradient(90deg,transparent 0 138px,rgba(15,7,3,.4) 138px 140px,rgba(242,205,151,.035) 140px 141px),
+    repeating-linear-gradient(91deg,rgba(12,6,2,.09) 0 1px,transparent 1px 6px,rgba(230,179,117,.035) 6px 8px,transparent 8px 19px),
+    linear-gradient(100deg,#38251a,#503422 35%,#3b281c 65%,#49301f);
+  -webkit-font-smoothing:antialiased;
+}
+section{position:relative;min-width:0}
+button{touch-action:manipulation}
+button:focus-visible,summary:focus-visible{outline:2px solid #ffdf91;outline-offset:5px}
+.paper{
+  border:1px solid rgba(128,91,44,.25);border-radius:8px;
+  background:
+    repeating-linear-gradient(2deg,rgba(103,72,29,.025) 0 1px,transparent 1px 4px),
+    radial-gradient(ellipse at 0 0,rgba(255,255,255,.7),transparent 60%),
+    radial-gradient(ellipse at 100% 100%,rgba(170,121,52,.16),transparent 65%),
+    linear-gradient(120deg,#f8efd9,#edddbb);
+  box-shadow:inset 0 0 28px rgba(140,94,34,.1),inset 0 1px 0 #fff8e7,0 1px 0 #c7af80,0 3px 0 #a88c5f,0 12px 24px #160b0766;
+}
+#sTitle{isolation:isolate;padding-top:12px}
+#sTitle::before,#sTitle::after{
+  content:"";position:absolute;inset:0 0 32%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(circle at 12% 24%,#fff0c0 0 1.5px,#f7d99466 2.5px,transparent 6px),
+    radial-gradient(circle at 83% 12%,#fff0c0 0 2px,#f7d99455 3px,transparent 8px),
+    radial-gradient(circle at 92% 55%,#f2d58c 0 1.5px,#d6b66b55 2.5px,transparent 6px),
+    radial-gradient(circle at 20% 72%,#fff0c0 0 2px,#e8c87d55 3.5px,transparent 9px),
+    radial-gradient(circle at 69% 84%,#f2d58c 0 1.5px,#e8c87d44 2.5px,transparent 6px),
+    radial-gradient(circle at 40% 8%,#fff0c0 0 1px,transparent 4px),
+    radial-gradient(circle at 58% 46%,#f2d58c 0 1px,transparent 4px);
+  animation:gold-drift 9s ease-in-out infinite alternate;
+}
+#sTitle::after{inset:10% 8% 22%;opacity:.45;animation-delay:-5s;animation-duration:13s;transform:rotate(18deg)}
+.emblem{margin:22px auto 20px;width:184px;height:184px}
+.emblem::before{opacity:.45;inset:-36px;animation-duration:65s}
+.emblem .ring{
+  background:radial-gradient(circle at 34% 22%,#9a4a50,#641d2c 54%,#35121d);
+  box-shadow:0 0 0 2px #f0d393,0 0 0 5px #8d6830,0 0 0 7px #d9b76d,0 0 0 9px #2b1b12,0 16px 28px #10080599,inset 0 2px 3px #f1bb8a33,inset 0 -8px 18px #1e080b88;
+}
+.emblem .ring::after{border:1px dashed #e7c88d88;inset:10px}
+.emblem .bread{font-size:72px;filter:drop-shadow(0 8px 6px #17090988) drop-shadow(0 0 18px #e6b45855);animation-duration:5s}
+.title{
+  font-size:clamp(30px,8.8vw,44px);letter-spacing:.07em;line-height:1.45;margin:10px -4px 0;
+  background-image:linear-gradient(112deg,#a4813c 0%,#e8c779 22%,#fff2bd 38%,#bb9147 44%,#f2d68d 48%,#d3ac5e 70%,#fff0b7 90%,#ae863f);
+  filter:drop-shadow(0 1px 0 #301c0c) drop-shadow(0 4px 8px #14090688);
+}
+.tagline{font-size:13px;letter-spacing:.18em;color:#ddc9a4;line-height:1.9;margin:10px 0 28px}
+.rules{margin-top:28px;padding:17px 18px;font-size:13px;transform:rotate(-.4deg)}
+.rules summary{font-size:15px;letter-spacing:.08em}
+.rules ol{line-height:1.95;margin-top:12px}
+.btn{
+  position:relative;isolation:isolate;overflow:hidden;min-height:56px;border-radius:10px;padding:16px 12px;
+  font-size:18px;letter-spacing:.16em;color:#f9e5b2;border-color:#bc9857;
+  background:radial-gradient(ellipse at 50% 0,#b2636b55,transparent 70%),linear-gradient(#873446,#681d2d 70%,#501625);
+  box-shadow:inset 0 1px 0 #ffdfb855,inset 0 -1px 0 #24081088,0 4px 0 #36121d,0 9px 20px #14090666;
+  text-shadow:0 1px 2px #290911;transition:transform .18s,box-shadow .18s,filter .18s;
+}
+.btn::before{content:"";position:absolute;inset:4px;border:1px solid #ebc77d33;border-radius:6px;pointer-events:none}
+.btn::after{content:"";position:absolute;inset:-70% -50%;pointer-events:none;background:linear-gradient(110deg,transparent 40%,#fff1c829 50%,transparent 60%);transform:translateX(-70%);animation:button-lustre 7s ease-in-out infinite}
+.btn:disabled::after{animation:none;opacity:0}
+.btn.wood{background:linear-gradient(#d6b47f,#b58b55);border-color:#c7a56b;color:#3e2a18;font-size:15px;box-shadow:inset 0 1px 0 #ffedd277,0 4px 0 #654321,0 9px 18px #14090655}
+.topic{padding:18px 17px 16px;margin:10px 4px 24px;transform:rotate(-.7deg)}
+.topic small{font-size:10px;letter-spacing:.2em;margin-bottom:7px}
+.topic span{font-size:18px;overflow-wrap:anywhere}
+.topic::before{width:14px;height:14px;top:-7px;margin-left:-7px;background:radial-gradient(circle at 30% 25%,#e3c88a,#af8341 45%,#694521 80%);box-shadow:inset 0 1px 1px #fff1c9aa,0 3px 4px #24100766}
+.altar{
+  padding:18px 12px 14px;border-radius:12px;
+  background:repeating-linear-gradient(90deg,#ffffff02 0 1px,transparent 1px 3px),radial-gradient(ellipse at 50% 0,#9a4354,#622132 60%,#421724);
+  box-shadow:0 0 0 1px #e5c580,0 0 0 4px #785527,0 0 0 5px #bb9452,0 12px 25px #14070888,inset 0 3px 18px #27091388;
+}
+.altar::before{border:1px solid #e8c68140;inset:6px;border-radius:7px}
+.altar::after{
+  content:"";position:absolute;inset:-20px -8px;pointer-events:none;border-radius:20px;
+  background:radial-gradient(ellipse at 2% 20%,#ffd17c26,transparent 37%),radial-gradient(ellipse at 98% 24%,#ffc77524,transparent 37%);
+  animation:candle-glow 4s ease-in-out infinite alternate;
+}
+.altar-title{top:-11px;border:1px solid #e8c985;font-size:11px;letter-spacing:.25em;padding:4px 15px;background:linear-gradient(#f4dfac,#c59c53);box-shadow:0 2px 5px #24100766}
+.board{min-height:96px;gap:9px 7px}
+.board.empty::before{font-size:12px;line-height:1.9;padding:10px;color:#e9cda78c}
+.preview{font-size:16px;line-height:1.85;border-color:#e4c68b33;padding-top:11px;overflow-wrap:anywhere}
+.chip,.token{max-width:100%;overflow-wrap:anywhere;transition:transform .18s,box-shadow .18s,filter .18s}
+.chip{border-radius:5px;font-size:14px;background:linear-gradient(120deg,#fffaeb,#e9d8b4);box-shadow:inset 0 1px 0 #fffdf4,0 2px 0 #bca477,0 5px 9px #210b1266}
+.chip.sel{box-shadow:0 0 0 2px #f7d88a,0 0 18px #efc56844,0 8px 12px #210b1277}
+.token{font-size:14px;padding:8px 12px;background:radial-gradient(ellipse at 35% 0,#fff0bd,#d9b76e 58%,#ad8038);border-color:#9e7a3f;box-shadow:inset 0 1px 0 #fff4d8aa,inset 0 -2px 3px #77521d44,0 2px 0 #71501e,0 4px 7px #180b0755}
+.token.holy{background:radial-gradient(ellipse at 35% 0,#b65e69,#7b293d 58%,#4e1728);border-color:#c09357;box-shadow:inset 0 1px 0 #ffe1ba55,0 2px 0 #34101c,0 4px 8px #180b0766}
+.tools{gap:8px;margin-top:17px}
+.tools button{min-width:0;min-height:40px;font-size:12px;border-radius:6px;background:linear-gradient(#d9bc8e,#b38a55);border-color:#ac8551;transition:transform .15s,filter .15s}
+.label{margin:24px 2px 12px;font-size:12px;color:#e7d2aa;letter-spacing:.18em}
+.label::before{content:"✦";color:#b99859;font-size:9px;margin-right:7px}
+.link{font-size:11px;text-underline-offset:4px;color:#d8b977}
+.hand{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 10px;padding:1px 2px 3px}
+.card{
+  min-width:0;min-height:106px;padding:27px 10px 17px;border-radius:8px;font-family:var(--mincho);font-size:14px;line-height:1.55;
+  background:linear-gradient(115deg,#ffffff88,transparent 48%,#c2995020),repeating-linear-gradient(0deg,#916b2905 0 1px,transparent 1px 3px),linear-gradient(145deg,#fff8e7,#ebdaba);
+  box-shadow:inset 0 1px 0 #fffdf3,0 1px 0 #e5d6b2,0 2px 0 #cbb78b,0 3px 0 #ae9464,0 8px 14px #180c0866;
+  transition:transform .22s cubic-bezier(.2,.7,.3,1),box-shadow .22s,filter .22s;
+}
+.card::before{border-width:1px;opacity:.55;border-radius:4px;background:linear-gradient(115deg,transparent 35%,#fff9e555 49%,transparent 63%);background-size:250% 100%;background-position:100% 0;transition:background-position .6s,opacity .2s}
+.card::after{content:"✦";font-size:8px;opacity:.6}
+.card .kind{font-family:var(--maru);font-size:9px;letter-spacing:.06em;padding:3px 7px;border:1px solid #fff5d944;border-radius:3px;text-shadow:0 1px 1px #0004}
+.card .stamp{right:-3px;bottom:-4px;font-size:10px;background:#7c2938;border:1px solid #efd6a1;color:#f6e2b4;box-shadow:0 2px 5px #29101366}
+.conns{gap:10px 8px;padding-bottom:4px}
+#submitBtn{margin-top:24px}
+.reveal-head{font-size:19px;letter-spacing:.38em;margin:28px 0 8px;color:#e4c786;text-shadow:0 2px 4px #1d0e08}
+.scroll{margin:28px 7px 24px;padding:34px 20px 76px;border-radius:3px;background:radial-gradient(ellipse at 50% 0,#b58b4333,transparent 23%),radial-gradient(ellipse at 50% 100%,#97612633,transparent 26%),repeating-linear-gradient(3deg,#8c662207 0 1px,transparent 1px 4px),linear-gradient(90deg,#deca9f,#f9f0d9 12%,#f4e8ca 86%,#deca9f);box-shadow:inset 0 0 22px #a67a3233,0 14px 28px #170c0877}
+.scroll::before,.scroll::after{height:17px;border:1px solid #95703a;background:linear-gradient(#775028,#cba168 20%,#efdbab 40%,#c89b5e 64%,#79502b);box-shadow:inset 0 1px 0 #ffedc588,0 4px 8px #180c0866}
+.scroll .q{font-size:11px;line-height:1.9;overflow-wrap:anywhere}
+.scroll .oracle{font-size:clamp(21px,6vw,28px);line-height:1.9;margin:18px 0 16px;overflow-wrap:anywhere;text-shadow:0 1px 0 #fff9e7}
+.scroll .who{font-size:12px;letter-spacing:.18em}
+.seal{right:17px;bottom:12px;width:52px;height:52px;font-size:20px;color:#e7c18e;border:1px solid #501628;background:radial-gradient(circle at 30% 22%,#bc6570,#7a293c 52%,#491424 85%);box-shadow:inset 0 2px 3px #ffb8a655,inset 0 -3px 5px #23081299,0 3px 0 #3f1321,0 6px 9px #26100b66}
+.seal::before{border-color:#edc99477;inset:6px}
+#dealOverlay{overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#c795444d,#150b08df)}
+#dealOverlay .msg{font-size:clamp(18px,5vw,24px);letter-spacing:.16em;color:#f4dfac;text-shadow:0 0 18px #d7a94e99}
+@media (hover:hover) and (pointer:fine){
+  .btn:enabled:hover{filter:brightness(1.1);transform:translateY(-2px)}
+  .card:enabled:hover{transform:rotate(0deg) translateY(-5px);box-shadow:0 0 0 1px #ebcc88,0 3px 0 #bca374,0 12px 20px #180c0880,0 0 20px #f7d68c22}
+  .card:enabled:hover::before{background-position:0 0;opacity:.9}
+  .token:hover,.chip:hover{filter:brightness(1.08)}
+  .tools button:enabled:hover{filter:brightness(1.12)}
+}
+.card:active:not(:disabled){transform:rotate(0deg) translateY(2px);filter:brightness(1.06)}
+@keyframes gold-drift{from{transform:translateY(8px);opacity:.2}to{transform:translateY(-14px);opacity:.7}}
+@keyframes candle-glow{0%,100%{opacity:.45}35%{opacity:.85}43%{opacity:.6}70%{opacity:1}}
+@keyframes button-lustre{0%,65%{transform:translateX(-70%)}90%,100%{transform:translateX(70%)}}
+@media(max-width:380px){body{padding-left:16px;padding-right:16px}.tagline{letter-spacing:.12em}.card{padding-left:8px;padding-right:8px;font-size:13px}.tools{gap:6px}.token{font-size:13px;padding:8px 11px}}
+/* ===== 効果音トグル ===== */
+.sound-btn{position:fixed;z-index:95;top:calc(10px + env(safe-area-inset-top));right:max(10px,calc(50vw - 270px));width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:#3e2a18;
+  background:radial-gradient(ellipse at 40% 20%,#fff0bd,#d9b76e 58%,#ad8038);border:1px solid #9e7a3f;
+  box-shadow:inset 0 1px 0 #fff4d8aa,0 2px 0 #71501e,0 5px 10px #180b0777}
+.sound-btn svg{width:20px;height:20px}
+.sound-btn .off{display:none}
+.sound-btn.muted{filter:saturate(.3) brightness(.85)}
+.sound-btn.muted .on{display:none}.sound-btn.muted .off{display:block}
+/* ===== X ポスト ===== */
+.btn.share{display:flex;align-items:center;justify-content:center;gap:10px;color:#f4dfac;border-color:#a88a52;
+  background:radial-gradient(ellipse at 50% 0,#5a4a3a66,transparent 70%),linear-gradient(#2b221c,#15100c 70%,#0c0907);
+  box-shadow:inset 0 1px 0 #ffe9b833,inset 0 -1px 0 #0008,0 4px 0 #050302,0 9px 20px #14090666;text-shadow:0 1px 2px #000}
+.btn.share svg{width:18px;height:18px;fill:currentColor;flex:none}
+.shared-note{text-align:center;margin:20px 0 -14px;font-family:var(--mincho);font-size:12px;letter-spacing:.2em;color:#d8b977;text-shadow:0 1px 2px #000}
+.shared-note::before,.shared-note::after{content:"";display:inline-block;width:26px;height:1px;margin:0 10px;vertical-align:middle;background:linear-gradient(90deg,transparent,#d8b977)}
+.shared-note::after{transform:scaleX(-1)}
+.share-hint{text-align:center;font-size:11px;color:#cdb68d;margin:8px 0 0;line-height:1.7}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  #sTitle::before,#sTitle::after{opacity:.4;transform:none}
+  .btn::after{display:none}
+}
 </style>
 </head>
 <body>
+
+<button class="sound-btn" id="soundBtn" aria-label="効果音のオン・オフ" aria-pressed="true">
+  <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+  <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="m16 9 6 6M22 9l-6 6"/></svg>
+</button>
 
 <!-- タイトル -->
 <section id="sTitle">
@@ -240,6 +405,7 @@ button{font:inherit;border:none;cursor:pointer;color:inherit}
 
 <!-- 発表 -->
 <section id="sReveal" class="hidden">
+  <p class="shared-note hidden" id="sharedNote">とある教祖から神託が届いた</p>
   <div class="reveal-head">神 託</div>
   <div class="scroll paper pop" id="scroll">
     <div class="q" id="rTopic"></div>
@@ -247,6 +413,7 @@ button{font:inherit;border:none;cursor:pointer;color:inherit}
     <div class="who">— パン教祖</div>
     <div class="seal stampin" id="seal">麦</div>
   </div>
+  <button class="btn share" id="shareBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>神託をポストする</button>
   <button class="btn" id="againBtn">次の信者を救う</button>
   <button class="btn wood" id="titleBtn">タイトルへ</button>
 </section>
@@ -285,6 +452,75 @@ const joinText = toks => toks.map(t=>t.text).join("");
 const wait = ms => new Promise(r=>setTimeout(r,ms));
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+// ===== 効果音（Web Audio で合成。音声ファイル不要） =====
+const SFX = (()=>{
+  let ctx=null, out=null, noiseBuf=null, muted=false;
+  try{ muted = localStorage.getItem("panSfxMute")==="1"; }catch(e){}
+  function ac(){
+    if(!ctx){
+      const C = window.AudioContext||window.webkitAudioContext; if(!C) return null;
+      ctx = new C();
+      const comp = ctx.createDynamicsCompressor(); comp.connect(ctx.destination);
+      out = ctx.createGain(); out.gain.value = .8; out.connect(comp);
+      noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+      const d = noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+    }
+    if(ctx.state==="suspended") ctx.resume();
+    return ctx;
+  }
+  function env(g,t,vol,attack,dur){
+    g.gain.setValueAtTime(.0001,t);
+    g.gain.exponentialRampToValueAtTime(vol,t+attack);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  }
+  function tone({f=440,f2=0,type="sine",dur=.15,vol=.2,at=0,attack=.005,lp=0}){
+    const c=ac(); if(!c||muted) return;
+    const t=c.currentTime+at, o=c.createOscillator(), g=c.createGain();
+    o.type=type; o.frequency.setValueAtTime(f,t); if(f2) o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+    env(g,t,vol,attack,dur);
+    let node=o;
+    if(lp){ const fl=c.createBiquadFilter(); fl.type="lowpass"; fl.frequency.value=lp; o.connect(fl); node=fl; }
+    node.connect(g).connect(out); o.start(t); o.stop(t+dur+.05);
+  }
+  function noise({dur=.2,vol=.2,at=0,attack=.005,type="bandpass",f=1500,f2=0,q=1}){
+    const c=ac(); if(!c||muted) return;
+    const t=c.currentTime+at, s=c.createBufferSource(), fl=c.createBiquadFilter(), g=c.createGain();
+    s.buffer=noiseBuf; s.loop=true;
+    fl.type=type; fl.Q.value=q; fl.frequency.setValueAtTime(f,t); if(f2) fl.frequency.exponentialRampToValueAtTime(f2,t+dur);
+    env(g,t,vol,attack,dur);
+    s.connect(fl).connect(g).connect(out); s.start(t); s.stop(t+dur+.05);
+  }
+  const N = n => 440*Math.pow(2,(n-69)/12); // MIDI→Hz
+  return {
+    get muted(){ return muted; },
+    setMuted(m){ muted=m; try{ localStorage.setItem("panSfxMute", m?"1":"0"); }catch(e){} },
+    unlock(){ ac(); },
+    running(){ return !!ctx && ctx.state==="running"; },
+    tap(){ tone({f:520,f2:240,type:"triangle",dur:.09,vol:.22}); noise({dur:.04,vol:.08,type:"highpass",f:3000}); },
+    tick(){ tone({f:1100,f2:900,type:"triangle",dur:.05,vol:.1}); },
+    token(){ tone({f:1568,dur:.18,vol:.08}); tone({f:2350,dur:.12,vol:.04}); tone({f:780,f2:700,type:"triangle",dur:.06,vol:.1}); },
+    card(){ noise({dur:.09,vol:.28,f:2600,f2:1400,q:.8}); tone({f:300,f2:180,type:"triangle",dur:.07,vol:.12}); },
+    whoosh(){ noise({dur:.42,vol:.18,attack:.12,f:350,f2:2400,q:1.2}); },
+    land(){ noise({dur:.06,vol:.22,f:2200,q:.7}); tone({f:N(84),dur:.25,vol:.05}); },
+    chime(){ [72,76,79,84,88].forEach((n,i)=>tone({f:N(n),dur:.6,vol:.09,at:i*.07,attack:.01})); },
+    remove(){ tone({f:420,f2:160,type:"triangle",dur:.16,vol:.16}); },
+    clear(){ noise({dur:.3,vol:.15,f:2400,f2:300,q:.9}); tone({f:360,f2:120,type:"triangle",dur:.25,vol:.12}); },
+    deny(){ tone({f:180,type:"square",dur:.12,vol:.05,lp:900}); },
+    reveal(){
+      // 聖歌隊っぽい和音 → 鐘 → 封蝋のスタンプ
+      [48,55,60,64,67,72].forEach(n=>tone({f:N(n),type:"sawtooth",dur:2.4,vol:.035,attack:.35,lp:1600}));
+      [84,91,96].forEach((n,i)=>tone({f:N(n),dur:1.6,vol:.07,at:.15+i*.12,attack:.01}));
+      tone({f:150,f2:45,dur:.35,vol:.6,at:.95}); noise({dur:.18,vol:.3,at:.95,type:"lowpass",f:900});
+    },
+    share(){ [79,83,86,91].forEach((n,i)=>tone({f:N(n),dur:.35,vol:.07,at:i*.05})); },
+  };
+})();
+function syncSoundBtn(){ const b=$("soundBtn"); b.classList.toggle("muted",SFX.muted); b.setAttribute("aria-pressed",String(!SFX.muted)); }
+$("soundBtn").onclick=()=>{ SFX.setMuted(!SFX.muted); syncSoundBtn(); SFX.tap(); };
+syncSoundBtn();
+// 最初の操作で AudioContext を起こす（iOS 対策）
+addEventListener("pointerdown",()=>SFX.unlock(),{once:true,capture:true});
+
 // ===== 状態 =====
 let G = null, deckPile = [], topicPile = [];
 function refill(){ const out=[]; for(const k in DECK) DECK[k].forEach(t=>out.push({text:t,kind:k})); deckPile = shuffle(out); }
@@ -298,15 +534,17 @@ function draw(n){
 function nextTopic(){ if(!topicPile.length) topicPile = shuffle(TOPICS); return topicPile.pop(); }
 
 // ===== 開始 =====
+function clearShareHash(){ if(location.hash) history.replaceState(null,"",location.pathname+location.search); }
 function startGame(){
-  G = { topic:nextTopic(), hand:draw(6), sentence:[], sel:-1, redeals:1, dealing:true };
+  SFX.tap(); clearShareHash();
+  G ={ topic:nextTopic(), hand:draw(6), sentence:[], sel:-1, redeals:1, dealing:true };
   $("cTopic").textContent = "「"+G.topic+"」";
   renderConns(); renderCompose(); show("sCompose");
   dealAnimation();
 }
 $("startBtn").onclick = startGame;
 $("againBtn").onclick = startGame;
-$("titleBtn").onclick = ()=>show("sTitle");
+$("titleBtn").onclick = ()=>{ SFX.tap(); clearShareHash(); show("sTitle"); };
 
 // ===== 配る演出 =====
 async function dealAnimation(){
@@ -328,6 +566,7 @@ async function dealOne(el, c, last){
   document.body.appendChild(fly);
   const sx = innerWidth/2 - (r.left+r.width/2), sy = innerHeight*0.3 - (r.top+r.height/2);
   const spin = (Math.random()<.5?-1:1)*(360+Math.random()*180) + (+c.tilt);
+  SFX.whoosh();
   if(!reduced){
     await fly.animate([
       {transform:`translate(${sx}px,${sy-120}px) scale(.2)`,opacity:0},
@@ -339,6 +578,7 @@ async function dealOne(el, c, last){
   }
   fly.remove();
   el.classList.remove("wait"); el.classList.add("landed");
+  if(last) SFX.chime(); else SFX.land();
   if(!reduced){
     el.animate([{transform:`rotate(${c.tilt}deg) scaleX(0)`},{transform:`rotate(${c.tilt}deg) scale(1.15)`},{transform:`rotate(${c.tilt}deg) scale(1)`}],{duration:260,easing:"ease-out"});
     burst(r, KCOLOR[c.kind], last);
@@ -373,7 +613,7 @@ function burst(r, color, big){
 function renderConns(){
   const box=$("conns"); box.innerHTML="";
   CONNS.forEach(t=>{ const b=document.createElement("button"); b.className="token"+(HOLY.includes(t)?" holy":""); b.textContent=t;
-    b.onclick=()=>{ if(!G.dealing) addToken({text:t,kind:"conn"}); }; box.appendChild(b); });
+    b.onclick=()=>{ if(!G.dealing){ SFX.token(); addToken({text:t,kind:"conn"}); } }; box.appendChild(b); });
 }
 function addToken(tok){
   if(G.sel>=0){ G.sentence.splice(G.sel+1,0,tok); G.sel++; } else G.sentence.push(tok);
@@ -386,7 +626,7 @@ function renderCompose(){
     b.style.setProperty("--r",c.tilt+"deg");
     b.innerHTML=`<span class="kind" data-i="${KICON[c.kind]}">${K[c.kind]}</span><span class="txt">${esc(c.text)}</span><span class="stamp">奉納</span>`;
     b.disabled=c.used||G.dealing;
-    b.onclick=()=>{ c.used=true; addToken({text:c.text,kind:c.kind,cid:c.id}); };
+    b.onclick=()=>{ SFX.card(); c.used=true; addToken({text:c.text,kind:c.kind,cid:c.id}); };
     hand.appendChild(b);
   });
   const board=$("board"); board.innerHTML="";
@@ -395,7 +635,7 @@ function renderCompose(){
     const b=document.createElement("button");
     b.className=(t.kind==="conn"?"token"+(HOLY.includes(t.text)?" holy":""):"chip k-"+t.kind)+(i===G.sel?" sel":"");
     b.textContent=t.text;
-    b.onclick=()=>{ G.sel = (G.sel===i?-1:i); renderCompose(); };
+    b.onclick=()=>{ SFX.tick(); G.sel = (G.sel===i?-1:i); renderCompose(); };
     board.appendChild(b);
   });
   $("preview").textContent = G.sentence.length ? "「"+joinText(G.sentence)+"」" : "";
@@ -406,16 +646,17 @@ function renderCompose(){
   $("submitBtn").disabled = G.dealing || !G.sentence.some(t=>t.kind!=="conn");
   const r=$("redeal"); r.textContent = G.redeals?"引き直す（残り1回）":"引き直し済み"; r.disabled=!G.redeals||G.dealing;
 }
-function move(d){ const i=G.sel,j=i+d; [G.sentence[i],G.sentence[j]]=[G.sentence[j],G.sentence[i]]; G.sel=j; renderCompose(); }
+function move(d){ SFX.tick(); const i=G.sel,j=i+d; [G.sentence[i],G.sentence[j]]=[G.sentence[j],G.sentence[i]]; G.sel=j; renderCompose(); }
 $("tLeft").onclick=()=>move(-1);
 $("tRight").onclick=()=>move(1);
 $("tDel").onclick=()=>{
+  SFX.remove();
   const t=G.sentence.splice(G.sel,1)[0];
   if(t.cid){ const c=G.hand.find(c=>c.id===t.cid); if(c) c.used=false; }
   G.sel = Math.min(G.sel, G.sentence.length-1);
   renderCompose();
 };
-$("tClear").onclick=()=>{ G.sentence=[]; G.sel=-1; G.hand.forEach(c=>c.used=false); renderCompose(); };
+$("tClear").onclick=()=>{ SFX.clear(); G.sentence=[]; G.sel=-1; G.hand.forEach(c=>c.used=false); renderCompose(); };
 $("redeal").onclick=()=>{
   if(!G.redeals||G.dealing) return;
   if(G.sentence.length && !confirm("並べた神託は消えます。引き直しますか？")) return;
@@ -424,13 +665,45 @@ $("redeal").onclick=()=>{
 };
 
 // ===== 発表 =====
-$("submitBtn").onclick=()=>{
-  $("rTopic").textContent="お悩み「"+G.topic+"」への答え";
-  $("oracle").textContent="「"+joinText(G.sentence)+"」";
+let RESULT = null; // 直近の {t:お悩み, o:神託}
+function showReveal(r, shared){
+  RESULT = r;
+  $("rTopic").textContent="お悩み「"+r.t+"」への答え";
+  $("oracle").textContent="「"+r.o+"」";
+  $("sharedNote").classList.toggle("hidden", !shared);
+  $("shareBtn").classList.toggle("hidden", shared);
+  $("againBtn").textContent = shared ? "自分も神託を授ける" : "次の信者を救う";
   show("sReveal");
   for(const id of ["scroll","seal"]){ const o=$(id); const c=id==="scroll"?"pop":"stampin"; o.classList.remove(c); void o.offsetWidth; o.classList.add(c); }
   if(!reduced) setTimeout(()=>burst($("scroll").getBoundingClientRect(),"#ffcc33",true),300);
+  if(!shared) SFX.reveal(); // 共有リンクを開いた直後はまだ操作がなく音を鳴らせない
+}
+$("submitBtn").onclick=()=>showReveal({t:G.topic, o:joinText(G.sentence)}, false);
+
+// ===== X にポスト / 共有リンク =====
+// 結果は URL の #r=… に UTF-8 JSON を base64url で埋め込む（サーバー不要）
+const b64e = s => { let b=""; new TextEncoder().encode(s).forEach(x=>b+=String.fromCharCode(x)); return btoa(b).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); };
+const b64d = s => { s=s.replace(/-/g,"+").replace(/_/g,"/"); while(s.length%4) s+="="; return new TextDecoder().decode(Uint8Array.from(atob(s),c=>c.charCodeAt(0))); };
+const clip = (s,n) => [...s].length>n ? [...s].slice(0,n).join("")+"…" : s;
+function shareUrl(r){ return location.href.split("#")[0] + "#r=" + b64e(JSON.stringify({t:r.t,o:r.o})); }
+$("shareBtn").onclick=()=>{
+  if(!RESULT) return;
+  SFX.share();
+  const text = `迷える信者のお悩み「${clip(RESULT.t,30)}」\nパン教祖の神託は――\n「${clip(RESULT.o,70)}」\n\n#パン教祖爆誕`;
+  const intent = "https://x.com/intent/tweet?text="+encodeURIComponent(text)+"&url="+encodeURIComponent(shareUrl(RESULT));
+  window.open(intent, "_blank", "noopener");
 };
+function readShared(){
+  const m = location.hash.match(/^#r=([A-Za-z0-9_-]{4,3000})$/); if(!m) return null;
+  try{
+    const r = JSON.parse(b64d(m[1]));
+    if(typeof r.t!=="string" || typeof r.o!=="string" || !r.o.trim()) return null;
+    return { t: clip(r.t,60), o: clip(r.o,300) };
+  }catch(e){ return null; }
+}
+function openShared(){ const r=readShared(); if(r) showReveal(r, true); }
+openShared();
+addEventListener("hashchange", openShared);
 </script>
 </body>
 </html>
