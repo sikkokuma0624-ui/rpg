@@ -4,95 +4,217 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>パン教祖爆誕</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@700;800&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#fbf4e6; --bg2:#f3e4c6; --ink:#3b2a1a; --sub:#8a6a48; --crust:#b8732e; --crust-d:#8f531a;
-  --card:#fffaf0; --line:#e2cda6; --gold:#e0a526;
-  --k-noun:#a8642a; --k-sim:#8a5bb5; --k-phr:#3f8a5a; --k-verb:#c0483a; --k-conn:#6b7c8f;
+  --wood:#5a3820; --paper:#f7edd5; --paper2:#efdfba; --ink:#3a2614; --sub:#8a6a48;
+  --gold:#e2b24a; --gold-d:#a67a22; --wine:#7a1f2b; --wine-d:#4e1018;
+  --k-noun:#9a5b22; --k-sim:#6d3fa0; --k-phr:#2f7a4c; --k-verb:#a8322a;
+  --mincho:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --maru:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
-body{font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif;background:radial-gradient(circle at 50% -10%,#fff7e3 0,var(--bg) 45%,var(--bg2) 100%) fixed;color:var(--ink);min-height:100vh;padding:12px 16px calc(20px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;overflow-x:hidden}
-h1{font-size:26px;text-align:center;margin:18px 0 4px;letter-spacing:.06em}
-h2{font-size:18px;margin:8px 0}
-.sub{color:var(--sub);font-size:13px}
-.center{text-align:center}
+html{background:#3e2513}
+body{
+  font-family:var(--maru);color:var(--ink);min-height:100vh;
+  padding:14px 16px calc(24px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto;overflow-x:hidden;
+  /* 木のテーブル */
+  background:
+    radial-gradient(ellipse at 50% -5%,rgba(255,196,110,.28),transparent 55%),
+    radial-gradient(ellipse at 50% 115%,rgba(0,0,0,.55),transparent 60%),
+    repeating-linear-gradient(90deg,transparent 0 138px,rgba(0,0,0,.38) 138px 140px,rgba(255,220,170,.06) 140px 141px),
+    repeating-linear-gradient(92deg,rgba(0,0,0,.07) 0 2px,transparent 2px 7px,rgba(255,230,190,.035) 7px 9px,transparent 9px 17px),
+    repeating-linear-gradient(88deg,rgba(0,0,0,.05) 0 1px,transparent 1px 29px),
+    linear-gradient(90deg,#5b3920,#6a442a 30%,#58361e 55%,#6b452b 80%,#5a3820);
+  background-attachment:fixed;
+}
 .hidden{display:none!important}
-button{font:inherit;border:none;cursor:pointer}
-.btn{display:block;width:100%;padding:14px;border-radius:14px;background:var(--crust);color:#fff;font-size:17px;font-weight:700;box-shadow:0 3px 0 var(--crust-d);margin-top:10px}
-.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--crust-d)}
-.btn.ghost{background:var(--card);color:var(--crust-d);box-shadow:0 3px 0 var(--line);border:1px solid var(--line)}
-.btn:disabled{opacity:.45}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 2px 8px rgba(120,80,30,.08)}
-.logo{font-size:72px;text-align:center;margin-top:30px;filter:drop-shadow(0 0 16px rgba(240,180,40,.7));animation:float 2.4s ease-in-out infinite}
+button{font:inherit;border:none;cursor:pointer;color:inherit}
+.center{text-align:center}
+.on-wood{color:#f3dfb8;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 
-.topic{background:#fff;border:2px dashed var(--crust);border-radius:14px;padding:12px;margin:8px 0;font-size:16px}
-.topic small{display:block;color:var(--sub);font-size:12px;margin-bottom:2px}
+/* 紙 */
+.paper{
+  background:
+    radial-gradient(circle at 15% 20%,rgba(190,140,60,.10),transparent 40%),
+    radial-gradient(circle at 85% 80%,rgba(160,110,40,.12),transparent 45%),
+    linear-gradient(135deg,#fbf3df,#f1e2bf);
+  border-radius:6px;
+  box-shadow:0 1px 0 #d9c497,0 2px 0 #cdb685,0 10px 18px rgba(0,0,0,.45),inset 0 0 30px rgba(150,100,30,.15);
+}
 
-/* 神託ボード */
-.board{min-height:96px;background:linear-gradient(#fffdf7,#fff6e2);border:2px solid var(--gold);border-radius:16px;padding:10px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;position:relative}
-.board.empty::before{content:"下のカードをタップして神託を組み立てよ";color:#c3a77f;font-size:13px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-.preview{font-size:15px;margin:8px 2px 0;min-height:1.4em;line-height:1.6}
-.tools{display:flex;gap:6px;margin-top:8px}
-.tools button{flex:1;padding:9px 4px;border-radius:10px;background:var(--bg2);color:var(--crust-d);font-weight:700;font-size:14px}
-.tools button:disabled{opacity:.35}
+/* ===== ボタン：封蝋のような立体ボタン ===== */
+.btn{
+  display:block;width:100%;padding:15px;margin-top:14px;border-radius:14px;
+  font-family:var(--mincho);font-size:19px;font-weight:800;letter-spacing:.12em;color:#ffe7a8;
+  background:linear-gradient(180deg,#a3313f,var(--wine) 55%,#651824);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.25),inset 0 -2px 0 rgba(0,0,0,.25),0 5px 0 var(--wine-d),0 10px 16px rgba(0,0,0,.45);
+  text-shadow:0 1px 0 #3a0a10,0 0 10px rgba(255,200,90,.45);
+  border:1px solid #c58b3d;transition:transform .08s,box-shadow .08s;
+}
+.btn:active{transform:translateY(4px);box-shadow:inset 0 2px 0 rgba(255,255,255,.2),0 1px 0 var(--wine-d),0 3px 6px rgba(0,0,0,.4)}
+.btn:disabled{filter:grayscale(.6) brightness(.8);opacity:.7}
+.btn.wood{
+  color:#4a2c14;text-shadow:0 1px 0 rgba(255,240,210,.6);font-size:16px;
+  background:linear-gradient(180deg,#e2b98a,#c9955f);border-color:#8f5f33;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.35),0 5px 0 #7a4c25,0 10px 16px rgba(0,0,0,.4);
+}
 
-/* カード */
-.chip{padding:7px 10px;border-radius:10px;font-size:15px;background:#fff;border:2px solid var(--c,var(--k-noun));color:var(--ink);line-height:1.3}
-.chip.conn{--c:var(--k-conn);border-style:dashed;padding:5px 8px}
-.chip.conn.holy{--c:var(--gold);font-weight:700;color:#8a5a00;background:#fff8dc}
-.chip.sel{background:var(--c,var(--k-noun));color:#fff;transform:translateY(-2px)}
-.hand{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px;position:relative;z-index:60}
-.card{position:relative;min-height:78px;padding:18px 6px 8px;border-radius:12px;background:var(--card);border:2px solid var(--c);box-shadow:0 3px 0 var(--c);font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3;word-break:break-all}
-.card .kind{position:absolute;top:0;left:0;right:0;font-size:10px;background:var(--c);color:#fff;border-radius:9px 9px 0 0;padding:2px 0;font-weight:400}
-.card.used{opacity:.25;box-shadow:none;transform:translateY(3px)}
+/* ===== タイトル ===== */
+.emblem{width:190px;height:190px;margin:26px auto 4px;position:relative;display:flex;align-items:center;justify-content:center}
+.emblem::before{content:"";position:absolute;inset:-30px;border-radius:50%;
+  background:repeating-conic-gradient(rgba(255,214,120,.5) 0 6deg,transparent 6deg 15deg);
+  -webkit-mask:radial-gradient(circle,#000 30%,transparent 70%);mask:radial-gradient(circle,#000 30%,transparent 70%);animation:spin 30s linear infinite}
+.emblem .ring{position:absolute;inset:14px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#7d2533,#4e1018 70%);
+  box-shadow:0 0 0 5px #d9a845,0 0 0 8px #6b4515,0 0 0 10px #e8c066,0 12px 24px rgba(0,0,0,.6),inset 0 6px 14px rgba(0,0,0,.5)}
+.emblem .ring::after{content:"";position:absolute;inset:9px;border-radius:50%;border:1.5px dashed rgba(240,200,110,.7)}
+.emblem .bread{position:relative;font-size:76px;filter:drop-shadow(0 6px 6px rgba(0,0,0,.5)) drop-shadow(0 0 14px rgba(255,200,80,.6));animation:float 3s ease-in-out infinite}
+.title{font-family:var(--mincho);font-weight:800;font-size:40px;text-align:center;margin:8px 0 0;letter-spacing:.08em;
+  background:linear-gradient(180deg,#fff4c8 0%,#f0c35a 45%,#b47a1e 55%,#f6d47c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 #4a2a0c) drop-shadow(0 4px 6px rgba(0,0,0,.6))}
+.tagline{font-family:var(--mincho);text-align:center;color:#f3dfb8;font-size:15px;letter-spacing:.2em;margin:6px 0 18px;text-shadow:0 1px 2px #000}
+.rules{padding:14px 16px;margin-top:22px;font-size:14px;transform:rotate(-.6deg)}
+.rules summary{font-family:var(--mincho);font-weight:800;font-size:16px;cursor:pointer}
+.rules ol{padding-left:1.3em;line-height:1.8;color:#5a4128;margin:8px 0 0}
+
+/* ===== お悩み：ピン留めされた手紙 ===== */
+.topic{position:relative;padding:16px 16px 14px;margin:10px 4px 18px;transform:rotate(-1.2deg)}
+.topic::before{content:"";position:absolute;top:-9px;left:50%;width:20px;height:20px;margin-left:-10px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#ff7b6b,#b3221a 60%,#6d0f0a);box-shadow:0 3px 4px rgba(0,0,0,.5)}
+.topic small{display:block;font-size:11px;color:var(--sub);letter-spacing:.15em}
+.topic span{font-family:var(--mincho);font-weight:800;font-size:19px;line-height:1.5}
+
+/* ===== 神託の祭壇（ベルベットのマット） ===== */
+.altar{position:relative;border-radius:16px;padding:14px 12px 12px;
+  background:radial-gradient(ellipse at 50% 30%,#8e2a37,#5a1520 75%);
+  box-shadow:0 0 0 3px #c99a43,0 0 0 6px #5a3a14,0 0 0 7px #e5bd63,0 12px 22px rgba(0,0,0,.55),inset 0 4px 16px rgba(0,0,0,.6)}
+.altar::before{content:"";position:absolute;inset:6px;border-radius:11px;border:1.5px dashed rgba(240,200,110,.55);pointer-events:none}
+.altar-title{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-family:var(--mincho);font-weight:800;font-size:12px;letter-spacing:.3em;
+  color:#4a2a0c;background:linear-gradient(#fbe3a0,#d9a845);padding:3px 14px;border-radius:20px;box-shadow:0 2px 4px rgba(0,0,0,.5);white-space:nowrap}
+.board{min-height:92px;display:flex;flex-wrap:wrap;gap:7px;align-content:flex-start;align-items:center;position:relative;padding:6px 2px}
+.board.empty::before{content:"手札とつなぎ言葉をタップして神託を組み立てよ";color:rgba(255,220,170,.55);font-size:13px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--mincho)}
+.preview{font-family:var(--mincho);font-weight:800;font-size:17px;line-height:1.6;color:#ffe7b0;text-shadow:0 1px 2px #000;margin-top:8px;padding:8px 6px 2px;border-top:1px solid rgba(240,200,110,.3);min-height:1.6em;text-align:center}
+
+/* 祭壇に置かれた言葉：小さなカード */
+.chip{position:relative;padding:7px 10px 6px;border-radius:6px;font-size:15px;font-weight:700;line-height:1.25;
+  background:linear-gradient(135deg,#fffaf0,#f1e3c2);color:var(--ink);border-top:3px solid var(--c,var(--k-noun));
+  box-shadow:0 1px 0 #d6c398,0 2px 0 #bfa877,0 5px 8px rgba(0,0,0,.45);transition:transform .12s}
+.chip.sel{transform:translateY(-5px) rotate(-2deg);box-shadow:0 0 0 2px #ffd65a,0 1px 0 #d6c398,0 2px 0 #bfa877,0 10px 14px rgba(0,0,0,.5)}
+/* 真鍮のトークン（つなぎ言葉） */
+.token{position:relative;padding:7px 12px;border-radius:999px;font-size:15px;font-weight:700;color:#4a300c;
+  background:radial-gradient(ellipse at 50% 20%,#fff0b8,#e7bd5c 50%,#b8862b);
+  border:1px solid #8a6420;text-shadow:0 1px 0 rgba(255,250,220,.7);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -2px 3px rgba(120,80,10,.4),0 3px 0 #7a5618,0 5px 7px rgba(0,0,0,.45);transition:transform .08s}
+.token:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 0 0 #7a5618,0 2px 3px rgba(0,0,0,.4)}
+.token.holy{color:#ffe7a8;text-shadow:0 1px 0 #3a0a10;background:radial-gradient(ellipse at 50% 20%,#d65463,#9a2232 55%,#5e1019);border-color:#3e0a12;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 3px rgba(0,0,0,.4),0 3px 0 #3e0a12,0 5px 7px rgba(0,0,0,.45),0 0 10px rgba(255,90,90,.35)}
+.token.sel{transform:translateY(-5px);box-shadow:0 0 0 2px #fff3b0,0 8px 12px rgba(0,0,0,.5)}
+
+.tools{display:flex;gap:7px;margin-top:14px}
+.tools button{flex:1;padding:9px 4px;border-radius:9px;font-weight:700;font-size:14px;color:#4a2c14;
+  background:linear-gradient(180deg,#e9c597,#c99a63);border:1px solid #8f5f33;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 3px 0 #7a4c25,0 5px 8px rgba(0,0,0,.35)}
+.tools button:active{transform:translateY(3px);box-shadow:0 0 0 #7a4c25}
+.tools button:disabled{filter:grayscale(.5);opacity:.45}
+
+.label{font-family:var(--mincho);font-weight:800;font-size:13px;letter-spacing:.15em;margin:22px 2px 8px;display:flex;justify-content:space-between;align-items:center}
+.label::before{content:"✦ "}
+.label span{flex:1}
+.link{background:none;font-family:var(--maru);font-size:12px;letter-spacing:0;color:#f3c96a;text-decoration:underline;text-shadow:0 1px 2px #000}
+.link:disabled{opacity:.45;text-decoration:none}
+
+/* ===== 手札：厚みのあるカード ===== */
+.hand{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 10px;position:relative;z-index:60;perspective:800px}
+.card{
+  position:relative;min-height:96px;padding:24px 8px 12px;border-radius:10px;
+  background:
+    radial-gradient(circle at 20% 15%,rgba(255,255,255,.8),transparent 45%),
+    linear-gradient(160deg,#fffaf0,#f2e3c3);
+  font-weight:700;font-size:15px;line-height:1.3;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;text-align:center;word-break:break-all;
+  transform:rotate(var(--r,0deg));transition:transform .15s,box-shadow .15s,filter .2s;
+  box-shadow:0 1px 0 #e3d3ae,0 2px 0 #d4c08f,0 3px 0 #c5ae7c,0 4px 0 #b39a68,0 10px 16px rgba(0,0,0,.5);
+}
+.card::before{content:"";position:absolute;inset:5px;border:1.5px solid var(--c);border-radius:6px;opacity:.75;pointer-events:none}
+.card::after{content:"✦";position:absolute;bottom:6px;right:8px;font-size:9px;color:var(--c);opacity:.8}
+.card .kind{position:absolute;top:-7px;left:50%;transform:translateX(-50%);white-space:nowrap;
+  font-size:10px;font-weight:700;letter-spacing:.1em;color:#fff;padding:3px 10px;border-radius:4px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c) 70%,#fff),var(--c));box-shadow:0 2px 3px rgba(0,0,0,.4)}
+.card .kind::before{content:attr(data-i) " "}
+.card .txt{position:relative}
+.card:active:not(:disabled){transform:rotate(var(--r,0deg)) translateY(3px)}
+.card.used{transform:rotate(var(--r,0deg)) translateY(4px) scale(.96);filter:grayscale(.7) brightness(.75);
+  box-shadow:0 1px 0 #c5ae7c,0 3px 5px rgba(0,0,0,.4)}
+.card .stamp{display:none;position:absolute;right:-6px;bottom:-6px;transform:rotate(-14deg);
+  font-family:var(--mincho);font-weight:800;font-size:12px;letter-spacing:.1em;color:#fff;background:#b3221a;border:2px solid #fff3e0;border-radius:5px;padding:1px 5px;box-shadow:0 2px 4px rgba(0,0,0,.5)}
+.card.used .stamp{display:block}
 .card.wait{visibility:hidden}
-.card.landed{animation:land .6s ease-out}
-@keyframes land{0%{box-shadow:0 0 0 0 var(--c),0 0 40px 10px #ffd65a}100%{box-shadow:0 3px 0 var(--c),0 0 0 0 transparent}}
+.card.landed{animation:land .7s ease-out}
+@keyframes land{0%{box-shadow:0 0 0 0 var(--c),0 0 46px 14px #ffd65a}100%{}}
 .k-noun{--c:var(--k-noun)} .k-sim{--c:var(--k-sim)} .k-phr{--c:var(--k-phr)} .k-verb{--c:var(--k-verb)}
-.conns{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.conns .chip{font-size:14px}
-.label{font-size:12px;color:var(--sub);margin-top:12px;display:flex;justify-content:space-between;align-items:center}
+.conns{display:flex;flex-wrap:wrap;gap:9px 7px}
 
-/* 配る演出 */
-#dealOverlay{position:fixed;inset:0;z-index:50;background:radial-gradient(circle at 50% 30%,rgba(255,220,120,.35),rgba(40,20,5,.55));display:flex;flex-direction:column;align-items:center;pointer-events:auto;opacity:0;transition:opacity .3s}
+/* ===== 配る演出 ===== */
+#dealOverlay{position:fixed;inset:0;z-index:50;background:radial-gradient(circle at 50% 30%,rgba(255,210,110,.3),rgba(20,8,2,.72));display:flex;flex-direction:column;align-items:center;opacity:0;transition:opacity .3s}
 #dealOverlay.on{opacity:1}
-#dealOverlay .msg{margin-top:12vh;color:#fff;font-weight:700;font-size:20px;letter-spacing:.15em;text-shadow:0 0 12px #ffb300,0 0 24px #ff8a00;animation:pulse 1s ease-in-out infinite}
-#dealOverlay .rays{position:absolute;left:50%;top:30%;width:520px;height:520px;margin:-260px 0 0 -260px;background:repeating-conic-gradient(rgba(255,230,150,.35) 0 8deg,transparent 8deg 20deg);border-radius:50%;-webkit-mask:radial-gradient(circle,#000 20%,transparent 70%);mask:radial-gradient(circle,#000 20%,transparent 70%);animation:spin 10s linear infinite}
+#dealOverlay .msg{margin-top:11vh;font-family:var(--mincho);font-weight:800;color:#fff3c8;font-size:24px;letter-spacing:.25em;text-shadow:0 0 12px #ffb300,0 0 28px #ff8a00;animation:pulse 1s ease-in-out infinite}
+#dealOverlay .rays{position:absolute;left:50%;top:30%;width:560px;height:560px;margin:-280px 0 0 -280px;background:repeating-conic-gradient(rgba(255,226,150,.38) 0 7deg,transparent 7deg 18deg);border-radius:50%;-webkit-mask:radial-gradient(circle,#000 18%,transparent 70%);mask:radial-gradient(circle,#000 18%,transparent 70%);animation:spin 10s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{50%{opacity:.6;transform:scale(1.05)}}
-.flyer{position:fixed;z-index:70;border-radius:12px;pointer-events:none;transform-origin:center;will-change:transform}
-.back{background:radial-gradient(circle at 50% 40%,#ffe9a8,#d4902e 60%,#7a4512);border:3px solid #ffe08a;display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;text-shadow:0 0 8px #fff3b0;box-shadow:0 0 24px rgba(255,200,60,.9)}
-.back::after{content:"";position:absolute;inset:5px;border:1px dashed rgba(255,255,255,.7);border-radius:8px}
-.spark{position:fixed;z-index:80;pointer-events:none;font-size:16px;line-height:1}
-.flash{position:fixed;inset:0;z-index:75;background:#fff6d0;pointer-events:none}
+@keyframes float{50%{transform:translateY(-6px)}}
+.flyer{position:fixed;z-index:70;border-radius:10px;pointer-events:none;will-change:transform}
+.back{
+  background:
+    radial-gradient(circle at 50% 50%,transparent 26%,rgba(0,0,0,.25) 27%,transparent 29%),
+    repeating-conic-gradient(from 0deg at 50% 50%,rgba(240,195,100,.22) 0 10deg,transparent 10deg 20deg),
+    radial-gradient(circle at 50% 40%,#9c2c3b,#5a1220 75%);
+  border:3px solid #e2b24a;display:flex;align-items:center;justify-content:center;font-size:30px;
+  box-shadow:0 0 0 2px #5a3a14,0 0 28px rgba(255,200,60,.9),0 12px 20px rgba(0,0,0,.6)}
+.back::after{content:"";position:absolute;inset:5px;border:1px solid rgba(240,200,110,.8);border-radius:6px}
+.spark{position:fixed;z-index:80;pointer-events:none;line-height:1}
+.flash{position:fixed;inset:0;z-index:75;background:#fff3c8;pointer-events:none}
 .shake{animation:shake .35s}
 @keyframes shake{20%{transform:translate(-5px,2px)}40%{transform:translate(5px,-2px)}60%{transform:translate(-3px,1px)}80%{transform:translate(3px,0)}}
 
-/* 発表 */
-.oracle{background:radial-gradient(circle at 50% 0,#fffbe9,#fff1cc);border:2px solid var(--gold);border-radius:18px;padding:22px 14px;margin:12px 0;text-align:center;font-size:21px;line-height:1.7;font-weight:700;box-shadow:0 0 0 4px var(--gold),0 0 32px rgba(224,165,38,.6)}
-.oracle .who{display:block;font-size:12px;color:var(--sub);font-weight:400;margin-top:8px}
-.halo{font-size:44px;text-align:center;animation:float 2.4s ease-in-out infinite}
-@keyframes float{50%{transform:translateY(-6px)}}
-.pop{animation:pop .7s cubic-bezier(.2,1.6,.4,1)}
-@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+/* ===== 発表：巻物 ===== */
+.reveal-head{font-family:var(--mincho);font-weight:800;text-align:center;color:#f6d47c;font-size:22px;letter-spacing:.3em;margin:22px 0 4px;text-shadow:0 2px 0 #3a1f08,0 0 16px rgba(255,190,60,.6)}
+.scroll{position:relative;margin:26px 6px 10px;padding:34px 22px 44px;text-align:center}
+.scroll::before,.scroll::after{content:"";position:absolute;left:-10px;right:-10px;height:18px;border-radius:9px;
+  background:linear-gradient(180deg,#a8743e,#e2b47a 40%,#7a4c22);box-shadow:0 4px 8px rgba(0,0,0,.5)}
+.scroll::before{top:-9px}.scroll::after{bottom:-9px}
+.scroll .q{font-size:12px;color:var(--sub);letter-spacing:.1em}
+.scroll .oracle{font-family:var(--mincho);font-weight:800;font-size:25px;line-height:1.75;margin:12px 0 4px;color:#2e1a0a}
+.scroll .who{font-family:var(--mincho);font-size:13px;color:var(--sub);letter-spacing:.2em}
+.seal{position:absolute;right:16px;bottom:10px;width:58px;height:58px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#d6483f,#9a1e18 60%,#5c0e0a);color:#ffd9c0;
+  display:flex;align-items:center;justify-content:center;font-family:var(--mincho);font-weight:800;font-size:22px;
+  box-shadow:inset 0 2px 3px rgba(255,255,255,.3),inset 0 -3px 5px rgba(0,0,0,.4),0 4px 8px rgba(0,0,0,.5);transform:rotate(-12deg)}
+.seal::before{content:"";position:absolute;inset:6px;border-radius:50%;border:1.5px solid rgba(255,210,190,.6)}
+.pop{animation:pop .8s cubic-bezier(.2,1.5,.4,1)}
+@keyframes pop{from{transform:scale(.4) rotate(-6deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.seal.stampin{animation:stamp .5s .6s both cubic-bezier(.3,1.6,.5,1)}
+@keyframes stamp{from{transform:scale(2.4) rotate(10deg);opacity:0}to{transform:scale(1) rotate(-12deg);opacity:1}}
 </style>
 </head>
 <body>
 
 <!-- タイトル -->
 <section id="sTitle">
-  <div class="logo">🍞</div>
-  <h1>パン教祖爆誕</h1>
-  <p class="center sub">迷える信者に、パンの神託を授けよ。</p>
+  <div class="emblem"><div class="ring"></div><div class="bread">🍞</div></div>
+  <h1 class="title">パン教祖爆誕</h1>
+  <p class="tagline">迷える者に、パンの神託を</p>
   <button class="btn" id="startBtn">神託を授かる</button>
-  <details class="panel">
-    <summary><b>あそびかた</b></summary>
-    <ol class="sub" style="padding-left:1.2em;line-height:1.7">
+  <details class="paper rules">
+    <summary>教典（あそびかた）</summary>
+    <ol>
       <li>信者のお悩みが届きます。</li>
       <li>カードが6枚配られます。タップして並べ、神託を作ります。カードは全部使わなくてOK。</li>
       <li>「神・あなた・は・そして」などの<b>つなぎ言葉</b>は手札とは別に何度でも使えます。</li>
-      <li>並べた言葉をタップすると選択でき、◀▶で並べ替え、✕で手札に戻せます。選択中に足した言葉はその後ろに入ります。</li>
+      <li>祭壇の言葉をタップすると選択でき、◀▶で並べ替え、✕で手札に戻せます。選択中に足した言葉はその後ろに入ります。</li>
       <li>手札の引き直しは1回だけできます。</li>
     </ol>
   </details>
@@ -100,27 +222,33 @@ button{font:inherit;border:none;cursor:pointer}
 
 <!-- 作成 -->
 <section id="sCompose" class="hidden">
-  <div class="topic"><small>迷える信者のお悩み</small><span id="cTopic"></span></div>
-  <div class="board" id="board"></div>
-  <div class="preview" id="preview"></div>
+  <div class="topic paper"><small>迷える信者のお悩み</small><span id="cTopic"></span></div>
+  <div class="altar">
+    <div class="altar-title">神託の祭壇</div>
+    <div class="board" id="board"></div>
+    <div class="preview" id="preview"></div>
+  </div>
   <div class="tools">
     <button id="tLeft">◀</button><button id="tRight">▶</button><button id="tDel">✕ 戻す</button><button id="tClear">全消し</button>
   </div>
-  <div class="label"><span>手札（6枚）</span><button id="redeal" style="background:none;color:var(--crust-d);font-size:12px;text-decoration:underline">引き直す（残り1回）</button></div>
+  <div class="label on-wood"><span>手札</span><button class="link" id="redeal">引き直す（残り1回）</button></div>
   <div class="hand" id="hand"></div>
-  <div class="label"><span>つなぎ言葉（何度でも使える）</span></div>
+  <div class="label on-wood"><span>つなぎ言葉（何度でも）</span></div>
   <div class="conns" id="conns"></div>
   <button class="btn" id="submitBtn" disabled>この神託を授ける</button>
 </section>
 
 <!-- 発表 -->
 <section id="sReveal" class="hidden">
-  <div class="halo" style="margin-top:20px">✨🍞✨</div>
-  <p class="center sub">神託が授けられた。</p>
-  <div class="topic"><small>迷える信者のお悩み</small><span id="rTopic"></span></div>
-  <div class="oracle pop" id="oracle"></div>
+  <div class="reveal-head">神 託</div>
+  <div class="scroll paper pop" id="scroll">
+    <div class="q" id="rTopic"></div>
+    <div class="oracle" id="oracle"></div>
+    <div class="who">— パン教祖</div>
+    <div class="seal stampin" id="seal">麦</div>
+  </div>
   <button class="btn" id="againBtn">次の信者を救う</button>
-  <button class="btn ghost" id="titleBtn">タイトルへ</button>
+  <button class="btn wood" id="titleBtn">タイトルへ</button>
 </section>
 
 <div id="dealOverlay" class="hidden"><div class="rays"></div><div class="msg">神託のカード降臨</div></div>
@@ -128,14 +256,12 @@ button{font:inherit;border:none;cursor:pointer}
 <script>
 // ===== データ =====
 const K = {noun:"名詞", sim:"たとえ", phr:"フレーズ", verb:"おこない"};
+const KICON = {noun:"🍞", sim:"🌀", phr:"📜", verb:"🔥"};
 const DECK = {
   noun:[
-    // パン
     "食パン","クロワッサン","バゲット","メロンパン","あんぱん","カレーパン","クリームパン","ベーグル","コッペパン","焼きそばパン","塩パン","ブリオッシュ","パンの耳","天然酵母","強力粉","バター","イースト菌","石窯","パン粉","いちごジャム","トースター","焦げ目","生地","ちくわパン","レーズン","バターロール","揚げパン","聖なる小麦",
-    // 日常・パンと無関係
     "人生","愛","明日","過去","罪","涙","魂","運命","上司","元恋人","月曜日","宇宙","真実","心","世界","夢","隣人","財布","給料日","母","推し","体重計","目覚まし時計",
     "冷蔵庫","消費税","ペンギン","満員電車","確定申告","靴下の片方","富士山","段ボール","洗濯機","エレベーター","電子レンジ","町内会","3丁目の田中さん","未読メール","有給休暇","筋肉","回覧板","住民票","カニ","Wi-Fi","昨日の晩ごはん",
-    // 宗教・狂気
     "教義","聖典","生贄","洗礼","啓示","預言者","楽園","終末","信仰","煉獄","第三の目","原罪","輪廻","審判の日","救世主","異端者","供物","祭壇","聖痕","奇跡","教団","来世","前世","悪魔","天使の羽"
   ],
   sim:["焼きたてのように","まるでバターが溶けるように","発酵した生地のように","パンの耳のように静かに","トースターから飛び出すように","二次発酵を待つように","小麦畑を渡る風のように","クロワッサンの層のように","朝のパン屋の香りのように","食パンをくわえて走る少女のように","カチカチのフランスパンのように","袋の底のパンくずのように","閉店間際のパン屋のように",
@@ -163,12 +289,11 @@ const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let G = null, deckPile = [], topicPile = [];
 function refill(){ const out=[]; for(const k in DECK) DECK[k].forEach(t=>out.push({text:t,kind:k})); deckPile = shuffle(out); }
 function draw(n){
-  // 名詞多め＋たとえ/フレーズ/おこないを最低1枚ずつ
   if(deckPile.length<n+10) refill();
   const pick=[];
   for(const k of ["sim","phr","verb"]){ const i=deckPile.findIndex(c=>c.kind===k); pick.push(deckPile.splice(i,1)[0]); }
   while(pick.length<n) pick.push(deckPile.pop());
-  return shuffle(pick).map((c,i)=>({...c,id:"c"+i+"_"+Math.random(),used:false}));
+  return shuffle(pick).map((c,i)=>({...c,id:"c"+i+"_"+Math.random(),used:false,tilt:(Math.random()*4-2).toFixed(1)}));
 }
 function nextTopic(){ if(!topicPile.length) topicPile = shuffle(TOPICS); return topicPile.pop(); }
 
@@ -187,12 +312,10 @@ $("titleBtn").onclick = ()=>show("sTitle");
 async function dealAnimation(){
   G.dealing = true; renderCompose();
   const ov=$("dealOverlay"); ov.classList.remove("hidden"); await wait(20); ov.classList.add("on");
-  const hand=$("hand"); hand.scrollIntoView({block:"center",behavior:reduced?"auto":"smooth"});
+  $("hand").scrollIntoView({block:"center",behavior:reduced?"auto":"smooth"});
   await wait(reduced?50:550);
-  const cards=[...hand.querySelectorAll(".card")];
-  for(let i=0;i<cards.length;i++){
-    await dealOne(cards[i], G.hand[i], i===cards.length-1);
-  }
+  const cards=[...$("hand").querySelectorAll(".card")];
+  for(let i=0;i<cards.length;i++) await dealOne(cards[i], G.hand[i], i===cards.length-1);
   await wait(250);
   ov.classList.remove("on"); await wait(300); ov.classList.add("hidden");
   G.dealing=false; renderCompose();
@@ -204,23 +327,20 @@ async function dealOne(el, c, last){
   Object.assign(fly.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});
   document.body.appendChild(fly);
   const sx = innerWidth/2 - (r.left+r.width/2), sy = innerHeight*0.3 - (r.top+r.height/2);
-  const spin = (Math.random()<.5?-1:1)*(360+Math.random()*180);
+  const spin = (Math.random()<.5?-1:1)*(360+Math.random()*180) + (+c.tilt);
   if(!reduced){
-    // 天から降臨：中央で巨大化→回転しながら所定の位置へ
     await fly.animate([
-      {transform:`translate(${sx}px,${sy-120}px) scale(.2) rotate(0deg)`,opacity:0},
-      {transform:`translate(${sx}px,${sy}px) scale(1.7) rotate(0deg)`,opacity:1,offset:.35},
-      {transform:`translate(${sx}px,${sy}px) scale(1.8) rotate(0deg)`,offset:.5},
+      {transform:`translate(${sx}px,${sy-120}px) scale(.2)`,opacity:0},
+      {transform:`translate(${sx}px,${sy}px) scale(1.7)`,opacity:1,offset:.35},
+      {transform:`translate(${sx}px,${sy}px) scale(1.8)`,offset:.5},
       {transform:`translate(0,0) scale(1) rotate(${spin}deg)`}
     ],{duration:620,easing:"cubic-bezier(.3,.7,.3,1)"}).finished;
-    // 裏返す
-    await fly.animate([{transform:"scaleX(1)"},{transform:"scaleX(0)"}],{duration:110,easing:"ease-in"}).finished;
+    await fly.animate([{transform:`rotate(${c.tilt}deg) scaleX(1)`},{transform:`rotate(${c.tilt}deg) scaleX(0)`}],{duration:110,easing:"ease-in"}).finished;
   }
   fly.remove();
-  el.classList.remove("wait");
-  el.classList.add("landed");
+  el.classList.remove("wait"); el.classList.add("landed");
   if(!reduced){
-    el.animate([{transform:"scaleX(0)"},{transform:"scaleX(1.15) scaleY(1.15)"},{transform:"scale(1)"}],{duration:260,easing:"ease-out"});
+    el.animate([{transform:`rotate(${c.tilt}deg) scaleX(0)`},{transform:`rotate(${c.tilt}deg) scale(1.15)`},{transform:`rotate(${c.tilt}deg) scale(1)`}],{duration:260,easing:"ease-out"});
     burst(r, KCOLOR[c.kind], last);
     if(navigator.vibrate) try{navigator.vibrate(last?[30,40,60]:20);}catch(e){}
   }
@@ -252,7 +372,7 @@ function burst(r, color, big){
 // ===== 作成画面 =====
 function renderConns(){
   const box=$("conns"); box.innerHTML="";
-  CONNS.forEach(t=>{ const b=document.createElement("button"); b.className="chip conn"+(HOLY.includes(t)?" holy":""); b.textContent=t;
+  CONNS.forEach(t=>{ const b=document.createElement("button"); b.className="token"+(HOLY.includes(t)?" holy":""); b.textContent=t;
     b.onclick=()=>{ if(!G.dealing) addToken({text:t,kind:"conn"}); }; box.appendChild(b); });
 }
 function addToken(tok){
@@ -263,7 +383,8 @@ function renderCompose(){
   const hand=$("hand"); hand.innerHTML="";
   G.hand.forEach(c=>{
     const b=document.createElement("button"); b.className=`card k-${c.kind}`+(c.used?" used":"")+(G.dealing?" wait":"");
-    b.innerHTML=`<span class="kind">${K[c.kind]}</span>${esc(c.text)}`;
+    b.style.setProperty("--r",c.tilt+"deg");
+    b.innerHTML=`<span class="kind" data-i="${KICON[c.kind]}">${K[c.kind]}</span><span class="txt">${esc(c.text)}</span><span class="stamp">奉納</span>`;
     b.disabled=c.used||G.dealing;
     b.onclick=()=>{ c.used=true; addToken({text:c.text,kind:c.kind,cid:c.id}); };
     hand.appendChild(b);
@@ -272,12 +393,13 @@ function renderCompose(){
   board.classList.toggle("empty", !G.sentence.length);
   G.sentence.forEach((t,i)=>{
     const b=document.createElement("button");
-    b.className="chip "+(t.kind==="conn"?"conn"+(HOLY.includes(t.text)?" holy":""):"k-"+t.kind)+(i===G.sel?" sel":"");
+    b.className=(t.kind==="conn"?"token"+(HOLY.includes(t.text)?" holy":""):"chip k-"+t.kind)+(i===G.sel?" sel":"");
     b.textContent=t.text;
     b.onclick=()=>{ G.sel = (G.sel===i?-1:i); renderCompose(); };
     board.appendChild(b);
   });
   $("preview").textContent = G.sentence.length ? "「"+joinText(G.sentence)+"」" : "";
+  $("preview").classList.toggle("hidden", !G.sentence.length);
   const s=G.sel>=0;
   $("tLeft").disabled=!s||G.sel===0; $("tRight").disabled=!s||G.sel===G.sentence.length-1;
   $("tDel").disabled=!s; $("tClear").disabled=!G.sentence.length;
@@ -303,11 +425,11 @@ $("redeal").onclick=()=>{
 
 // ===== 発表 =====
 $("submitBtn").onclick=()=>{
-  $("rTopic").textContent="「"+G.topic+"」";
-  $("oracle").innerHTML=`「${esc(joinText(G.sentence))}」<span class="who">— パン教祖より</span>`;
+  $("rTopic").textContent="お悩み「"+G.topic+"」への答え";
+  $("oracle").textContent="「"+joinText(G.sentence)+"」";
   show("sReveal");
-  const o=$("oracle"); o.classList.remove("pop"); void o.offsetWidth; o.classList.add("pop");
-  if(!reduced) setTimeout(()=>burst(o.getBoundingClientRect(),"#ffcc33",true),250);
+  for(const id of ["scroll","seal"]){ const o=$(id); const c=id==="scroll"?"pop":"stampin"; o.classList.remove(c); void o.offsetWidth; o.classList.add(c); }
+  if(!reduced) setTimeout(()=>burst($("scroll").getBoundingClientRect(),"#ffcc33",true),300);
 };
 </script>
 </body>
