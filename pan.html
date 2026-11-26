@@ -678,14 +678,42 @@ function showReveal(r, shared){
   if(!reduced) setTimeout(()=>burst($("scroll").getBoundingClientRect(),"#ffcc33",true),300);
   if(!shared) SFX.reveal(); // 共有リンクを開いた直後はまだ操作がなく音を鳴らせない
 }
-$("submitBtn").onclick=()=>showReveal({t:G.topic, o:joinText(G.sentence)}, false);
+$("submitBtn").onclick=()=>showReveal({t:G.topic, o:joinText(G.sentence), code:encodeResult(G.topic,G.sentence)}, false);
 
 // ===== X にポスト / 共有リンク =====
 // 結果は URL の #r=… に UTF-8 JSON を base64url で埋め込む（サーバー不要）
 const b64e = s => { let b=""; new TextEncoder().encode(s).forEach(x=>b+=String.fromCharCode(x)); return btoa(b).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); };
 const b64d = s => { s=s.replace(/-/g,"+").replace(/_/g,"/"); while(s.length%4) s+="="; return new TextDecoder().decode(Uint8Array.from(atob(s),c=>c.charCodeAt(0))); };
 const clip = (s,n) => [...s].length>n ? [...s].slice(0,n).join("")+"…" : s;
-function shareUrl(r){ return location.href.split("#")[0] + "#r=" + b64e(JSON.stringify({t:r.t,o:r.o})); }
+// 短縮形式 #o=1…：お悩みと各単語を「リスト内の番号」で表す（1語=2文字）。
+// ※ 単語リストの並びを変えると古いリンクの中身が変わるので、変えるときは先頭の版数 "1" を上げること
+const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+const WORDS = [...CONNS.map(t=>["conn",t]), ...["noun","sim","phr","verb"].flatMap(k=>DECK[k].map(t=>[k,t]))];
+function encodeResult(topic, sentence){
+  const ti = TOPICS.indexOf(topic); if(ti<0||ti>63) return null;
+  let s = "1"+B64[ti];
+  for(const tok of sentence){
+    const i = WORDS.findIndex(w=>w[0]===tok.kind && w[1]===tok.text);
+    if(i<0||i>4095) return null;
+    s += B64[i>>6]+B64[i&63];
+  }
+  return s;
+}
+function decodeResult(s){
+  if(s[0]!=="1" || s.length%2) return null;
+  const t = TOPICS[B64.indexOf(s[1])]; if(!t) return null;
+  let o = "";
+  for(let i=2;i<s.length;i+=2){
+    const a=B64.indexOf(s[i]), b=B64.indexOf(s[i+1]); if(a<0||b<0) return null;
+    const w = WORDS[a*64+b]; if(!w) return null;
+    o += w[1];
+  }
+  return o ? {t, o, code:s} : null;
+}
+function shareUrl(r){
+  const base = location.href.split("#")[0];
+  return r.code ? base+"#o="+r.code : base+"#r="+b64e(JSON.stringify({t:r.t,o:r.o}));
+}
 $("shareBtn").onclick=()=>{
   if(!RESULT) return;
   SFX.share();
@@ -694,6 +722,9 @@ $("shareBtn").onclick=()=>{
   window.open(intent, "_blank", "noopener");
 };
 function readShared(){
+  const s = location.hash.match(/^#o=([A-Za-z0-9_-]{2,400})$/);
+  if(s) return decodeResult(s[1]);
+  // 旧形式 #r=（文章をそのまま埋め込んだリンク）も引き続き開ける
   const m = location.hash.match(/^#r=([A-Za-z0-9_-]{4,3000})$/); if(!m) return null;
   try{
     const r = JSON.parse(b64d(m[1]));
