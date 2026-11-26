@@ -710,8 +710,11 @@ function decodeResult(s){
   }
   return o ? {t, o, code:s} : null;
 }
+// X はリンクカード（タイトル等）をURLごとに数日キャッシュする。
+// タイトルや説明文を変えたら SHARE_VER を上げると、新しいカードで表示される。
+const SHARE_VER = "3";
 function shareUrl(r){
-  const base = location.href.split("#")[0];
+  const base = location.href.split(/[?#]/)[0] + "?v=" + SHARE_VER;
   return r.code ? base+"#o="+r.code : base+"#r="+b64e(JSON.stringify({t:r.t,o:r.o}));
 }
 $("shareBtn").onclick=()=>{
