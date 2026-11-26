@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>パン教祖爆誕</title>
+<title>パン教祖の神託</title>
 <meta name="description" content="迷える信者のお悩みに、パンの神託で答えよ。カードを並べて神託をつくるゲーム。">
-<meta property="og:title" content="パン教祖爆誕">
+<meta property="og:title" content="パン教祖の神託">
 <meta property="og:description" content="迷える信者のお悩みに、パンの神託で答えよ。">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
@@ -370,7 +370,7 @@ button:focus-visible,summary:focus-visible{outline:2px solid #ffdf91;outline-off
 <!-- タイトル -->
 <section id="sTitle">
   <div class="emblem"><div class="ring"></div><div class="bread">🍞</div></div>
-  <h1 class="title">パン教祖爆誕</h1>
+  <h1 class="title">パン教祖の神託</h1>
   <p class="tagline">迷える者に、パンの神託を</p>
   <button class="btn" id="startBtn">神託を授かる</button>
   <details class="paper rules">
@@ -717,7 +717,7 @@ function shareUrl(r){
 $("shareBtn").onclick=()=>{
   if(!RESULT) return;
   SFX.share();
-  const text = `迷える信者のお悩み「${clip(RESULT.t,30)}」\nパン教祖の神託は――\n「${clip(RESULT.o,70)}」\n\n#パン教祖爆誕`;
+  const text = `迷える信者のお悩み「${clip(RESULT.t,30)}」\n教祖の答えは――\n「${clip(RESULT.o,70)}」\n\n#パン教祖の神託`;
   const intent = "https://x.com/intent/tweet?text="+encodeURIComponent(text)+"&url="+encodeURIComponent(shareUrl(RESULT));
   window.open(intent, "_blank", "noopener");
 };
