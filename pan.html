@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>パン教祖の神託</title>
-<meta name="description" content="迷える信者のお悩みに、パンの神託で答えよ。カードを並べて神託をつくるゲーム。">
-<meta property="og:title" content="パン教祖の神託">
-<meta property="og:description" content="迷える信者のお悩みに、パンの神託で答えよ。">
+<title>パン教祖のお告げ</title>
+<meta name="description" content="相談者の悩みに、焼きたてのお告げで答えよう。カードを並べてお告げを焼き上げるゲーム。">
+<meta property="og:title" content="パン教祖のお告げ">
+<meta property="og:description" content="相談者の悩みに、焼きたてのお告げで答えよう。">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -86,14 +86,14 @@ button{font:inherit;border:none;cursor:pointer;color:inherit}
 .rules summary{font-family:var(--mincho);font-weight:800;font-size:16px;cursor:pointer}
 .rules ol{padding-left:1.3em;line-height:1.8;color:#5a4128;margin:8px 0 0}
 
-/* ===== お悩み：ピン留めされた手紙 ===== */
+/* ===== ご相談：ピン留めされた手紙 ===== */
 .topic{position:relative;padding:16px 16px 14px;margin:10px 4px 18px;transform:rotate(-1.2deg)}
 .topic::before{content:"";position:absolute;top:-9px;left:50%;width:20px;height:20px;margin-left:-10px;border-radius:50%;
   background:radial-gradient(circle at 35% 30%,#ff7b6b,#b3221a 60%,#6d0f0a);box-shadow:0 3px 4px rgba(0,0,0,.5)}
 .topic small{display:block;font-size:11px;color:var(--sub);letter-spacing:.15em}
 .topic span{font-family:var(--mincho);font-weight:800;font-size:19px;line-height:1.5}
 
-/* ===== 神託の祭壇（ベルベットのマット） ===== */
+/* ===== お告げの石窯（ベルベットのマット） ===== */
 .altar{position:relative;border-radius:16px;padding:14px 12px 12px;
   background:radial-gradient(ellipse at 50% 30%,#8e2a37,#5a1520 75%);
   box-shadow:0 0 0 3px #c99a43,0 0 0 6px #5a3a14,0 0 0 7px #e5bd63,0 12px 22px rgba(0,0,0,.55),inset 0 4px 16px rgba(0,0,0,.6)}
@@ -101,10 +101,10 @@ button{font:inherit;border:none;cursor:pointer;color:inherit}
 .altar-title{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-family:var(--mincho);font-weight:800;font-size:12px;letter-spacing:.3em;
   color:#4a2a0c;background:linear-gradient(#fbe3a0,#d9a845);padding:3px 14px;border-radius:20px;box-shadow:0 2px 4px rgba(0,0,0,.5);white-space:nowrap}
 .board{min-height:92px;display:flex;flex-wrap:wrap;gap:7px;align-content:flex-start;align-items:center;position:relative;padding:6px 2px}
-.board.empty::before{content:"手札とつなぎ言葉をタップして神託を組み立てよ";color:rgba(255,220,170,.55);font-size:13px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--mincho)}
+.board.empty::before{content:"手札とつなぎ言葉をタップしてお告げを仕込もう";color:rgba(255,220,170,.55);font-size:13px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--mincho)}
 .preview{font-family:var(--mincho);font-weight:800;font-size:17px;line-height:1.6;color:#ffe7b0;text-shadow:0 1px 2px #000;margin-top:8px;padding:8px 6px 2px;border-top:1px solid rgba(240,200,110,.3);min-height:1.6em;text-align:center}
 
-/* 祭壇に置かれた言葉：小さなカード */
+/* 石窯に置かれた言葉：小さなカード */
 .chip{position:relative;padding:7px 10px 6px;border-radius:6px;font-size:15px;font-weight:700;line-height:1.25;
   background:linear-gradient(135deg,#fffaf0,#f1e3c2);color:var(--ink);border-top:3px solid var(--c,var(--k-noun));
   box-shadow:0 1px 0 #d6c398,0 2px 0 #bfa877,0 5px 8px rgba(0,0,0,.45);transition:transform .12s}
@@ -370,16 +370,16 @@ button:focus-visible,summary:focus-visible{outline:2px solid #ffdf91;outline-off
 <!-- タイトル -->
 <section id="sTitle">
   <div class="emblem"><div class="ring"></div><div class="bread">🍞</div></div>
-  <h1 class="title">パン教祖の神託</h1>
-  <p class="tagline">迷える者に、パンの神託を</p>
-  <button class="btn" id="startBtn">神託を授かる</button>
+  <h1 class="title">パン教祖のお告げ</h1>
+  <p class="tagline">悩める者に、焼きたての言葉を</p>
+  <button class="btn" id="startBtn">相談を受ける</button>
   <details class="paper rules">
-    <summary>教典（あそびかた）</summary>
+    <summary>秘伝のレシピ（あそびかた）</summary>
     <ol>
-      <li>信者のお悩みが届きます。</li>
-      <li>カードが6枚配られます。タップして並べ、神託を作ります。カードは全部使わなくてOK。</li>
+      <li>相談者から悩みが届きます。</li>
+      <li>カードが6枚配られます。タップして並べ、お告げを仕込みます。カードは全部使わなくてOK。</li>
       <li>「神・あなた・は・そして」などの<b>つなぎ言葉</b>は手札とは別に何度でも使えます。</li>
-      <li>祭壇の言葉をタップすると選択でき、◀▶で並べ替え、✕で手札に戻せます。選択中に足した言葉はその後ろに入ります。</li>
+      <li>石窯の言葉をタップすると選択でき、◀▶で並べ替え、✕で手札に戻せます。選択中に足した言葉はその後ろに入ります。</li>
       <li>手札の引き直しは1回だけできます。</li>
     </ol>
   </details>
@@ -387,9 +387,9 @@ button:focus-visible,summary:focus-visible{outline:2px solid #ffdf91;outline-off
 
 <!-- 作成 -->
 <section id="sCompose" class="hidden">
-  <div class="topic paper"><small>迷える信者のお悩み</small><span id="cTopic"></span></div>
+  <div class="topic paper"><small>本日のご相談</small><span id="cTopic"></span></div>
   <div class="altar">
-    <div class="altar-title">神託の祭壇</div>
+    <div class="altar-title">お告げの石窯</div>
     <div class="board" id="board"></div>
     <div class="preview" id="preview"></div>
   </div>
@@ -400,25 +400,25 @@ button:focus-visible,summary:focus-visible{outline:2px solid #ffdf91;outline-off
   <div class="hand" id="hand"></div>
   <div class="label on-wood"><span>つなぎ言葉（何度でも）</span></div>
   <div class="conns" id="conns"></div>
-  <button class="btn" id="submitBtn" disabled>この神託を授ける</button>
+  <button class="btn" id="submitBtn" disabled>このお告げを焼き上げる</button>
 </section>
 
 <!-- 発表 -->
 <section id="sReveal" class="hidden">
-  <p class="shared-note hidden" id="sharedNote">とある教祖から神託が届いた</p>
-  <div class="reveal-head">神 託</div>
+  <p class="shared-note hidden" id="sharedNote">焼きたてのお告げが届きました</p>
+  <div class="reveal-head">お 告 げ</div>
   <div class="scroll paper pop" id="scroll">
     <div class="q" id="rTopic"></div>
     <div class="oracle" id="oracle"></div>
     <div class="who">— パン教祖</div>
     <div class="seal stampin" id="seal">麦</div>
   </div>
-  <button class="btn share" id="shareBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>神託をポストする</button>
-  <button class="btn" id="againBtn">次の信者を救う</button>
+  <button class="btn share" id="shareBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>お告げをポストする</button>
+  <button class="btn" id="againBtn">次の相談を受ける</button>
   <button class="btn wood" id="titleBtn">タイトルへ</button>
 </section>
 
-<div id="dealOverlay" class="hidden"><div class="rays"></div><div class="msg">神託のカード降臨</div></div>
+<div id="dealOverlay" class="hidden"><div class="rays"></div><div class="msg">本日の材料が焼き上がり</div></div>
 
 <script>
 // ===== データ =====
@@ -624,7 +624,7 @@ function renderCompose(){
   G.hand.forEach(c=>{
     const b=document.createElement("button"); b.className=`card k-${c.kind}`+(c.used?" used":"")+(G.dealing?" wait":"");
     b.style.setProperty("--r",c.tilt+"deg");
-    b.innerHTML=`<span class="kind" data-i="${KICON[c.kind]}">${K[c.kind]}</span><span class="txt">${esc(c.text)}</span><span class="stamp">奉納</span>`;
+    b.innerHTML=`<span class="kind" data-i="${KICON[c.kind]}">${K[c.kind]}</span><span class="txt">${esc(c.text)}</span><span class="stamp">仕込済</span>`;
     b.disabled=c.used||G.dealing;
     b.onclick=()=>{ SFX.card(); c.used=true; addToken({text:c.text,kind:c.kind,cid:c.id}); };
     hand.appendChild(b);
@@ -659,20 +659,20 @@ $("tDel").onclick=()=>{
 $("tClear").onclick=()=>{ SFX.clear(); G.sentence=[]; G.sel=-1; G.hand.forEach(c=>c.used=false); renderCompose(); };
 $("redeal").onclick=()=>{
   if(!G.redeals||G.dealing) return;
-  if(G.sentence.length && !confirm("並べた神託は消えます。引き直しますか？")) return;
+  if(G.sentence.length && !confirm("仕込んだお告げは消えます。引き直しますか？")) return;
   G.redeals=0; G.hand=draw(6); G.sentence=[]; G.sel=-1;
   dealAnimation();
 };
 
 // ===== 発表 =====
-let RESULT = null; // 直近の {t:お悩み, o:神託}
+let RESULT = null; // 直近の {t:相談, o:お告げ}
 function showReveal(r, shared){
   RESULT = r;
-  $("rTopic").textContent="お悩み「"+r.t+"」への答え";
+  $("rTopic").textContent="ご相談「"+r.t+"」";
   $("oracle").textContent="「"+r.o+"」";
   $("sharedNote").classList.toggle("hidden", !shared);
   $("shareBtn").classList.toggle("hidden", shared);
-  $("againBtn").textContent = shared ? "自分も神託を授ける" : "次の信者を救う";
+  $("againBtn").textContent = shared ? "自分もお告げを焼いてみる" : "次の相談を受ける";
   show("sReveal");
   for(const id of ["scroll","seal"]){ const o=$(id); const c=id==="scroll"?"pop":"stampin"; o.classList.remove(c); void o.offsetWidth; o.classList.add(c); }
   if(!reduced) setTimeout(()=>burst($("scroll").getBoundingClientRect(),"#ffcc33",true),300);
@@ -685,7 +685,7 @@ $("submitBtn").onclick=()=>showReveal({t:G.topic, o:joinText(G.sentence), code:e
 const b64e = s => { let b=""; new TextEncoder().encode(s).forEach(x=>b+=String.fromCharCode(x)); return btoa(b).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); };
 const b64d = s => { s=s.replace(/-/g,"+").replace(/_/g,"/"); while(s.length%4) s+="="; return new TextDecoder().decode(Uint8Array.from(atob(s),c=>c.charCodeAt(0))); };
 const clip = (s,n) => [...s].length>n ? [...s].slice(0,n).join("")+"…" : s;
-// 短縮形式 #o=1…：お悩みと各単語を「リスト内の番号」で表す（1語=2文字）。
+// 短縮形式 #o=1…：相談と各単語を「リスト内の番号」で表す（1語=2文字）。
 // ※ 単語リストの並びを変えると古いリンクの中身が変わるので、変えるときは先頭の版数 "1" を上げること
 const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 const WORDS = [...CONNS.map(t=>["conn",t]), ...["noun","sim","phr","verb"].flatMap(k=>DECK[k].map(t=>[k,t]))];
@@ -717,7 +717,12 @@ function shareUrl(r){
 $("shareBtn").onclick=()=>{
   if(!RESULT) return;
   SFX.share();
-  const text = `迷える信者のお悩み「${clip(RESULT.t,30)}」\n教祖の答えは――\n「${clip(RESULT.o,70)}」\n\n#パン教祖の神託`;
+  const text = `🍞 ご相談「${clip(RESULT.t,30)}」
+
+焼きたてのお告げ
+「${clip(RESULT.o,70)}」
+
+#パン教祖のお告げ`;
   const intent = "https://x.com/intent/tweet?text="+encodeURIComponent(text)+"&url="+encodeURIComponent(shareUrl(RESULT));
   window.open(intent, "_blank", "noopener");
 };
